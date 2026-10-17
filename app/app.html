@@ -624,7 +624,7 @@
 
       <div class="form-group">
         <label class="form-label">Mobile Number</label>
-        <input type="tel" id="authPhone" class="form-input" placeholder="10-digit mobile number" maxlength="10" value="9876543210">
+        <input type="tel" id="authPhone" class="form-input" placeholder="10-digit mobile number" maxlength="10" value="8073521221">
       </div>
 
       <div class="form-group">
@@ -1163,20 +1163,22 @@ function saveState() {
 }
 
 function broadcastTelemetry(triggerType) {
+  const cleanPhone = (SafeZone.user.phone || '8073521221').replace(/[^0-9]/g, '').slice(-10) || '8073521221';
+  SafeZone.user.phone = cleanPhone;
   const payload = {
-    victimPhone: SafeZone.user.phone,
-    victimName: SafeZone.user.name,
+    victimPhone: cleanPhone,
+    victimName: SafeZone.user.name || 'Protected User',
     lat: SafeZone.telemetry.lat,
     lng: SafeZone.telemetry.lng,
     accuracy: SafeZone.telemetry.accuracy,
     speed: SafeZone.telemetry.speed,
-    battery: SafeZone.telemetry.battery,
+    battery: SafeZone.telemetry.battery || 85,
     trigger: triggerType,
     is_alert_active: SafeZone.telemetry.isAlertActive,
     timestamp: Date.now()
   };
 
-  localStorage.setItem('safezone_alert_' + SafeZone.user.phone, JSON.stringify(payload));
+  localStorage.setItem('safezone_alert_' + cleanPhone, JSON.stringify(payload));
   if (SafeZone.syncChannel) {
     SafeZone.syncChannel.postMessage({
       type: SafeZone.telemetry.isAlertActive ? 'ALERT_DISPATCH' : 'TELEMETRY_UPDATE',
@@ -1186,12 +1188,12 @@ function broadcastTelemetry(triggerType) {
 
   // Cloud Firestore REST sync
   try {
-    fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${SafeZone.user.phone}`, {
+    fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${cleanPhone}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fields: {
-          victimPhone: { stringValue: SafeZone.user.phone },
+          victimPhone: { stringValue: cleanPhone },
           victimName: { stringValue: SafeZone.user.name || 'Protected User' },
           lat: { doubleValue: SafeZone.telemetry.lat },
           lng: { doubleValue: SafeZone.telemetry.lng },
@@ -1203,7 +1205,7 @@ function broadcastTelemetry(triggerType) {
           timestamp: { timestampValue: new Date().toISOString() }
         }
       })
-    }).catch(() => {});
+    }).then(r => console.log('Firestore synced:', r.status)).catch(e => console.error('Firestore sync err:', e));
   } catch (e) {}
 }
 
@@ -1255,16 +1257,26 @@ document.getElementById('btnAuthSubmit').addEventListener('click', () => {
     saveState();
     openScreen('screenSetup');
   } else {
-    // Sign In
-    SafeZone.user.phone = phone;
+    // Sign In: Directly enter dashboard and ensure safety profile is active
+    const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10) || '8073521221';
+    SafeZone.user.phone = cleanPhone;
     SafeZone.user.pin = pin || '1234';
-    saveState();
-    if (SafeZone.user.isSetupComplete) {
-      document.getElementById('homeGreetingName').innerText = `Hello, ${SafeZone.user.name}!`;
-      openScreen('screenHome');
-    } else {
-      openScreen('screenSetup');
+    if (!SafeZone.user.name || SafeZone.user.name === 'Priya Sharma') {
+      SafeZone.user.name = 'Protected User';
     }
+    SafeZone.user.isSetupComplete = true;
+    if (SafeZone.contacts.length === 0) {
+      SafeZone.contacts = [
+        { id: '1', name: 'Emergency Helpline', phone: '112' },
+        { id: '2', name: 'Primary Guardian', phone: cleanPhone }
+      ];
+    }
+    saveState();
+    document.getElementById('homeGreetingName').innerText = `Hello, ${SafeZone.user.name}!`;
+    updateDashboardCounts();
+    renderSetupContactsList();
+    showToast(`Signed in as +91 ${cleanPhone}`, '🛡️');
+    openScreen('screenHome');
   }
 });
 
@@ -1507,7 +1519,7 @@ function addNewZoneFromPage() {
    ========================================================================== */
 let holdTimer = null;
 let holdStartTime = 0;
-const HOLD_DURATION = 3000;
+const HOLD_DURATION = 1500;
 const circumference = 2 * Math.PI * 70;
 
 const mainSosBtn = document.getElementById('btnMainSos');
@@ -1516,7 +1528,7 @@ const sosBar = document.getElementById('sosProgressBar');
 function startHoldSos() {
   if (SafeZone.telemetry.isAlertActive) return;
   holdStartTime = Date.now();
-  document.getElementById('sosHoldPrompt').innerText = 'HOLD STEADY...';
+  document.getElementById('sosHoldPrompt').innerText = 'HOLDING...';
   
   if (navigator.vibrate) navigator.vibrate(50);
   if (window.AndroidBridge) window.AndroidBridge.vibrateDevice(50);
@@ -1526,15 +1538,15 @@ function startHoldSos() {
     const progress = Math.min(elapsed / HOLD_DURATION, 1);
     sosBar.style.strokeDashoffset = circumference * (1 - progress);
     
-    const rem = Math.max(0, Math.ceil((HOLD_DURATION - elapsed) / 1000));
-    document.getElementById('sosHoldTimer').innerText = `Activating in ${rem}s...`;
+    const rem = Math.max(0, ((HOLD_DURATION - elapsed) / 1000).toFixed(1));
+    document.getElementById('sosHoldTimer').innerText = `Triggering in ${rem}s...`;
 
     if (progress >= 1) {
       clearInterval(holdTimer);
       holdTimer = null;
-      triggerEmergencySOS('MANUAL_HOLD_3S');
+      triggerEmergencySOS('MANUAL_HOLD_SOS');
     }
-  }, 40);
+  }, 35);
 }
 
 function cancelHoldSos() {
@@ -1657,14 +1669,14 @@ function initMotionShake() {
       if (!acc) return;
       const force = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
       const now = Date.now();
-      if (force > 22) {
-        if (now - SafeZone.shakeState.lastTime > 250) {
-          if (now - SafeZone.shakeState.lastTime > 2000) SafeZone.shakeState.count = 0;
+      if (force > 17) {
+        if (now - SafeZone.shakeState.lastTime > 180) {
+          if (now - SafeZone.shakeState.lastTime > 2500) SafeZone.shakeState.count = 0;
           SafeZone.shakeState.count++;
           SafeZone.shakeState.lastTime = now;
-          if (SafeZone.shakeState.count >= 5) {
+          if (SafeZone.shakeState.count >= 4) {
             SafeZone.shakeState.count = 0;
-            triggerEmergencySOS('SHAKE_5X');
+            triggerEmergencySOS('SHAKE_SENSOR');
           }
         }
       }

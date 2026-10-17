@@ -6,484 +6,310 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>PRJ_650: Real-Time Women Safety Monitoring & Emergency Response Coordination Platform</title>
+  <title>SafeZone - Women Safety & Emergency Dispatch System</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg-dark: #070B13;
-      --bg-surface: #0E1626;
-      --bg-card: #131E33;
-      --border-dark: #1F2F4A;
+      --bg: #070B13;
+      --surface: #0E1626;
+      --card: #131E33;
+      --card-hover: #182640;
+      --border: #1F2F4A;
       --border-bright: #2E456B;
       --crimson: #EF4444;
       --crimson-glow: rgba(239, 68, 68, 0.4);
       --crimson-subtle: rgba(239, 68, 68, 0.12);
       --emerald: #10B981;
-      --emerald-glow: rgba(16, 185, 129, 0.4);
-      --amber: #F59E0B;
       --cyan: #38BDF8;
-      --sdg-orange: #FF3A21;
-      --text-bright: #F8FAFC;
-      --text-muted: #94A3B8;
-      --text-dim: #64748B;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+      --dim: #64748B;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-bright);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 36px 20px 60px;
-      line-height: 1.6;
+      justify-content: center;
+      padding: 32px 20px;
     }
 
-    .main-wrapper {
-      max-width: 1080px;
+    .portal-wrap {
+      max-width: 900px;
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 28px;
     }
 
-    /* TOP PROJECT BADGE STRIP */
-    .hero-badge-strip {
+    /* BRAND LOGO & HEADER */
+    .brand-hero {
+      text-align: center;
+    }
+
+    .logo-badge {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #EF4444, #B91C1C);
+      border-radius: 16px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      box-shadow: 0 0 24px var(--crimson-glow);
     }
 
-    .badge-pill {
-      font-size: 11.5px;
-      font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .badge-pill.project-id {
-      background: linear-gradient(135deg, #EF4444, #B91C1C);
-      color: #FFF;
-      box-shadow: 0 0 16px var(--crimson-glow);
-    }
-
-    .badge-pill.sdg {
-      background: linear-gradient(135deg, #FF3A21, #D82610);
-      color: #FFF;
-      box-shadow: 0 0 14px rgba(255, 58, 33, 0.35);
-    }
-
-    .badge-pill.tech {
-      background: var(--bg-surface);
-      color: #38BDF8;
-      border: 1px solid var(--border-dark);
-    }
-
-    /* HERO SECTION */
-    .hero-section {
-      text-align: center;
-      padding: 10px 0 16px;
-    }
-
-    .hero-title {
+    .brand-hero h1 {
       font-size: 34px;
       font-weight: 800;
-      letter-spacing: -0.6px;
-      line-height: 1.25;
-      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
     }
 
-    .hero-title span {
+    .brand-hero h1 span {
       background: linear-gradient(135deg, #EF4444, #F43F5E);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .hero-desc {
+    .brand-hero p {
       font-size: 15px;
-      color: var(--text-muted);
-      max-width: 820px;
+      color: var(--muted);
+      max-width: 560px;
       margin: 0 auto;
-      line-height: 1.65;
+      line-height: 1.6;
     }
 
-    /* 4-PILLARS ARCHITECTURE GRID */
-    .pillars-grid {
+    /* 2 PRIMARY TIERS */
+    .tiers-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
-    @media (max-width: 900px) {
-      .pillars-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 520px) {
-      .pillars-grid { grid-template-columns: 1fr; }
-      .hero-title { font-size: 26px; }
+    @media (max-width: 700px) {
+      .tiers-grid { grid-template-columns: 1fr; }
+      .brand-hero h1 { font-size: 28px; }
     }
 
-    .pillar-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-dark);
-      border-radius: 18px;
-      padding: 18px;
-      transition: all 0.2s;
-    }
-
-    .pillar-card:hover {
-      border-color: var(--border-bright);
-      transform: translateY(-2px);
-    }
-
-    .pillar-icon-box {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-
-    .pillar-card.web .pillar-icon-box { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
-    .pillar-card.cyber .pillar-icon-box { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
-    .pillar-card.vision .pillar-icon-box { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-    .pillar-card.bigdata .pillar-icon-box { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-
-    .pillar-title {
-      font-size: 14.5px;
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-
-    .pillar-body {
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-
-    /* 3 PRIMARY ACTION LAUNCHERS */
-    .launcher-title-strip {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .launchers-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-
-    @media (max-width: 900px) {
-      .launchers-grid { grid-template-columns: 1fr; }
-    }
-
-    .launch-tile {
-      background: var(--bg-surface);
-      border: 1.5px solid var(--border-dark);
+    .tier-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
       border-radius: 22px;
-      padding: 26px 22px;
+      padding: 28px;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.2s ease-in-out;
+      transition: all 0.2s ease;
       position: relative;
       overflow: hidden;
     }
 
-    .launch-tile:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+    .tier-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
     }
 
-    .launch-tile.client {
-      border-color: rgba(239, 68, 68, 0.4);
-    }
-    .launch-tile.client:hover {
-      border-color: #EF4444;
-      box-shadow: 0 14px 32px var(--crimson-glow);
+    .tier-card.mobile:hover {
+      border-color: var(--crimson);
+      box-shadow: 0 16px 36px var(--crimson-glow);
     }
 
-    .launch-tile.monitor {
-      border-color: rgba(56, 189, 248, 0.4);
-    }
-    .launch-tile.monitor:hover {
-      border-color: #38BDF8;
-      box-shadow: 0 14px 32px rgba(56, 189, 248, 0.25);
+    .tier-card.monitor:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 16px 36px rgba(56, 189, 248, 0.25);
     }
 
-    .launch-tile.analytics {
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-    .launch-tile.analytics:hover {
-      border-color: #F59E0B;
-      box-shadow: 0 14px 32px rgba(245, 158, 11, 0.25);
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
 
-    .tile-badge {
-      font-size: 10px;
-      font-weight: 800;
+    .card-icon {
+      font-size: 36px;
+    }
+
+    .pill-tag {
       font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 800;
       padding: 4px 10px;
       border-radius: 8px;
-      align-self: flex-start;
-      margin-bottom: 16px;
       text-transform: uppercase;
     }
 
-    .launch-tile.client .tile-badge { background: var(--crimson-subtle); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .launch-tile.monitor .tile-badge { background: rgba(56, 189, 248, 0.12); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); }
-    .launch-tile.analytics .tile-badge { background: rgba(245, 158, 11, 0.12); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
-
-    .tile-icon {
-      font-size: 34px;
-      margin-bottom: 12px;
+    .tier-card.mobile .pill-tag {
+      background: var(--crimson-subtle);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
-    .tile-name {
-      font-size: 18px;
+    .tier-card.monitor .pill-tag {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .card-title {
+      font-size: 20px;
       font-weight: 800;
       color: #FFF;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
-    .tile-desc {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 22px;
-    }
-
-    .tile-action-btn {
+    .card-desc {
       font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+
+    .card-action {
+      font-size: 13.5px;
       font-weight: 800;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .launch-tile.client .tile-action-btn { color: #EF4444; }
-    .launch-tile.monitor .tile-action-btn { color: #38BDF8; }
-    .launch-tile.analytics .tile-action-btn { color: #F59E0B; }
+    .tier-card.mobile .card-action { color: var(--crimson); }
+    .tier-card.monitor .card-action { color: var(--cyan); }
 
-    /* FOOTER DOWNLOAD & INFO STRIP */
-    .download-card-bar {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-dark);
-      border-radius: 20px;
-      padding: 18px 24px;
+    /* FOOTER BAR */
+    .bottom-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 22px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 16px;
-    }
-
-    .download-info {
-      display: flex;
-      align-items: center;
       gap: 14px;
     }
 
-    .android-icon {
-      font-size: 30px;
+    .download-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .download-text-main {
-      font-size: 14px;
-      font-weight: 800;
+    .download-left strong {
+      font-size: 13.5px;
       color: #FFF;
     }
 
-    .download-text-sub {
+    .download-left span {
       font-size: 11.5px;
-      color: var(--text-dim);
+      color: var(--dim);
     }
 
-    .btn-download-apk {
+    .btn-apk {
       background: linear-gradient(135deg, #10B981, #059669);
       color: #FFF;
       text-decoration: none;
-      padding: 10px 22px;
-      border-radius: 12px;
+      font-size: 12.5px;
       font-weight: 800;
-      font-size: 13px;
-      display: inline-flex;
+      padding: 9px 18px;
+      border-radius: 10px;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px var(--emerald-glow);
+      gap: 6px;
       transition: all 0.15s;
     }
 
-    .btn-download-apk:hover {
+    .btn-apk:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px var(--emerald-glow);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
     }
 
-    /* ACADEMIC SPECIFICATION FOOTER */
-    .academic-footer {
+    .system-footer {
       text-align: center;
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 10px;
-      line-height: 1.6;
+      font-size: 11.5px;
+      color: var(--dim);
     }
   </style>
 </head>
 <body>
 
-  <div class="main-wrapper">
-
-    <!-- PROJECT BADGES -->
-    <div class="hero-badge-strip">
-      <div class="badge-pill project-id">PRJ_650 Capstone</div>
-      <div class="badge-pill sdg">🎯 SDG 5: Gender Equality (Target 5.2)</div>
-      <div class="badge-pill tech">Web Tech</div>
-      <div class="badge-pill tech">Cybersecurity</div>
-      <div class="badge-pill tech">Computer Vision</div>
-      <div class="badge-pill tech">Big Data</div>
-    </div>
+  <div class="portal-wrap">
 
     <!-- HERO HEADER -->
-    <section class="hero-section">
-      <h1 class="hero-title">
-        Real-Time Women Safety Monitoring &<br>
-        <span>Emergency Response Coordination Platform</span>
-      </h1>
-      <p class="hero-desc">
-        A multi-tier autonomous safety and rapid response ecosystem integrating high-precision satellite telemetry, computer vision surveillance, stealth cybersecurity triggers, and spatial big data risk analytics.
-      </p>
-    </section>
-
-    <!-- 4 TECHNICAL PILLARS -->
-    <div class="pillars-grid">
-      <div class="pillar-card web">
-        <div class="pillar-icon-box">🌐</div>
-        <div class="pillar-title">Web Technologies</div>
-        <div class="pillar-body">
-          Progressive Web App (PWA), real-time Leaflet GIS mapping, bidirectional WebRTC video streams, and Cloud Firestore distributed state sync.
-        </div>
+    <header class="brand-hero">
+      <div class="logo-badge">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
+      <h1>SafeZone <span>Portal</span></h1>
+      <p>Autonomous Real-Time Women Safety Monitoring & Emergency Dispatch System</p>
+    </header>
 
-      <div class="pillar-card cyber">
-        <div class="pillar-icon-box">🔒</div>
-        <div class="pillar-title">Cybersecurity</div>
-        <div class="pillar-body">
-          Steganographic Covert PIN calculator camouflage, silent panic vectors, encrypted PIN-protected stand-down, and tamper-proof audit trails.
-        </div>
-      </div>
-
-      <div class="pillar-card vision">
-        <div class="pillar-icon-box">👁️</div>
-        <div class="pillar-title">Computer Vision</div>
-        <div class="pillar-body">
-          Ambient camera frame capture, optical forensic timestamp watermarking, real-time visual telemetry, and live surveillance streaming.
-        </div>
-      </div>
-
-      <div class="pillar-card bigdata">
-        <div class="pillar-icon-box">📊</div>
-        <div class="pillar-title">Big Data Analytics</div>
-        <div class="pillar-body">
-          Spatial incident density heatmaps, Haversine velocity computation, time-of-day vulnerability modeling, and safe corridor coverage.
-        </div>
-      </div>
-    </div>
-
-    <!-- 3 APPLICATION LAUNCH TILES -->
-    <div class="launcher-title-strip">
-      <span>🚀</span>
-      <span>Interactive System Launchers</span>
-    </div>
-
-    <div class="launchers-grid">
+    <!-- 2 MAIN TIERS -->
+    <div class="tiers-grid">
       <!-- 1. Victim Mobile App -->
-      <a href="app/app.html" class="launch-tile client">
-        <div class="tile-badge">Victim Client Tier</div>
+      <a href="app/app.html" class="tier-card mobile">
         <div>
-          <div class="tile-icon">📱</div>
-          <div class="tile-name">Victim Mobile Application</div>
-          <div class="tile-desc">
-            Responsive mobile portal featuring 3-second hold SOS, 5x hardware motion shake trigger, covert calculator PIN, live journey mapping, and custom safe zones.
+          <div class="card-top">
+            <span class="card-icon">📱</span>
+            <span class="pill-tag">Victim App</span>
+          </div>
+          <div class="card-title">Mobile Safety App</div>
+          <div class="card-desc">
+            Smartphone application featuring hardware motion shake trigger, covert calculator PIN, live journey tracking, custom safe zones, and automatic camera frame broadcasting.
           </div>
         </div>
-        <div class="tile-action-btn">Launch Mobile App →</div>
+        <div class="card-action">Launch Mobile App →</div>
       </a>
 
-      <!-- 2. Police Tactical Console -->
-      <a href="monitor/monitor.html" class="launch-tile monitor">
-        <div class="tile-badge">Police & Dispatch Tier</div>
+      <!-- 2. Police & Guardian Dispatch Console -->
+      <a href="monitor/monitor.html" class="tier-card monitor">
         <div>
-          <div class="tile-icon">🖥️</div>
-          <div class="tile-name">Tactical Command Center</div>
-          <div class="tile-desc">
-            Police & guardian dispatch console with auto-detection of alerts across all devices, real-time GPS tracking, loud audio siren, live video surveillance, and 1-click intercept navigation.
+          <div class="card-top">
+            <span class="card-icon">🖥️</span>
+            <span class="pill-tag">Command Center</span>
+          </div>
+          <div class="card-title">Tactical Dispatch Console</div>
+          <div class="card-desc">
+            Dispatch monitoring station with cloud emergency detection, live GPS tracking, loud alarm siren, real-time video surveillance, and 1-click police intercept navigation.
           </div>
         </div>
-        <div class="tile-action-btn">Launch Command Center →</div>
-      </a>
-
-      <!-- 3. Big Data & SDG 5 Dashboard -->
-      <a href="analytics/analytics.html" class="launch-tile analytics">
-        <div class="tile-badge">Research & Spatial Tier</div>
-        <div>
-          <div class="tile-icon">📊</div>
-          <div class="tile-name">Big Data & SDG 5 Analytics</div>
-          <div class="tile-desc">
-            Spatial threat density clustering, time-of-day vulnerability histograms, mean dispatch response telemetry, and UN SDG 5 impact evaluation metrics.
-          </div>
-        </div>
-        <div class="tile-action-btn">Launch Analytics Engine →</div>
+        <div class="card-action">Launch Command Center →</div>
       </a>
     </div>
 
-    <!-- NATIVE ANDROID PACKAGE STRIP -->
-    <div class="download-card-bar">
-      <div class="download-info">
-        <span class="android-icon">🤖</span>
+    <!-- DOWNLOAD STRIP -->
+    <div class="bottom-bar">
+      <div class="download-left">
+        <span style="font-size:26px;">🤖</span>
         <div>
-          <div class="download-text-main">Native Android Application Package (APK)</div>
-          <div class="download-text-sub">Built with Android WebView Bridge, Hardware Accelerometer Sensors, & Background SMS Dispatch (6.5 MB)</div>
+          <div><strong>Native Android App Package (APK)</strong></div>
+          <span>Offline support, direct emergency calls, and hardware background SMS</span>
         </div>
       </div>
-      <a href="app-debug.apk" download class="btn-download-apk">
-        <span>📥</span> Download app-debug.apk
-      </a>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="analytics/analytics.html" style="color:var(--muted); font-size:12px; font-weight:700; text-decoration:none; padding:8px 12px;">📊 Threat Analytics</a>
+        <a href="app-debug.apk" download class="btn-apk">
+          <span>📥</span> Download APK (6.5 MB)
+        </a>
+      </div>
     </div>
 
-    <!-- EVALUATOR / GUIDE FOOTER -->
-    <footer class="academic-footer">
-      <strong>PRJ_650: Real-Time Women Safety Monitoring and Emergency Response Coordination Platform</strong><br>
-      Mapped to <strong>UN Sustainable Development Goal 5 (Gender Equality - Target 5.2)</strong><br>
-      Designed for Academic Evaluation & Production Deployment.
+    <footer class="system-footer">
+      SafeZone Emergency Response Network • Production Environment
     </footer>
 
   </div>

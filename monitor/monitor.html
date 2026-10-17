@@ -673,11 +673,8 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
       </div>
       <div class="brand-title-wrap">
-        <div class="brand-main-title">
-          SafeZone Command Center
-          <span class="brand-tag-v3">PRJ_650</span>
-        </div>
-        <div class="brand-sub-label">Real-Time Women Safety Monitoring & Emergency Dispatch Platform</div>
+        <div class="brand-main-title">SafeZone Command Center</div>
+        <div class="brand-sub-label">Tactical Emergency Dispatch & Real-Time Surveillance</div>
       </div>
     </div>
 
@@ -687,10 +684,9 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" id="inputTargetPhone" class="target-input" placeholder="Victim Mobile (10 Digits)" maxlength="10">
       </div>
-      <button class="btn-action-sm primary" id="btnInterceptTarget">Track Target</button>
-      <button class="btn-action-sm" id="btnPurgeCache" title="Clear cached alerts and reset to standby">🧹 Clean Reset</button>
-      <a href="../analytics/analytics.html" class="btn-action-sm" style="text-decoration:none; color:#F59E0B; border-color:rgba(245,158,11,0.4);" title="Open Big Data & SDG 5 Spatial Analytics">📊 Big Data Analytics</a>
-      <a href="../index.html" class="btn-action-sm" style="text-decoration:none;" title="Return to Portal">🏠 Portal</a>
+      <button class="btn-action-sm primary" id="btnInterceptTarget">Track</button>
+      <button class="btn-action-sm" id="btnPurgeCache" title="Clear and reset to standby">Reset</button>
+      <a href="../index.html" class="btn-action-sm" style="text-decoration:none;" title="Return to Portal">Portal</a>
     </div>
 
     <!-- Status Badges -->
@@ -864,8 +860,8 @@
 
     const savedProf = localStorage.getItem('safezone_user_profile');
     const parsedProf = savedProf ? JSON.parse(savedProf) : null;
-    const initialPhone = (qPhone && qPhone.length === 10) ? qPhone : (parsedProf && parsedProf.phone ? parsedProf.phone : '9876543210');
-    const initialName = (parsedProf && parsedProf.name) ? parsedProf.name : 'Client Device';
+    const initialPhone = (qPhone && qPhone.length === 10) ? qPhone : (parsedProf && parsedProf.phone ? parsedProf.phone : '8073521221');
+    const initialName = (parsedProf && parsedProf.name) ? parsedProf.name : 'Protected User';
 
     const savedAlert = localStorage.getItem('safezone_alert_' + initialPhone);
     const parsedAlert = savedAlert ? JSON.parse(savedAlert) : null;
@@ -873,8 +869,8 @@
     const savedUserZones = localStorage.getItem('safezone_user_zones');
     const parsedZones = savedUserZones ? JSON.parse(savedUserZones) : [];
 
-    // ONLY consider alert active if explicitly true AND triggered recently (within 5 minutes)
-    const isFreshAlert = !!(parsedAlert && parsedAlert.is_alert_active === true && (Date.now() - (parsedAlert.timestamp || 0) < 300000));
+    // Console always initializes in clean STANDBY on load, then Firestore sync auto-detects active alerts
+    const isFreshAlert = false;
 
     const ConsoleState = {
       targetPhone: initialPhone,
@@ -1258,32 +1254,7 @@
         };
       } catch (e) {}
 
-      // Polling localStorage fallback
-      setInterval(() => {
-        const raw = localStorage.getItem('safezone_alert_' + ConsoleState.targetPhone);
-        if (raw) {
-          try {
-            const data = JSON.parse(raw);
-            const isFresh = data.is_alert_active === true && (Date.now() - (data.timestamp || 0) < 300000);
-            if (isFresh !== ConsoleState.isAlertActive) {
-              ConsoleState.isAlertActive = isFresh;
-              ConsoleState.trigger = isFresh ? (data.trigger || 'MANUAL_HOLD_3S') : 'NORMAL';
-              if (data.lat && data.lng) updateTargetPosition(data.lat, data.lng, data.accuracy, ConsoleState.trigger);
-              updateHudUI();
-            }
-          } catch(e) {}
-        }
-
-        // Live camera surveillance frame polling ONLY if alert is active
-        if (ConsoleState.isAlertActive) {
-          const savedFrame = localStorage.getItem('safezone_surveillance_frame_' + ConsoleState.targetPhone);
-          if (savedFrame) {
-            displaySurveillanceFrame(savedFrame);
-          }
-        }
-      }, 1000);
-
-      // Cloud Firestore Alerts Collection Polling (Auto-Detect ANY Victim Emergency across all devices)
+      // Cloud Firestore Alerts Synchronization (Authoritative Cross-Device Bus)
       let isFetchingAlerts = false;
       setInterval(() => {
         if (isFetchingAlerts) return;
@@ -1296,45 +1267,44 @@
             isFetchingAlerts = false;
             if (!data || !data.documents) return;
 
-            // Search for any active emergency across all victim documents
-            let activeDoc = null;
-
-            // Check if current target phone or any victim has is_alert_active === true
+            // Collect all active emergency alerts
+            const activeList = [];
             for (const doc of data.documents) {
               const f = doc.fields;
               if (!f) continue;
               const isActive = f.is_alert_active ? f.is_alert_active.booleanValue : false;
               if (isActive) {
-                const docPhone = f.victimPhone ? f.victimPhone.stringValue : (f.phone ? f.phone.stringValue : doc.name.split('/').pop().replace('user_', ''));
-                if (docPhone === ConsoleState.targetPhone) {
-                  activeDoc = doc;
-                  break;
-                }
-                if (!activeDoc) {
-                  activeDoc = doc;
-                }
+                let timeVal = 0;
+                if (doc.updateTime) timeVal = Date.parse(doc.updateTime);
+                else if (f.timestamp && f.timestamp.timestampValue) timeVal = Date.parse(f.timestamp.timestampValue);
+                activeList.push({ doc, timeVal });
               }
             }
 
-            if (activeDoc) {
+            if (activeList.length > 0) {
+              // Sort by newest update time descending - LATEST alert ALWAYS takes priority!
+              activeList.sort((a, b) => b.timeVal - a.timeVal);
+              const activeDoc = activeList[0].doc;
               const f = activeDoc.fields;
+
               const phone = f.victimPhone ? f.victimPhone.stringValue : (f.phone ? f.phone.stringValue : activeDoc.name.split('/').pop().replace('user_', ''));
               const name = f.victimName ? f.victimName.stringValue : (f.user_name ? f.user_name.stringValue : 'Protected User');
               const lat = f.lat ? f.lat.doubleValue : (f.latitude ? f.latitude.doubleValue : ConsoleState.lat);
               const lng = f.lng ? f.lng.doubleValue : (f.longitude ? f.longitude.doubleValue : ConsoleState.lng);
-              const accuracy = f.accuracy ? f.accuracy.doubleValue : 6.0;
+              const accuracy = f.accuracy ? f.accuracy.doubleValue : 5.0;
               const speed = f.speed ? f.speed.doubleValue : 0;
               const trigger = f.trigger ? f.trigger.stringValue : (f.trigger_source ? f.trigger_source.stringValue : 'EMERGENCY_SOS');
               const cameraFrame = f.camera_frame ? f.camera_frame.stringValue : '';
               const battery = f.battery ? f.battery.doubleValue : (f.battery_level ? parseInt(f.battery_level.stringValue) : ConsoleState.battery);
 
+              // Auto-switch to active victim
               if (ConsoleState.targetPhone !== phone) {
                 ConsoleState.targetPhone = phone;
                 const phoneInput = document.getElementById('inputTargetPhone');
                 if (phoneInput) phoneInput.value = phone;
                 const peerLbl = document.getElementById('peerLabelPhone');
-                if (peerLbl) peerLbl.innerText = 'PEER: safezone-' + phone;
-                appendAuditLog(`🚨 AUTO-INTERCEPT LOCKED ONTO VICTIM: +91 ${phone} (${name})`);
+                if (peerLbl) peerLbl.innerText = 'TARGET: +91 ' + phone;
+                appendAuditLog(`🚨 AUTO-INTERCEPT: LOCKED ONTO VICTIM +91 ${phone} (${name})`);
               }
 
               ConsoleState.targetName = name;
@@ -1344,7 +1314,7 @@
               if (!ConsoleState.isAlertActive) {
                 ConsoleState.isAlertActive = true;
                 ConsoleState.trigger = trigger;
-                appendAuditLog(`🚨 EMERGENCY ACTIVE: ${name} triggered ${trigger}!`);
+                appendAuditLog(`🚨 EMERGENCY TRIGGERED: ${name} (+91 ${phone}) via ${trigger}`);
                 playConsoleSiren();
               } else {
                 ConsoleState.trigger = trigger;
@@ -1353,7 +1323,7 @@
               updateTargetPosition(lat, lng, accuracy, ConsoleState.trigger);
               updateHudUI();
 
-              if (cameraFrame) {
+              if (cameraFrame && cameraFrame.length > 50) {
                 displaySurveillanceFrame(cameraFrame);
               }
             } else {
@@ -1379,7 +1349,7 @@
                   const lat = f.lat ? f.lat.doubleValue : (f.latitude ? f.latitude.doubleValue : null);
                   const lng = f.lng ? f.lng.doubleValue : (f.longitude ? f.longitude.doubleValue : null);
                   if (lat !== null && lng !== null && (lat !== ConsoleState.lat || lng !== ConsoleState.lng)) {
-                    updateTargetPosition(lat, lng, f.accuracy ? f.accuracy.doubleValue : 6.0, 'NORMAL');
+                    updateTargetPosition(lat, lng, f.accuracy ? f.accuracy.doubleValue : 5.0, 'NORMAL');
                   }
                 }
               }
@@ -1388,7 +1358,7 @@
           .catch(() => {
             isFetchingAlerts = false;
           });
-      }, 2000);
+      }, 1500);
     }
 
     /* ==========================================================================
