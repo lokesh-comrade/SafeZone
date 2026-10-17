@@ -701,29 +701,31 @@
     /* ==========================================================================
        TACTICAL CONSOLE STATE & MAP ENGINE
        ========================================================================== */
+    const savedProf = localStorage.getItem('safezone_user_profile');
+    const parsedProf = savedProf ? JSON.parse(savedProf) : null;
+    const initialPhone = parsedProf ? parsedProf.phone : '9876543210';
+    const initialName = parsedProf ? parsedProf.name : 'Victim';
+
+    const savedAlert = localStorage.getItem('safezone_alert_' + initialPhone);
+    const parsedAlert = savedAlert ? JSON.parse(savedAlert) : null;
+
+    const savedUserZones = localStorage.getItem('safezone_user_zones');
+    const parsedZones = savedUserZones ? JSON.parse(savedUserZones) : [];
+
     const ConsoleState = {
-      targetPhone: '9876543210',
-      targetName: 'Ananya Sharma',
-      lat: 28.6139,
-      lng: 77.2090,
-      prevLat: 28.6125,
-      prevLng: 77.2078,
-      speed: 18.4,
-      accuracy: 6,
-      battery: 88,
-      trigger: 'MANUAL_HOLD_3S',
-      isAlertActive: true,
-      breadcrumbs: [
-        [28.6080, 77.2020],
-        [28.6105, 77.2050],
-        [28.6125, 77.2078],
-        [28.6139, 77.2090]
-      ],
-      safeZones: [
-        { name: 'Home Residence', lat: 28.6139, lng: 77.2090, radius: 300 },
-        { name: 'Campus', lat: 28.6250, lng: 77.2180, radius: 500 },
-        { name: 'Hostel Sector 12', lat: 28.6080, lng: 77.2020, radius: 200 }
-      ],
+      targetPhone: initialPhone,
+      targetName: initialName,
+      lat: parsedAlert && parsedAlert.lat ? parsedAlert.lat : 28.6139,
+      lng: parsedAlert && parsedAlert.lng ? parsedAlert.lng : 77.2090,
+      prevLat: null,
+      prevLng: null,
+      speed: parsedAlert && parsedAlert.speed ? parsedAlert.speed : 0,
+      accuracy: parsedAlert && parsedAlert.accuracy ? parsedAlert.accuracy : 8,
+      battery: parsedAlert && parsedAlert.battery ? parsedAlert.battery : 85,
+      trigger: parsedAlert && parsedAlert.trigger ? parsedAlert.trigger : 'NONE',
+      isAlertActive: parsedAlert ? parsedAlert.is_alert_active : false,
+      breadcrumbs: parsedAlert && parsedAlert.lat ? [[parsedAlert.lat, parsedAlert.lng]] : [],
+      safeZones: parsedZones,
       peer: null,
       peerCall: null,
       syncChannel: null
@@ -822,7 +824,10 @@
       if (trigger) ConsoleState.trigger = trigger;
 
       // Update Map elements
-      if (targetMarker) targetMarker.setLatLng([newLat, newLng]);
+      if (targetMarker) {
+        targetMarker.setLatLng([newLat, newLng]);
+        targetMarker.setPopupContent(`<b>${ConsoleState.targetName}</b><br>Trigger: ${ConsoleState.trigger}<br>Live GPS: ${newLat.toFixed(5)}, ${newLng.toFixed(5)}`);
+      }
       if (accuracyCircle) {
         accuracyCircle.setLatLng([newLat, newLng]);
         accuracyCircle.setRadius(ConsoleState.accuracy);
@@ -833,7 +838,7 @@
       if (polylineTrack) polylineTrack.setLatLngs(ConsoleState.breadcrumbs);
 
       // Auto-pan
-      map.panTo([newLat, newLng]);
+      if (map) map.setView([newLat, newLng], Math.max(map.getZoom(), 15));
 
       // Update HUD
       updateHudUI();

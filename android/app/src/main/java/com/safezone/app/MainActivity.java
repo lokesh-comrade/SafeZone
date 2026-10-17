@@ -238,36 +238,58 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @JavascriptInterface
         public void sendSMS(String phoneNumber, String message) {
             Log.d(TAG, "Bridge sendSMS: " + phoneNumber + " -> " + message);
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
-                try {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    ArrayList<String> parts = smsManager.divideMessage(message);
-                    smsManager.sendMultipartTextMessage(phoneNumber, null, parts, null, null);
-                    runOnUiThread(() -> Toast.makeText(context, "Emergency SMS dispatched to " + phoneNumber, Toast.LENGTH_SHORT).show());
-                } catch (Exception e) {
-                    Log.e(TAG, "SMS dispatch error", e);
+            try {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+                    SmsManager smsManager;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        smsManager = context.getSystemService(SmsManager.class);
+                    } else {
+                        smsManager = SmsManager.getDefault();
+                    }
+                    if (smsManager != null) {
+                        ArrayList<String> parts = smsManager.divideMessage(message);
+                        smsManager.sendMultipartTextMessage(phoneNumber, null, parts, null, null);
+                        runOnUiThread(() -> Toast.makeText(context, "Emergency SMS dispatched to " + phoneNumber, Toast.LENGTH_SHORT).show());
+                        return;
+                    }
                 }
-            } else {
-                Log.w(TAG, "SEND_SMS permission not granted");
+            } catch (Exception e) {
+                Log.e(TAG, "Direct SMS dispatch error, falling back to intent", e);
+            }
+
+            // Fallback: Launch SMS app with pre-filled message
+            try {
+                Intent smsIntent = new Intent(Intent.ACTION_SENDTO);
+                smsIntent.setData(Uri.parse("smsto:" + phoneNumber));
+                smsIntent.putExtra("sms_body", message);
+                smsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(smsIntent);
+            } catch (Exception ex) {
+                Log.e(TAG, "SMS intent fallback failed", ex);
             }
         }
 
         @JavascriptInterface
         public void makeCall(String phoneNumber) {
             Log.d(TAG, "Bridge makeCall: " + phoneNumber);
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-                try {
+            try {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                     callIntent.setData(Uri.parse("tel:" + phoneNumber));
                     callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(callIntent);
-                } catch (Exception e) {
-                    Log.e(TAG, "Call initiation error", e);
+                    return;
                 }
-            } else {
+            } catch (Exception e) {
+                Log.e(TAG, "Direct call error, falling back to dialer", e);
+            }
+
+            try {
                 Intent dialIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
                 dialIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(dialIntent);
+            } catch (Exception ex) {
+                Log.e(TAG, "Dialer fallback failed", ex);
             }
         }
 
