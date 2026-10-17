@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>PRJ_650 - Big Data Spatial Analytics & SDG 5 Dashboard</title>
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Jagruthi - Admin & Threat Analytics Dashboard</title>
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
   <!-- Leaflet GIS Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -17,696 +19,1404 @@
 
   <style>
     :root {
-      --bg-dark: #070B13;
-      --bg-surface: #0E1626;
-      --bg-card: #131E33;
-      --border-dark: #1F2F4A;
-      --border-bright: #2E456B;
-      --crimson: #EF4444;
-      --crimson-glow: rgba(239, 68, 68, 0.35);
+      --sidebar-bg: #121626;
+      --sidebar-hover: #1E243D;
+      --body-bg: #F5F7FB;
+      --card-bg: #FFFFFF;
+      --border: #E5E7EB;
+      --crimson: #E11D48;
+      --crimson-gradient: linear-gradient(135deg, #FF2A6D, #BE123C);
+      --purple: #8B5CF6;
+      --purple-light: #EDE9FE;
+      --pink: #EC4899;
+      --pink-light: #FCE7F3;
       --emerald: #10B981;
-      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --emerald-light: #D1FAE5;
+      --cyan: #06B6D4;
+      --cyan-light: #CFFAFE;
       --amber: #F59E0B;
-      --cyan: #38BDF8;
-      --sdg-orange: #FF3A21;
-      --text-bright: #F8FAFC;
-      --text-muted: #94A3B8;
-      --text-dim: #64748B;
+      --amber-light: #FEF3C7;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --text-sub: #9CA3AF;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-bright);
-      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--body-bg);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ==========================================================================
+       SIDEBAR NAVIGATION (Matches Image 4 Dark Navy Purple Sidebar)
+       ========================================================================== */
+    aside.admin-sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      color: #FFF;
       display: flex;
       flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      z-index: 100;
     }
 
-    /* Top Navigation Header */
-    header.analytics-header {
-      height: 68px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border-dark);
+    .sidebar-brand-box {
+      padding: 22px 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .brand-lotus {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
     }
 
-    .brand-badge-sdg {
-      background: linear-gradient(135deg, #FF3A21, #D82610);
-      color: #FFF;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 6px 12px;
-      border-radius: 8px;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 12px rgba(255, 58, 33, 0.4);
-    }
-
-    .brand-title {
-      font-size: 17px;
+    .brand-text h2 {
+      font-size: 20px;
       font-weight: 800;
       letter-spacing: -0.3px;
+      color: #FFF;
+      line-height: 1.1;
     }
 
-    .brand-subtitle {
-      font-size: 11.5px;
-      color: var(--text-muted);
+    .brand-text p {
+      font-size: 11px;
+      color: #F43F5E;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
       margin-top: 2px;
     }
 
-    .header-nav-links {
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      border-radius: 12px;
+      color: #94A3B8;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .menu-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: #FFF;
+    }
+
+    .menu-item.active {
+      background: var(--crimson-gradient);
+      color: #FFF;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+    }
+
+    .menu-left {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .nav-btn {
-      text-decoration: none;
-      font-size: 12.5px;
-      font-weight: 700;
-      padding: 8px 16px;
+    .menu-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
       border-radius: 10px;
-      transition: all 0.15s;
+      background: #EF4444;
+      color: #FFF;
+    }
+
+    .sidebar-promo-card {
+      margin: 14px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(225,29,72,0.18), rgba(139,92,246,0.18));
+      border: 1px solid rgba(225,29,72,0.3);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .sidebar-promo-card h4 {
+      font-size: 12px;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-promo-card p {
+      font-size: 10.5px;
+      color: #FDA4AF;
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT WRAPPER
+       ========================================================================== */
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Top Search & Profile Bar */
+    .admin-topbar {
+      height: 64px;
+      background: #FFF;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
-    .nav-btn.secondary {
-      background: var(--bg-card);
-      color: var(--text-bright);
-      border: 1px solid var(--border-dark);
-    }
-    .nav-btn.secondary:hover {
-      border-color: var(--cyan);
-      background: #1A2942;
-    }
-
-    .nav-btn.primary {
-      background: linear-gradient(135deg, #EF4444, #B91C1C);
-      color: #FFF;
-      box-shadow: 0 4px 12px var(--crimson-glow);
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #F3F4F6;
+      padding: 8px 16px;
+      border-radius: 20px;
+      width: 380px;
     }
 
-    /* Main Container */
-    main.analytics-body {
-      flex: 1;
-      padding: 24px;
-      max-width: 1440px;
+    .search-wrapper input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: inherit;
+      font-size: 13px;
       width: 100%;
-      margin: 0 auto;
+      color: var(--text-main);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .bell-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #4B5563;
+    }
+
+    .bell-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #EF4444;
+      color: #FFF;
+      font-size: 10px;
+      font-weight: 800;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #6D28D9;
+      color: #FFF;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-info .user-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .user-info .user-role {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Content Area */
+    .dashboard-body {
+      padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
 
-    /* Metric Summary KPI Cards Grid */
-    .kpi-grid {
+    /* ==========================================================================
+       TOP 4 KPI CARDS
+       ========================================================================== */
+    .kpi-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 1024px) {
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .kpi-grid { grid-template-columns: 1fr; }
+      gap: 20px;
     }
 
     .kpi-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-dark);
-      border-radius: 18px;
+      background: #FFF;
+      border-radius: var(--radius-lg);
       padding: 20px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s;
-    }
-
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-bright);
-    }
-
-    .kpi-header {
+      border: 1px solid var(--border);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
     }
+
+    .kpi-details-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .kpi-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .kpi-icon-box.pink { background: var(--pink-light); color: var(--pink); }
+    .kpi-icon-box.purple { background: var(--purple-light); color: var(--purple); }
+    .kpi-icon-box.emerald { background: var(--emerald-light); color: var(--emerald); }
+    .kpi-icon-box.cyan { background: var(--cyan-light); color: var(--cyan); }
 
     .kpi-label {
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 12.5px;
+      font-weight: 600;
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
     }
 
-    .kpi-icon {
-      font-size: 20px;
-    }
-
-    .kpi-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 28px;
+    .kpi-number {
+      font-size: 24px;
       font-weight: 800;
-      color: var(--text-bright);
+      color: var(--text-main);
+      margin-top: 2px;
+      letter-spacing: -0.5px;
     }
 
     .kpi-subtext {
       font-size: 11.5px;
-      margin-top: 8px;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .badge-positive {
-      color: var(--emerald);
       font-weight: 700;
+      margin-top: 2px;
     }
 
-    /* 2-Column Analytical Section */
-    .analytical-row {
+    .kpi-subtext.up-pink { color: var(--pink); }
+    .kpi-subtext.up-purple { color: var(--purple); }
+    .kpi-subtext.up-emerald { color: var(--emerald); }
+    .kpi-subtext.up-cyan { color: var(--cyan); }
+
+    .kpi-sparkline {
+      width: 70px;
+      height: 34px;
+    }
+
+    /* ==========================================================================
+       MIDDLE ROW: LIVE SOS ALERTS MAP & RECENT ALERTS
+       ========================================================================== */
+    .mid-row {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: 2fr 1fr;
       gap: 20px;
     }
 
-    @media (max-width: 992px) {
-      .analytical-row { grid-template-columns: 1fr; }
-    }
-
     .panel-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-dark);
-      border-radius: 20px;
-      padding: 22px;
+      background: #FFF;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    .panel-title-bar {
+    .panel-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      justify-content: space-between;
     }
 
     .panel-title {
-      font-size: 15.5px;
+      font-size: 15px;
       font-weight: 800;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .panel-legend {
-      display: flex;
-      gap: 12px;
-      font-size: 11.5px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .legend-item {
+    .pill-live {
+      background: #FEE2E2;
+      color: #DC2626;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       gap: 5px;
     }
 
-    .legend-dot {
-      width: 10px;
-      height: 10px;
+    .pill-live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #DC2626;
       border-radius: 50%;
+      animation: blinkDot 1.2s infinite;
     }
 
-    #spatialHeatmap {
-      height: 380px;
-      border-radius: 14px;
-      border: 1px solid var(--border-dark);
-      overflow: hidden;
+    @keyframes blinkDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
     }
 
-    /* Tactical Tile Dark Filter */
-    .tactical-dark-tiles {
-      filter: brightness(0.8) invert(1) contrast(2.5) hue-rotate(190deg) saturate(0.25) brightness(0.75);
-    }
-
-    /* Risk Distribution Histogram Bar Container */
-    .histogram-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .hist-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 11.5px;
-    }
-
-    .hist-time {
-      font-family: 'JetBrains Mono', monospace;
-      width: 85px;
+    .filter-select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
       color: var(--text-muted);
-      flex-shrink: 0;
+      background: #F9FAFB;
+      outline: none;
     }
 
-    .hist-bar-bg {
-      flex: 1;
-      height: 14px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 7px;
-      overflow: hidden;
+    /* Map Box */
+    .map-container {
+      height: 380px;
+      width: 100%;
       position: relative;
     }
 
-    .hist-bar-fill {
+    #adminSosMap {
+      width: 100%;
       height: 100%;
-      border-radius: 7px;
-      transition: width 0.8s ease-in-out;
     }
 
-    .hist-count {
-      font-family: 'JetBrains Mono', monospace;
-      width: 45px;
-      text-align: right;
-      color: var(--text-bright);
-      font-weight: 700;
-    }
-
-    /* SDG 5 Narrative Banner */
-    .sdg-narrative-banner {
-      background: linear-gradient(135deg, rgba(255, 58, 33, 0.12), rgba(239, 68, 68, 0.05));
-      border: 1px solid rgba(255, 58, 33, 0.3);
-      border-radius: 18px;
-      padding: 22px 26px;
+    .map-floating-alert {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--crimson);
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 14px rgba(225,29,72,0.2);
+      z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 10px;
     }
 
-    @media (max-width: 768px) {
-      .sdg-narrative-banner { flex-direction: column; text-align: center; }
+    .map-legend-card {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 11px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      box-shadow: var(--shadow-md);
     }
 
-    .sdg-wheel-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      background: #FF3A21;
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* Recent Alerts List */
+    .recent-alerts-list {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 380px;
+    }
+
+    .alert-card-item {
+      padding: 12px;
+      border-radius: 12px;
+      background: #F9FAFB;
+      border: 1px solid #F3F4F6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .alert-card-item:hover {
+      background: #FFF1F2;
+      border-color: #FECDD3;
+    }
+
+    .alert-card-item.critical {
+      background: #FFF5F5;
+      border-left: 4px solid var(--crimson);
+    }
+
+    .alert-left-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-tag-square {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
-      flex-shrink: 0;
-      box-shadow: 0 0 20px rgba(255, 58, 33, 0.4);
-    }
-
-    .sdg-content h3 {
-      font-size: 16px;
       font-weight: 800;
-      color: #FFF;
-      margin-bottom: 6px;
+      font-size: 11px;
+      flex-shrink: 0;
     }
 
-    .sdg-content p {
+    .alert-tag-square.sos { background: #FEE2E2; color: #DC2626; }
+    .alert-tag-square.deviation { background: #FEF3C7; color: #D97706; }
+    .alert-tag-square.safezone { background: #D1FAE5; color: #059669; }
+
+    .alert-title-text {
       font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .alert-sub-text {
+      font-size: 11px;
       color: var(--text-muted);
-      line-height: 1.6;
+      margin-top: 2px;
     }
 
-    /* Telemetry Table */
-    .data-table-wrap {
+    .alert-badge-status {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: capitalize;
+    }
+
+    .alert-badge-status.critical { background: #FEE2E2; color: #DC2626; }
+    .alert-badge-status.medium { background: #FEF3C7; color: #D97706; }
+    .alert-badge-status.resolved { background: #D1FAE5; color: #059669; }
+
+    /* ==========================================================================
+       BOTTOM ROW: 3 ANALYTICS CARDS (User Growth, Alert Stats Donut, Device Status)
+       ========================================================================== */
+    .bottom-row-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    .chart-panel-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Donut Chart Visual */
+    .donut-chart-wrap {
+      width: 170px;
+      height: 170px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-center-info {
+      position: absolute;
+      text-align: center;
+    }
+
+    .donut-center-number {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .donut-center-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .chart-legend-list {
       width: 100%;
-      overflow-x: auto;
-      margin-top: 8px;
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    table.telemetry-table {
+    .chart-legend-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .legend-name-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .legend-count {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Circular Progress Device Status */
+    .circle-progress-wrap {
+      width: 150px;
+      height: 150px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circle-center-text {
+      text-align: center;
+      position: absolute;
+    }
+
+    .circle-pct {
+      font-size: 24px;
+      font-weight: 800;
+      color: #059669;
+    }
+
+    .circle-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       FOURTH ROW: RECENT USERS & SYSTEM ACTIVITY STREAM
+       ========================================================================== */
+    .activity-row-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Users Table */
+    .users-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 12.5px;
+    }
+
+    .users-table th {
       text-align: left;
-    }
-
-    table.telemetry-table th {
-      padding: 12px 14px;
-      background: var(--bg-card);
-      color: var(--text-muted);
-      font-family: 'JetBrains Mono', monospace;
+      padding: 12px 16px;
+      font-size: 11px;
       font-weight: 700;
-      border-bottom: 1px solid var(--border-dark);
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
     }
 
-    table.telemetry-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      font-family: 'Inter', sans-serif;
+    .users-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #F3F4F6;
+      color: var(--text-main);
     }
 
-    table.telemetry-table tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .status-pill {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 800;
+    .status-pill-user {
+      font-size: 11px;
+      font-weight: 700;
       padding: 3px 8px;
       border-radius: 12px;
-      display: inline-block;
+      background: #D1FAE5;
+      color: #059669;
     }
 
-    .status-pill.resolved {
-      background: var(--emerald-glow);
-      color: #34D399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+    /* Activity Stream */
+    .activity-feed-list {
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .status-pill.active {
-      background: var(--crimson-glow);
-      color: #F87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .activity-dot-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .activity-content {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .activity-text {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .activity-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
-  <!-- TOP HEADER -->
-  <header class="analytics-header">
-    <div class="brand-group">
-      <div class="brand-badge-sdg">
-        <span>🎯</span>
-        <span>SDG 5.2</span>
-      </div>
-      <div>
-        <div class="brand-title">PRJ_650 Big Data & Spatial Analytics Engine</div>
-        <div class="brand-subtitle">Real-Time Threat Density Mapping & SDG 5 Gender Equality Telemetry</div>
+  <!-- =========================================================================
+       SIDEBAR: Dark Navy Purple with Lotus Emblem (Matches Image 4)
+       ========================================================================= -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand-box">
+      <svg class="brand-lotus" viewBox="0 0 100 100" fill="none">
+        <path d="M50 15 C35 30 20 50 20 70 C20 85 35 90 50 90 C65 90 80 85 80 70 C80 50 65 30 50 15 Z" fill="url(#brandGrad1)"/>
+        <path d="M50 35 C42 45 32 60 35 75 C38 85 46 88 50 88 C54 88 62 85 65 75 C68 60 58 45 50 35 Z" fill="url(#brandGrad2)"/>
+        <path d="M50 50 C46 58 42 68 45 78 C47 84 50 85 50 85 C50 85 53 84 55 78 C58 68 54 58 50 50 Z" fill="#FFFFFF"/>
+        <defs>
+          <linearGradient id="brandGrad1" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FF2A6D"/>
+            <stop offset="1" stop-color="#9333EA"/>
+          </linearGradient>
+          <linearGradient id="brandGrad2" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FB7185"/>
+            <stop offset="1" stop-color="#E11D48"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="brand-text">
+        <h2>Jagruthi</h2>
+        <p>Admin Dashboard</p>
       </div>
     </div>
 
-    <div class="header-nav-links">
-      <a href="../monitor/monitor.html" class="nav-btn primary">
-        <span>🖥️</span> Tactical Command Center
+    <nav class="sidebar-menu">
+      <a class="menu-item active" href="analytics.html">
+        <div class="menu-left"><span>🏠</span> Dashboard</div>
       </a>
-      <a href="../app/app.html" class="nav-btn secondary">
-        <span>📱</span> Mobile App
+      <a class="menu-item" href="#users">
+        <div class="menu-left"><span>👥</span> Users</div>
       </a>
-      <a href="../index.html" class="nav-btn secondary">
-        <span>🏠</span> Portal Hub
+      <a class="menu-item" href="../monitor/monitor.html">
+        <div class="menu-left"><span>🚨</span> SOS Alerts</div>
+        <span class="menu-badge" id="sidebarSosBadge">1</span>
       </a>
+      <a class="menu-item" href="#devices">
+        <div class="menu-left"><span>📱</span> Devices (IoT)</div>
+      </a>
+      <a class="menu-item" href="#safezones">
+        <div class="menu-left"><span>🛡️</span> Safe Zones</div>
+      </a>
+      <a class="menu-item" href="#reports">
+        <div class="menu-left"><span>📊</span> Reports & Analytics</div>
+      </a>
+      <a class="menu-item" href="../monitor/monitor.html">
+        <div class="menu-left"><span>👮</span> Police Management</div>
+      </a>
+      <a class="menu-item" href="#content">
+        <div class="menu-left"><span>📄</span> Content Management</div>
+      </a>
+      <a class="menu-item" href="#settings">
+        <div class="menu-left"><span>⚙️</span> System Settings</div>
+      </a>
+      <a class="menu-item" href="#notifications">
+        <div class="menu-left"><span>🔔</span> Notifications</div>
+        <span class="menu-badge" style="background:#6D28D9;">5</span>
+      </a>
+      <a class="menu-item" href="#audit">
+        <div class="menu-left"><span>📜</span> Audit Logs</div>
+      </a>
+    </nav>
+
+    <div class="sidebar-promo-card">
+      <h4>Safer Steps</h4>
+      <p>Brighter Tomorrow</p>
     </div>
-  </header>
+  </aside>
 
-  <!-- BODY CONTENT -->
-  <main class="analytics-body">
+  <!-- =========================================================================
+       MAIN BODY CONTENT
+       ========================================================================= -->
+  <main class="admin-main">
 
-    <!-- KPI STATS GRID -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <span class="kpi-label">Mean Dispatch Response Time</span>
-          <span class="kpi-icon">⏱️</span>
-        </div>
-        <div class="kpi-value" style="color:var(--emerald);">1.8 min</div>
-        <div class="kpi-subtext">
-          <span class="badge-positive">▼ 83.4% faster</span> than conventional 911/112 dialers
-        </div>
+    <!-- Topbar -->
+    <header class="admin-topbar">
+      <div class="search-wrapper">
+        <span>🔍</span>
+        <input type="text" placeholder="Search users, alerts, devices, locations...">
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <span class="kpi-label">Interception Success Rate</span>
-          <span class="kpi-icon">🛡️</span>
-        </div>
-        <div class="kpi-value" style="color:#38BDF8;">98.7%</div>
-        <div class="kpi-subtext">
-          <span>Target locked via real-time satellite GPS & cell triangulator</span>
-        </div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <span class="kpi-label">Safe Corridor Coverage</span>
-          <span class="kpi-icon">🏰</span>
-        </div>
-        <div class="kpi-value" style="color:var(--amber);">94.2%</div>
-        <div class="kpi-subtext">
-          <span>Active geofenced safe zones mapped across major metro nodes</span>
-        </div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-header">
-          <span class="kpi-label">Optical Evidence Integrity</span>
-          <span class="kpi-icon">📸</span>
-        </div>
-        <div class="kpi-value" style="color:#A78BFA;">100%</div>
-        <div class="kpi-subtext">
-          <span>Cryptographically geotagged frames with UTC watermark</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- SDG 5 NARRATIVE STRIP -->
-    <div class="sdg-narrative-banner">
-      <div class="sdg-wheel-icon">⚖️</div>
-      <div class="sdg-content">
-        <h3>United Nations Sustainable Development Goal 5: Gender Equality</h3>
-        <p>
-          <strong>Target 5.2:</strong> Eliminate all forms of violence against all women and girls in public and private spheres. PRJ_650 directly accelerates this mandate by providing an autonomous, technology-driven rapid response infrastructure. By merging zero-latency WebRTC surveillance, stealth calculator camouflage, sensor shake detection, and spatial big data clustering, the platform protects vulnerable citizens during critical nighttime journeys and high-risk commutes.
-        </p>
-      </div>
-    </div>
-
-    <!-- ANALYTICAL ROW 1: SPATIAL HEATMAP & TEMPORAL RISK HISTOGRAM -->
-    <div class="analytical-row">
-      <!-- Big Data Heatmap -->
-      <div class="panel-card">
-        <div class="panel-title-bar">
-          <div class="panel-title">
-            <span>🗺️</span> Spatial Threat Density Heatmap (Big Data GIS Clustering)
-          </div>
-          <div class="panel-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#EF4444;"></div> High Risk Cluster</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#10B981;"></div> Safe Corridor</div>
-          </div>
-        </div>
-        <div id="spatialHeatmap"></div>
-      </div>
-
-      <!-- Temporal Risk Histogram -->
-      <div class="panel-card">
-        <div class="panel-title-bar">
-          <div class="panel-title">
-            <span>📊</span> Peak Vulnerability Hours (Time-of-Day Risk Analysis)
-          </div>
-        </div>
-        <div class="histogram-wrap">
-          <div class="hist-row">
-            <span class="hist-time">00:00 - 04:00</span>
-            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:78%; background:linear-gradient(90deg, #F59E0B, #EF4444);"></div></div>
-            <span class="hist-count">39 pts</span>
-          </div>
-          <div class="hist-row">
-            <span class="hist-time">04:00 - 08:00</span>
-            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:18%; background:#10B981;"></div></div>
-            <span class="hist-count">9 pts</span>
-          </div>
-          <div class="hist-row">
-            <span class="hist-time">08:00 - 12:00</span>
-            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:12%; background:#10B981;"></div></div>
-            <span class="hist-count">6 pts</span>
-          </div>
-          <div class="hist-row">
-            <span class="hist-time">12:00 - 16:00</span>
-            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:16%; background:#10B981;"></div></div>
-            <span class="hist-count">8 pts</span>
-          </div>
-          <div class="hist-row">
-            <span class="hist-time">16:00 - 20:00</span>
-            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:45%; background:#F59E0B;"></div></div>
-            <span class="hist-count">22 pts</span>
-          </div>
-          <div class="hist-row">
-            <span class="hist-time">20:00 - 24:00</span>
-            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:92%; background:linear-gradient(90deg, #EF4444, #B91C1C);"></div></div>
-            <span class="hist-count">46 pts</span>
-          </div>
-        </div>
-        <div style="margin-top:18px; font-size:11.5px; color:var(--text-dim); line-height:1.5;">
-          <strong>Algorithmic Finding:</strong> 71% of high-priority distress alerts cluster between 20:00 and 03:00 hours in transit corridors lacking adequate public lighting.
-        </div>
-      </div>
-    </div>
-
-    <!-- RECENT INCIDENT TELEMETRY AUDIT LOG -->
-    <div class="panel-card">
-      <div class="panel-title-bar">
-        <div class="panel-title">
-          <span>📋</span> Historical Incident & Dispatch Audit Log (Big Data Spatial Records)
-        </div>
-        <button onclick="refreshDataLog()" style="background:var(--bg-card); color:#38BDF8; border:1px solid var(--border-dark); padding:6px 14px; border-radius:8px; font-weight:700; font-size:11.5px; cursor:pointer;">
-          🔄 Refresh Cloud Telemetry
+      <div class="topbar-right">
+        <button class="bell-btn" title="Notifications">
+          🔔
+          <span class="bell-badge">5</span>
         </button>
-      </div>
 
-      <div class="data-table-wrap">
-        <table class="telemetry-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Victim ID</th>
-              <th>Trigger Vector</th>
-              <th>Coordinates</th>
-              <th>Haversine Velocity</th>
-              <th>Dispatch Time</th>
-              <th>Resolution Status</th>
-            </tr>
-          </thead>
-          <tbody id="telemetryTableBody">
-            <tr>
-              <td style="font-family:'JetBrains Mono',monospace;">2026-10-17 14:48:20</td>
-              <td style="font-weight:700;">Lokesh (+91 8073521221)</td>
-              <td><span style="color:#EF4444; font-weight:700;">SHAKE_5X SENSOR</span></td>
-              <td style="font-family:'JetBrains Mono',monospace;">13.2925° N, 77.5306° E</td>
-              <td style="font-family:'JetBrains Mono',monospace;">12.4 km/h</td>
-              <td>1.2 min</td>
-              <td><span class="status-pill resolved">STAND DOWN / SECURED</span></td>
-            </tr>
-            <tr>
-              <td style="font-family:'JetBrains Mono',monospace;">2026-10-17 11:15:04</td>
-              <td style="font-weight:700;">Ananya (+91 9876543210)</td>
-              <td><span style="color:#F59E0B; font-weight:700;">MANUAL_HOLD_3S</span></td>
-              <td style="font-family:'JetBrains Mono',monospace;">13.1688° N, 77.5337° E</td>
-              <td style="font-family:'JetBrains Mono',monospace;">0.0 km/h</td>
-              <td>1.9 min</td>
-              <td><span class="status-pill resolved">POLICE INTERCEPTED</span></td>
-            </tr>
-            <tr>
-              <td style="font-family:'JetBrains Mono',monospace;">2026-10-16 22:41:18</td>
-              <td style="font-weight:700;">Priya (+91 9998887776)</td>
-              <td><span style="color:#38BDF8; font-weight:700;">COVERT_PIN_9999</span></td>
-              <td style="font-family:'JetBrains Mono',monospace;">13.1674° N, 77.5331° E</td>
-              <td style="font-family:'JetBrains Mono',monospace;">8.6 km/h</td>
-              <td>2.1 min</td>
-              <td><span class="status-pill resolved">RESOLVED BY GUARDIAN</span></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="user-profile">
+          <div class="user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name">Admin</div>
+            <div class="user-role">System Administrator</div>
+          </div>
+        </div>
       </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="dashboard-body">
+
+      <!-- TOP 4 KPI CARDS -->
+      <section class="kpi-row">
+        <!-- 1. Total Users -->
+        <div class="kpi-card">
+          <div class="kpi-details-left">
+            <div class="kpi-icon-box pink">👥</div>
+            <div>
+              <div class="kpi-label">Total Users</div>
+              <div class="kpi-number" id="kpiUsers">2,481</div>
+              <div class="kpi-subtext up-pink">↑ +12% this month</div>
+            </div>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40">
+            <path d="M0,35 Q20,30 40,25 T80,15 T100,8" fill="none" stroke="#EC4899" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- 2. Total SOS Alerts -->
+        <div class="kpi-card">
+          <div class="kpi-details-left">
+            <div class="kpi-icon-box purple">🔔</div>
+            <div>
+              <div class="kpi-label">Total SOS Alerts</div>
+              <div class="kpi-number" id="kpiTotalAlerts">156</div>
+              <div class="kpi-subtext up-purple">↑ +8% this month</div>
+            </div>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40">
+            <path d="M0,32 Q25,35 50,20 T80,18 T100,5" fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- 3. Resolved Alerts -->
+        <div class="kpi-card">
+          <div class="kpi-details-left">
+            <div class="kpi-icon-box emerald">🛡️</div>
+            <div>
+              <div class="kpi-label">Resolved Alerts</div>
+              <div class="kpi-number" id="kpiResolved">142</div>
+              <div class="kpi-subtext up-emerald">91% resolution rate</div>
+            </div>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40">
+            <path d="M0,30 Q30,28 60,15 T100,6" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- 4. Active Devices (IoT) -->
+        <div class="kpi-card">
+          <div class="kpi-details-left">
+            <div class="kpi-icon-box cyan">📱</div>
+            <div>
+              <div class="kpi-label">Active Devices (IoT)</div>
+              <div class="kpi-number" id="kpiDevices">328</div>
+              <div class="kpi-subtext up-cyan">↑ 96% online</div>
+            </div>
+          </div>
+          <svg class="kpi-sparkline" viewBox="0 0 100 40">
+            <path d="M0,28 Q30,32 60,18 T100,10" fill="none" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- MIDDLE ROW: LIVE SOS ALERTS MAP & RECENT ALERTS -->
+      <section class="mid-row">
+        <!-- Live Map -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">
+              <span>📍 Live SOS Alerts Map</span>
+              <span class="pill-live">Live</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <select class="filter-select">
+                <option>All Alerts</option>
+                <option>Critical Only</option>
+                <option>Route Deviations</option>
+              </select>
+              <select class="filter-select">
+                <option>Today</option>
+                <option>This Week</option>
+                <option>This Month</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="map-container">
+            <div id="adminSosMap"></div>
+
+            <!-- Floating Top Card -->
+            <div class="map-floating-alert" id="mapFloatAlert">
+              <span style="font-size:18px;">🚨</span>
+              <div>
+                <strong style="font-size:12px; color:#DC2626;" id="floatAlertTitle">Live SOS Alert Active</strong>
+                <div style="font-size:11px; color:var(--text-muted);" id="floatAlertSub">Tracking live GPS coordinates from mobile app</div>
+              </div>
+            </div>
+
+            <!-- Map Legend -->
+            <div class="map-legend-card">
+              <div class="legend-item"><span class="legend-dot" style="background:#EF4444;"></span> Live SOS Alert</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6;"></span> User Location</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#06B6D4;"></span> Device (IoT)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#10B981;"></span> Safe Zone</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#1E3A8A;"></span> Police Station</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#F59E0B;"></span> Route Deviation</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Alerts Feed -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">
+              <span>📋 Recent SOS Alerts</span>
+            </div>
+            <a href="../monitor/monitor.html" style="font-size:12px; color:var(--crimson); font-weight:700; text-decoration:none;">View All →</a>
+          </div>
+
+          <div class="recent-alerts-list" id="adminRecentAlertsFeed">
+            <!-- Dynamic alerts loaded from Firestore -->
+            <div class="alert-card-item critical">
+              <div class="alert-left-group">
+                <span class="alert-tag-square sos">SOS</span>
+                <div>
+                  <div class="alert-title-text">SOS Triggered</div>
+                  <div class="alert-sub-text">Near 4th Main Road • 2 min ago</div>
+                </div>
+              </div>
+              <span class="alert-badge-status critical">Critical</span>
+            </div>
+
+            <div class="alert-card-item">
+              <div class="alert-left-group">
+                <span class="alert-tag-square deviation">RT</span>
+                <div>
+                  <div class="alert-title-text">Route Deviation</div>
+                  <div class="alert-sub-text">College to Home Route • 5 min ago</div>
+                </div>
+              </div>
+              <span class="alert-badge-status medium">Medium</span>
+            </div>
+
+            <div class="alert-card-item">
+              <div class="alert-left-group">
+                <span class="alert-tag-square sos">SOS</span>
+                <div>
+                  <div class="alert-title-text">Panic Button Pressed</div>
+                  <div class="alert-sub-text">Near Central Transit • 12 min ago</div>
+                </div>
+              </div>
+              <span class="alert-badge-status critical">Critical</span>
+            </div>
+
+            <div class="alert-card-item">
+              <div class="alert-left-group">
+                <span class="alert-tag-square safezone">SZ</span>
+                <div>
+                  <div class="alert-title-text">Reached Safe Zone</div>
+                  <div class="alert-sub-text">User arrived at College • 24 min ago</div>
+                </div>
+              </div>
+              <span class="alert-badge-status resolved">Resolved</span>
+            </div>
+
+            <div class="alert-card-item">
+              <div class="alert-left-group">
+                <span class="alert-tag-square sos">SOS</span>
+                <div>
+                  <div class="alert-title-text">SOS Dispatched</div>
+                  <div class="alert-sub-text">Near Ring Road Corridor • 32 min ago</div>
+                </div>
+              </div>
+              <span class="alert-badge-status critical">Critical</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTTOM ROW: 3 ANALYTICS CARDS (User Growth, Alert Stats Donut, Device Status) -->
+      <section class="bottom-row-grid">
+        <!-- 1. User Growth Chart -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">👥 User Growth</div>
+              <div style="font-size:12px; color:#10B981; font-weight:700; margin-top:2px;">2,481 <span style="font-size:11px; color:var(--text-muted);">• +35% growth</span></div>
+            </div>
+            <select class="filter-select">
+              <option>Last 6 Months</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+
+          <div class="chart-panel-body">
+            <svg viewBox="0 0 320 160" style="width:100%; height:160px;">
+              <defs>
+                <linearGradient id="growthArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#EC4899" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#EC4899" stop-opacity="0.0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="20" y1="30" x2="310" y2="30" stroke="#F3F4F6" stroke-width="1"/>
+              <line x1="20" y1="70" x2="310" y2="70" stroke="#F3F4F6" stroke-width="1"/>
+              <line x1="20" y1="110" x2="310" y2="110" stroke="#F3F4F6" stroke-width="1"/>
+              <!-- Area fill -->
+              <path d="M25,120 Q70,115 120,95 T220,70 T305,35 L305,140 L25,140 Z" fill="url(#growthArea)"/>
+              <!-- Line -->
+              <path d="M25,120 Q70,115 120,95 T220,70 T305,35" fill="none" stroke="#EC4899" stroke-width="3" stroke-linecap="round"/>
+              <!-- Points -->
+              <circle cx="25" cy="120" r="3.5" fill="#EC4899"/>
+              <circle cx="80" cy="112" r="3.5" fill="#EC4899"/>
+              <circle cx="135" cy="95" r="3.5" fill="#EC4899"/>
+              <circle cx="190" cy="80" r="3.5" fill="#EC4899"/>
+              <circle cx="245" cy="65" r="3.5" fill="#EC4899"/>
+              <circle cx="305" cy="35" r="4.5" fill="#EC4899" stroke="#FFF" stroke-width="2"/>
+              <!-- Labels -->
+              <text x="20" y="152" font-size="10" fill="#9CA3AF" font-family="sans-serif">Apr</text>
+              <text x="75" y="152" font-size="10" fill="#9CA3AF" font-family="sans-serif">May</text>
+              <text x="130" y="152" font-size="10" fill="#9CA3AF" font-family="sans-serif">Jun</text>
+              <text x="185" y="152" font-size="10" fill="#9CA3AF" font-family="sans-serif">Jul</text>
+              <text x="240" y="152" font-size="10" fill="#9CA3AF" font-family="sans-serif">Aug</text>
+              <text x="295" y="152" font-size="10" fill="#9CA3AF" font-family="sans-serif">Sep</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 2. Alert Statistics Donut -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">📊 Alert Statistics</div>
+            <select class="filter-select">
+              <option>Last 30 Days</option>
+              <option>Last 90 Days</option>
+            </select>
+          </div>
+
+          <div class="chart-panel-body">
+            <div class="donut-chart-wrap">
+              <svg viewBox="0 0 100 100" style="width:100%; height:100%; transform:rotate(-90deg);">
+                <!-- SOS 64% (Crimson) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#E11D48" stroke-width="12" stroke-dasharray="152 238" stroke-dashoffset="0"/>
+                <!-- Route Deviation 20% (Amber) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#F59E0B" stroke-width="12" stroke-dasharray="48 238" stroke-dashoffset="-152"/>
+                <!-- Panic Button 8% (Purple) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#8B5CF6" stroke-width="12" stroke-dasharray="19 238" stroke-dashoffset="-200"/>
+                <!-- Geofence 5% (Cyan) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#06B6D4" stroke-width="12" stroke-dasharray="12 238" stroke-dashoffset="-219"/>
+                <!-- Others 3% (Gray) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#CBD5E1" stroke-width="12" stroke-dasharray="7 238" stroke-dashoffset="-231"/>
+              </svg>
+              <div class="donut-center-info">
+                <div class="donut-center-number">156</div>
+                <div class="donut-center-sub">Total Alerts</div>
+              </div>
+            </div>
+
+            <div class="chart-legend-list">
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#E11D48;"></span> SOS (64%)</span>
+                <span class="legend-count">100</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#F59E0B;"></span> Route Deviation (20%)</span>
+                <span class="legend-count">31</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#8B5CF6;"></span> Panic Button (8%)</span>
+                <span class="legend-count">13</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#06B6D4;"></span> Geofence Alert (5%)</span>
+                <span class="legend-count">8</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#CBD5E1;"></span> Others (3%)</span>
+                <span class="legend-count">4</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Device Status Circle -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">📱 Device Status</div>
+            <a href="#devices" style="font-size:12px; color:var(--crimson); font-weight:700; text-decoration:none;">View All →</a>
+          </div>
+
+          <div class="chart-panel-body">
+            <div class="circle-progress-wrap">
+              <svg viewBox="0 0 100 100" style="width:100%; height:100%; transform:rotate(-90deg);">
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#E5E7EB" stroke-width="8"/>
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#10B981" stroke-width="8" stroke-dasharray="229 238" stroke-linecap="round"/>
+              </svg>
+              <div class="circle-center-text">
+                <div class="circle-pct">96%</div>
+                <div class="circle-sub">Online<br>328 / 342</div>
+              </div>
+            </div>
+
+            <div class="chart-legend-list">
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#10B981;"></span> Online</span>
+                <span class="legend-count">328</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#EF4444;"></span> Offline</span>
+                <span class="legend-count">14</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#F59E0B;"></span> Low Battery</span>
+                <span class="legend-count">9</span>
+              </div>
+              <div class="chart-legend-row">
+                <span class="legend-name-group"><span class="legend-dot" style="background:#6B7280;"></span> Maintenance</span>
+                <span class="legend-count">5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOURTH ROW: RECENT USERS & SYSTEM ACTIVITY STREAM -->
+      <section class="activity-row-grid">
+        <!-- Recent Users Table -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">👥 Recent Users</div>
+            <a href="#users" style="font-size:12px; color:var(--crimson); font-weight:700; text-decoration:none;">View All →</a>
+          </div>
+
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Role</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentUsersTableBody">
+              <tr>
+                <td style="font-weight:700;">Ananya S.</td>
+                <td style="font-family:'JetBrains Mono',monospace;">+91 98765 43210</td>
+                <td><span style="background:#EDE9FE; color:#6D28D9; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">User</span></td>
+                <td>28 Sep 2026</td>
+                <td><span class="status-pill-user">● Active</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">Lokesh C.</td>
+                <td style="font-family:'JetBrains Mono',monospace;">+91 80735 21221</td>
+                <td><span style="background:#EDE9FE; color:#6D28D9; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">User</span></td>
+                <td>27 Sep 2026</td>
+                <td><span class="status-pill-user">● Active</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">Priya K.</td>
+                <td style="font-family:'JetBrains Mono',monospace;">+91 91234 56789</td>
+                <td><span style="background:#EDE9FE; color:#6D28D9; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">User</span></td>
+                <td>27 Sep 2026</td>
+                <td><span class="status-pill-user">● Active</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:700;">Sneha R.</td>
+                <td style="font-family:'JetBrains Mono',monospace;">+91 99876 54321</td>
+                <td><span style="background:#EDE9FE; color:#6D28D9; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">User</span></td>
+                <td>26 Sep 2026</td>
+                <td><span class="status-pill-user">● Active</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- System Activity Feed -->
+        <div class="panel-card">
+          <div class="panel-head">
+            <div class="panel-title">⚙️ System Activity</div>
+            <a href="#audit" style="font-size:12px; color:var(--crimson); font-weight:700; text-decoration:none;">View All →</a>
+          </div>
+
+          <div class="activity-feed-list" id="systemActivityList">
+            <div class="activity-item">
+              <div class="activity-dot-icon" style="background:#D1FAE5; color:#059669;">●</div>
+              <div class="activity-content">
+                <div>
+                  <div class="activity-text">New user registered</div>
+                  <div class="activity-desc">Lokesh C. (+91 80735 21221)</div>
+                </div>
+                <div class="activity-time">Just now</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-dot-icon" style="background:#FEE2E2; color:#DC2626;">🚨</div>
+              <div class="activity-content">
+                <div>
+                  <div class="activity-text">Live SOS telemetry received</div>
+                  <div class="activity-desc">High accuracy GPS coordinates logged</div>
+                </div>
+                <div class="activity-time">2 min ago</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-dot-icon" style="background:#CFFAFE; color:#0284C7;">📱</div>
+              <div class="activity-content">
+                <div>
+                  <div class="activity-text">Device connected</div>
+                  <div class="activity-desc">IoT Bodycam Device #JD2026-104</div>
+                </div>
+                <div class="activity-time">10 min ago</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-dot-icon" style="background:#FEF3C7; color:#D97706;">🛡️</div>
+              <div class="activity-content">
+                <div>
+                  <div class="activity-text">Safe zone updated</div>
+                  <div class="activity-desc">Campus Zone (300m perimeter) saved by user</div>
+                </div>
+                <div class="activity-time">15 min ago</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-dot-icon" style="background:#D1FAE5; color:#059669;">✓</div>
+              <div class="activity-content">
+                <div>
+                  <div class="activity-text">Alert resolved</div>
+                  <div class="activity-desc">User arrived safely at destination</div>
+                </div>
+                <div class="activity-time">24 min ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
-
   </main>
 
   <script>
-    // Initialize Spatial Heatmap
-    const heatMap = L.map('spatialHeatmap', {
-      zoomControl: true,
-      attributionControl: false
-    }).setView([13.2925, 77.5306], 14);
+    // =========================================================================
+    // INITIALIZE GIS MAP
+    // =========================================================================
+    let map = null;
+    let liveAlertMarker = null;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      className: 'tactical-dark-tiles'
-    }).addTo(heatMap);
+    function initAdminMap() {
+      // Default center around user's city
+      map = L.map('adminSosMap', {
+        zoomControl: true,
+        attributionControl: false
+      }).setView([13.2925, 77.5306], 13);
 
-    // Safe Zones (Green Geofences)
-    const safeZonesData = [
-      { name: "Safe Haven Metro Station", lat: 13.2950, lng: 77.5320, r: 250 },
-      { name: "Police Assistance Outpost", lat: 13.2890, lng: 77.5280, r: 200 },
-      { name: "University Campus Safe Corridor", lat: 13.2910, lng: 77.5350, r: 350 }
-    ];
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
 
-    safeZonesData.forEach(z => {
-      L.circle([z.lat, z.lng], {
-        radius: z.r,
-        color: '#10B981',
-        fillColor: '#10B981',
-        fillOpacity: 0.18,
-        weight: 2
-      }).addTo(heatMap).bindPopup(`<b>${z.name}</b><br>Type: Verified Safe Zone<br>Radius: ${z.r}m`);
-    });
+      // Add a couple of realistic reference markers (Police, Safe Zones)
+      const policeIcon = L.divIcon({
+        className: 'custom-pin',
+        html: `<div style="background:#1E3A8A; color:#FFF; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #FFF; box-shadow:0 2px 6px rgba(0,0,0,0.3); font-size:14px;">👮</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
 
-    // Simulated Big Data Incident Clusters (Red Heat Density Circles)
-    const incidentClusters = [
-      { lat: 13.2932, lng: 77.5301, intensity: 45, radius: 180, label: "Night Transit Chokepoint (14 alerts)" },
-      { lat: 13.2965, lng: 77.5342, intensity: 35, radius: 140, label: "Unlit Underpass Hazard Area (8 alerts)" },
-      { lat: 13.2875, lng: 77.5260, intensity: 55, radius: 220, label: "Industrial Belt Periphery (21 alerts)" }
-    ];
+      L.marker([13.2970, 77.5350], { icon: policeIcon }).addTo(map)
+        .bindPopup('<b>Central Police Station</b><br>Dispatch Unit Active');
 
-    incidentClusters.forEach(c => {
-      L.circle([c.lat, c.lng], {
-        radius: c.radius,
-        color: '#EF4444',
-        fillColor: '#EF4444',
-        fillOpacity: 0.35,
-        weight: 1.5
-      }).addTo(heatMap).bindPopup(`<b>${c.label}</b><br>Danger Density Index: ${c.intensity}%`);
-    });
+      // Live Alert Marker Icon
+      const alertIcon = L.divIcon({
+        className: 'alert-sos-pin',
+        html: `<div style="background:#E11D48; color:#FFF; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #FFF; box-shadow:0 0 15px rgba(225,29,72,0.8); font-size:16px; animation:bouncePin 1s infinite alternate;">🚨</div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
+      });
 
-    function refreshDataLog() {
+      liveAlertMarker = L.marker([13.2925, 77.5306], { icon: alertIcon }).addTo(map)
+        .bindPopup('<b>Live SOS Alert</b><br>Coordinates streaming from user mobile app');
+    }
+
+    // =========================================================================
+    // SYNC WITH CLOUD FIRESTORE FOR REAL DATA
+    // =========================================================================
+    function fetchLiveAlerts() {
       fetch('https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts')
         .then(r => r.json())
         .then(data => {
-          if (data && data.documents) {
-            const tbody = document.getElementById('telemetryTableBody');
-            const rows = data.documents.map(d => {
-              const f = d.fields;
-              if (!f) return '';
-              const phone = f.victimPhone?.stringValue || f.phone?.stringValue || d.name.split('/').pop().replace('user_', '');
-              const name = f.victimName?.stringValue || f.user_name?.stringValue || 'Protected Client';
-              const trigger = f.trigger?.stringValue || f.trigger_source?.stringValue || 'EMERGENCY_SOS';
-              const active = f.is_alert_active?.booleanValue || false;
-              const lat = f.lat?.doubleValue ?? f.latitude?.doubleValue ?? 13.2925;
-              const lng = f.lng?.doubleValue ?? f.longitude?.doubleValue ?? 77.5306;
-              const speed = f.speed?.doubleValue ?? 0;
-              const time = f.timestamp?.timestampValue || f.timestamp?.stringValue || new Date().toISOString();
+          if (!data || !data.documents) return;
 
-              return `
-                <tr>
-                  <td style="font-family:'JetBrains Mono',monospace;">${time.substring(0, 19).replace('T', ' ')}</td>
-                  <td style="font-weight:700;">${name} (+91 ${phone})</td>
-                  <td><span style="color:${active ? '#EF4444' : '#38BDF8'}; font-weight:700;">${trigger}</span></td>
-                  <td style="font-family:'JetBrains Mono',monospace;">${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E</td>
-                  <td style="font-family:'JetBrains Mono',monospace;">${speed} km/h</td>
-                  <td>&lt; 2 min</td>
-                  <td><span class="status-pill ${active ? 'active' : 'resolved'}">${active ? '● LIVE EMERGENCY' : 'SECURE / STAND DOWN'}</span></td>
-                </tr>
-              `;
-            }).join('');
-            if (rows) tbody.innerHTML = rows;
+          let hasActive = false;
+          let latestAlert = null;
+          let maxTime = 0;
+
+          data.documents.forEach(doc => {
+            const f = doc.fields;
+            if (!f) return;
+            const active = f.is_alert_active?.booleanValue === true;
+            let t = 0;
+            if (doc.updateTime) t = Date.parse(doc.updateTime);
+            else if (f.timestamp?.timestampValue) t = Date.parse(f.timestamp.timestampValue);
+
+            if (active && t > maxTime) {
+              maxTime = t;
+              latestAlert = { doc, fields: f };
+              hasActive = true;
+            }
+          });
+
+          const floatAlert = document.getElementById('mapFloatAlert');
+          const floatTitle = document.getElementById('floatAlertTitle');
+          const floatSub = document.getElementById('floatAlertSub');
+          const badge = document.getElementById('sidebarSosBadge');
+
+          if (hasActive && latestAlert) {
+            const f = latestAlert.fields;
+            const phone = f.victimPhone?.stringValue || latestAlert.doc.name.split('/').pop().replace('user_', '');
+            const name = f.victimName?.stringValue || 'Protected User';
+            const lat = f.lat?.doubleValue ?? 13.2925;
+            const lng = f.lng?.doubleValue ?? 77.5306;
+            const trigger = f.trigger?.stringValue || 'EMERGENCY_SOS';
+
+            if (floatAlert) floatAlert.style.display = 'flex';
+            if (floatTitle) floatTitle.innerText = `🚨 Live SOS Alert: ${name} (+91 ${phone})`;
+            if (floatSub) floatSub.innerText = `Trigger: ${trigger} • GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            if (badge) badge.innerText = '1';
+
+            if (liveAlertMarker && map) {
+              liveAlertMarker.setLatLng([lat, lng]);
+              map.setView([lat, lng], 14);
+            }
+          } else {
+            if (floatAlert) floatAlert.style.display = 'none';
+            if (badge) badge.innerText = '0';
           }
-        }).catch(() => {});
+        })
+        .catch(() => {});
     }
 
-    // Initial load
-    refreshDataLog();
+    document.addEventListener('DOMContentLoaded', () => {
+      initAdminMap();
+      fetchLiveAlerts();
+      setInterval(fetchLiveAlerts, 2000);
+    });
   </script>
 </body>
 </html>

@@ -3,50 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SafeZone - Personal Safety & Emergency Response</title>
-  
+  <title>Jagruthi - Personal Safety & Emergency Response</title>
+
   <!-- Cache-Control Meta Tags -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  
+
   <!-- PWA & Mobile Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#E11D48">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="SafeZone">
+  <meta name="apple-mobile-web-app-title" content="Jagruthi">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
 
   <!-- Google Fonts: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Local Offline Assets with CDN Fallback -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="leaflet.css" onerror="this.onerror=null;this.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';" />
   <script src="peerjs.min.js" onerror="console.log('PeerJS local loaded');"></script>
   <script src="leaflet.js" onerror="console.log('Leaflet local loaded');"></script>
 
   <style>
     :root {
-      --bg-main: #FFF8F9;
+      --bg-main: #FFF5F7;
       --card-bg: #FFFFFF;
       --crimson: #E11D48;
-      --crimson-dark: #BE123C;
+      --crimson-gradient: linear-gradient(135deg, #FF2A6D, #BE123C);
       --crimson-light: #FFF1F2;
       --border-rose: #FFE4E8;
       --emerald: #059669;
       --emerald-bg: #ECFDF5;
       --emerald-border: #A7F3D0;
+      --purple: #8B5CF6;
+      --amber: #F59E0B;
       --text-main: #1F2937;
       --text-muted: #6B7280;
       --text-sub: #9CA3AF;
-      --radius-card: 22px;
-      --radius-sm: 14px;
-      --shadow-card: 0 10px 25px -5px rgba(225, 29, 72, 0.08), 0 8px 10px -6px rgba(225, 29, 72, 0.04);
-      --shadow-float: 0 20px 30px -10px rgba(225, 29, 72, 0.28);
+      --radius-card: 20px;
+      --radius-sm: 12px;
+      --shadow-sm: 0 4px 14px rgba(225, 29, 72, 0.06);
+      --shadow-card: 0 10px 25px -5px rgba(225, 29, 72, 0.08);
+      --shadow-btn: 0 8px 20px rgba(225, 29, 72, 0.35);
     }
 
     * {
@@ -58,19 +61,19 @@
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #12141A;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #111319;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0;
       margin: 0;
+      padding: 0;
       overflow-x: hidden;
     }
 
-    /* Mobile Phone Shell Container */
+    /* Mobile Shell Frame */
     .app-viewport {
       width: 100%;
       max-width: 440px;
@@ -96,1913 +99,2407 @@
       }
     }
 
-    /* Top Status Notch */
-    .status-notch {
-      height: env(safe-area-inset-top, 16px);
-      min-height: 14px;
+    /* Top Status Bar */
+    .mobile-status-notch {
+      height: env(safe-area-inset-top, 24px);
+      min-height: 20px;
       width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 24px 0 24px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
       flex-shrink: 0;
+      z-index: 100;
     }
 
-    /* Single-Page Screen Views (One Thing Per Page) */
-    .screen {
+    /* Single Focused Screen Architecture (One Thing Per Page) */
+    .screen-view {
       display: none;
       flex-direction: column;
       width: 100%;
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 16px 20px 30px 20px;
-      animation: pageFade 0.25s ease-out;
+      padding: 12px 18px 85px 18px; /* space for bottom nav */
+      animation: screenFade 0.22s ease-out;
     }
 
-    .screen.active {
+    .screen-view.active {
       display: flex;
     }
 
-    @keyframes pageFade {
-      from { opacity: 0; transform: translateY(8px); }
+    /* Fullscreen view overrides (Welcome & SOS Active) */
+    .screen-view.no-bottom-nav {
+      padding-bottom: 24px;
+    }
+
+    @keyframes screenFade {
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Header Nav */
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-shrink: 0;
-    }
-
-    .page-title-box h2 {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1.2;
-    }
-
-    .page-title-box p {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 2px;
-    }
-
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
+    /* Common Card */
+    .ui-card {
       background: var(--card-bg);
+      border-radius: var(--radius-card);
+      padding: 16px;
       border: 1px solid var(--border-rose);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    /* Primary Gradient Button */
+    .btn-crimson {
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--crimson-gradient);
+      color: #FFF;
+      border: none;
+      border-radius: 28px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      color: var(--crimson);
-      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
-      transition: transform 0.15s;
-      flex-shrink: 0;
+      gap: 10px;
+      box-shadow: var(--shadow-btn);
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
-    .icon-btn:active {
-      transform: scale(0.92);
+    .btn-crimson:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+    }
+
+    .btn-outline {
+      width: 100%;
+      padding: 12px 18px;
+      background: transparent;
+      border: 1.5px solid var(--crimson);
+      color: var(--crimson);
+      border-radius: 28px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+
+    .btn-outline:active {
       background: var(--crimson-light);
     }
 
-    /* Generic Card */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-rose);
-      border-radius: var(--radius-card);
-      padding: 20px;
-      box-shadow: var(--shadow-card);
-      margin-bottom: 16px;
-    }
-
-    /* Input & Forms */
+    /* Inputs */
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       text-align: left;
     }
 
     .form-label {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 6px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
       display: block;
     }
 
     .form-input {
       width: 100%;
-      padding: 14px 16px;
-      border-radius: 14px;
-      border: 1.5px solid #E5E7EB;
+      padding: 12px 16px;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
       font-size: 14px;
-      font-family: inherit;
       color: var(--text-main);
-      background: #FAFAFA;
+      font-family: inherit;
       outline: none;
-      transition: all 0.2s;
+      transition: border-color 0.2s;
     }
 
     .form-input:focus {
       border-color: var(--crimson);
       background: #FFF;
-      box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
-    }
-
-    /* Primary Action Buttons */
-    .btn-primary {
-      width: 100%;
-      background: linear-gradient(135deg, #E11D48, #BE123C);
-      color: #FFF;
-      border: none;
-      border-radius: 18px;
-      padding: 16px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: var(--shadow-float);
-      transition: transform 0.15s;
-    }
-
-    .btn-primary:active {
-      transform: scale(0.97);
-    }
-
-    .btn-secondary {
-      width: 100%;
-      background: #FFF;
-      color: var(--text-main);
-      border: 1.5px solid #E5E7EB;
-      border-radius: 16px;
-      padding: 14px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    /* Status Pill */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .status-badge.green {
-      background: var(--emerald-bg);
-      color: var(--emerald);
-      border: 1px solid var(--emerald-border);
-    }
-
-    .status-badge.red {
-      background: #FEE2E2;
-      color: var(--crimson);
-      border: 1px solid #FECDD3;
     }
 
     /* =========================================================================
-       SCREEN 1: LOGIN / REGISTER SCREEN
+       SCREEN 1: WELCOME SCREEN (Image 2 - Screen 1)
        ========================================================================= */
-    .auth-logo-box {
-      width: 72px;
-      height: 72px;
-      border-radius: 24px;
-      background: linear-gradient(145deg, #E11D48, #BE123C);
-      color: #FFF;
+    #viewWelcome {
+      align-items: center;
+      text-align: center;
+      padding: 24px 24px 30px 24px;
+      justify-content: space-between;
+    }
+
+    .welcome-brand-wrap {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lotus-hero-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 12px;
+    }
+
+    .welcome-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .welcome-subtitle {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--crimson);
+      margin-top: 4px;
+    }
+
+    .welcome-motto {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Illustration Vector */
+    .welcome-illustration-box {
+      width: 100%;
+      max-height: 280px;
+      margin: 15px 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 10px auto 16px auto;
-      box-shadow: 0 16px 30px rgba(225, 29, 72, 0.35);
+      position: relative;
     }
 
-    .auth-tab-row {
+    .welcome-illustration-box svg {
+      width: 100%;
+      height: auto;
+      max-height: 250px;
+    }
+
+    /* Feature Badges */
+    .feature-pills-row {
       display: flex;
-      background: #F3F4F6;
-      border-radius: 14px;
-      padding: 4px;
+      justify-content: space-around;
+      width: 100%;
       margin-bottom: 20px;
     }
 
-    .auth-tab {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .auth-tab.active {
-      background: #FFF;
-      color: var(--crimson);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    /* =========================================================================
-       SCREEN 2: SETUP WIZARD (SAFEZONE & CONTACTS SETUP)
-       ========================================================================= */
-    .wizard-step-indicator {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-
-    .w-step-dot {
-      flex: 1;
-      height: 4px;
-      background: #E5E7EB;
-      border-radius: 4px;
-      margin: 0 4px;
-      transition: background 0.25s;
-    }
-
-    .w-step-dot.active {
-      background: var(--crimson);
-    }
-
-    /* =========================================================================
-       SCREEN 3: CLEAN DASHBOARD (FOCUSED, SINGLE VIEW)
-       ========================================================================= */
-    .hero-sos-container {
+    .feat-pill {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 16px 0 24px 0;
-      position: relative;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-main);
     }
 
-    .target-ring-wrap {
-      position: relative;
-      width: 220px;
-      height: 220px;
+    .feat-pill-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #FFF;
+      box-shadow: var(--shadow-sm);
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 18px;
+    }
+
+    .welcome-actions-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-signin-link {
+      background: none;
+      border: none;
+      color: var(--crimson);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    /* =========================================================================
+       SCREEN 2: SIGN IN / REGISTRATION
+       ========================================================================= */
+    .auth-tab-pill {
+      display: flex;
+      background: #FFE4E8;
+      border-radius: 20px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+
+    .auth-tab-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 16px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .auth-tab-btn.active {
+      background: #FFF;
+      color: var(--crimson);
+      box-shadow: 0 2px 6px rgba(225, 29, 72, 0.15);
+    }
+
+    /* =========================================================================
+       SCREEN 3: HOME DASHBOARD (Image 2 - Screen 2)
+       ========================================================================= */
+    .home-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 14px;
     }
 
-    .pulse-layer {
-      position: absolute;
-      border-radius: 50%;
-      border: 2px solid rgba(225, 29, 72, 0.35);
-      animation: pulseWave 2.4s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-
-    .pulse-layer.p1 { width: 160px; height: 160px; animation-delay: 0s; }
-    .pulse-layer.p2 { width: 195px; height: 195px; animation-delay: 0.7s; }
-    .pulse-layer.p3 { width: 220px; height: 220px; animation-delay: 1.4s; }
-
-    @keyframes pulseWave {
-      0% { transform: scale(0.75); opacity: 0.9; }
-      100% { transform: scale(1.18); opacity: 0; }
-    }
-
-    /* SVG Progress Ring */
-    .progress-svg {
-      position: absolute;
-      width: 154px;
-      height: 154px;
-      transform: rotate(-90deg);
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .progress-circle-bg {
-      fill: none;
-      stroke: rgba(225, 29, 72, 0.15);
-      stroke-width: 6;
-    }
-
-    .progress-circle-bar {
-      fill: none;
-      stroke: #E11D48;
-      stroke-width: 6;
-      stroke-linecap: round;
-      stroke-dasharray: 440;
-      stroke-dashoffset: 440;
-      transition: stroke-dashoffset 0.05s linear;
-    }
-
-    .sos-core-btn {
-      width: 136px;
-      height: 136px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #F43F5E, #BE123C);
-      color: #FFF;
+    .home-profile-row {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .home-avatar-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #8B5CF6;
+      color: #FFF;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+    }
+
+    .home-greeting-box h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .home-greeting-box p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .btn-header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #FFF;
+      border: 1px solid var(--border-rose);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
       cursor: pointer;
       position: relative;
-      z-index: 5;
-      box-shadow: 0 16px 36px rgba(225, 29, 72, 0.45), inset 0 2px 6px rgba(255, 255, 255, 0.4);
-      user-select: none;
-      touch-action: none;
-      transition: transform 0.15s;
+      box-shadow: var(--shadow-sm);
     }
 
-    .sos-core-btn:active {
-      transform: scale(0.94);
-    }
-
-    .sos-btn-title {
-      font-size: 32px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      line-height: 1;
-    }
-
-    .sos-btn-sub {
-      font-size: 10px;
+    .badge-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #EF4444;
+      color: #FFF;
+      font-size: 9.5px;
       font-weight: 800;
-      letter-spacing: 1px;
-      margin-top: 4px;
-      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Navigation Stack Cards (Next Page for Next Thing) */
-    .nav-card-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border-rose);
-      border-radius: 20px;
-      padding: 16px 18px;
+    /* Green Safe Area Banner */
+    .safe-status-banner {
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      border-radius: var(--radius-card);
+      padding: 14px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(225, 29, 72, 0.04);
-      transition: transform 0.15s, border-color 0.15s;
     }
 
-    .nav-card-item:active {
-      transform: scale(0.98);
-      border-color: var(--crimson);
-    }
-
-    .nav-card-left {
+    .banner-left {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
-    .nav-card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: var(--crimson-light);
+    .banner-shield {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: #10B981;
+      color: #FFF;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 20px;
+      flex-shrink: 0;
     }
 
-    .nav-card-info h4 {
-      font-size: 14.5px;
+    .banner-text h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #065F46;
+    }
+
+    .banner-text p {
+      font-size: 11.5px;
+      color: #059669;
+      margin-top: 2px;
+    }
+
+    /* Mini Map Live Location Card */
+    .home-map-card {
+      background: #FFF;
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-rose);
+      overflow: hidden;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .home-map-header {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .home-map-header h4 {
+      font-size: 14px;
       font-weight: 800;
       color: var(--text-main);
     }
 
-    .nav-card-info p {
-      font-size: 11.5px;
+    .home-map-header a {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--crimson);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .home-mini-map-box {
+      width: 100%;
+      height: 140px;
+      position: relative;
+    }
+
+    #homeMiniMap {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-eta-pill {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    /* 3 Telemetry Cards Row */
+    .telemetry-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .telemetry-card {
+      background: #FFF;
+      border-radius: 16px;
+      padding: 12px 10px;
+      border: 1px solid var(--border-rose);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .telemetry-icon {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .telemetry-label {
+      font-size: 10px;
+      font-weight: 700;
       color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .telemetry-val {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .telemetry-sub {
+      font-size: 9.5px;
+      color: var(--text-sub);
       margin-top: 2px;
     }
 
-    .nav-card-arrow {
-      color: var(--crimson);
-      font-size: 18px;
+    /* Quick Actions */
+    .quick-actions-box h4 {
+      font-size: 14px;
       font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 12px;
     }
 
-    /* Dedicated Map Containers */
-    .map-box {
-      width: 100%;
-      height: 250px;
-      border-radius: var(--radius-card);
-      overflow: hidden;
-      border: 1px solid var(--border-rose);
-      box-shadow: var(--shadow-card);
-      margin-bottom: 16px;
-    }
-
-    /* Covert Calculator */
-    .calc-screen {
-      background-color: #0F172A;
-      color: #FFF;
-      padding: 16px;
-      justify-content: space-between;
-      height: 100%;
-      display: none;
-    }
-
-    .calc-screen.active {
-      display: flex !important;
-      flex-direction: column;
-    }
-
-    .calc-display {
-      background: #1E293B;
-      border-radius: 16px;
-      padding: 20px 16px;
-      text-align: right;
-      margin-bottom: 16px;
-      min-height: 86px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    .calc-sub-expr { font-size: 13px; color: #94A3B8; min-height: 18px; }
-    .calc-main-num { font-size: 38px; font-weight: 700; color: #FFF; }
-
-    .calc-grid {
+    .quick-actions-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
     }
 
-    .c-btn {
-      height: 58px;
-      border-radius: 16px;
-      background: #1E293B;
+    .action-circle-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: none;
       border: none;
-      color: #FFF;
-      font-size: 20px;
-      font-weight: 700;
       cursor: pointer;
     }
 
-    .c-btn.op { background: #334155; color: #F43F5E; }
-    .c-btn.eq { background: #E11D48; color: #FFF; }
-
-    /* Toast Alert */
-    .toast-alert {
-      position: absolute;
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-30px);
-      background: rgba(17, 24, 39, 0.95);
-      color: #FFF;
-      padding: 12px 20px;
-      border-radius: 25px;
-      font-size: 12.5px;
-      font-weight: 700;
+    .action-btn-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 8px;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      z-index: 500;
-      box-shadow: 0 12px 25px rgba(0,0,0,0.3);
-      max-width: 90%;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s;
     }
 
-    .toast-alert.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
+    .action-circle-btn:active .action-btn-icon {
+      transform: scale(0.92);
+    }
+
+    .action-btn-icon.green { background: #ECFDF5; color: #10B981; border: 1.5px solid #A7F3D0; }
+    .action-btn-icon.sos {
+      background: var(--crimson-gradient);
+      color: #FFF;
+      font-weight: 900;
+      font-size: 14px;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+      animation: pulseSos 1.8s infinite;
+    }
+    .action-btn-icon.purple { background: #F5F3FF; color: #8B5CF6; border: 1.5px solid #DDD6FE; }
+    .action-btn-icon.amber { background: #FFFBEB; color: #F59E0B; border: 1.5px solid #FDE68A; }
+
+    @keyframes pulseSos {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .action-btn-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* =========================================================================
+       SCREEN 4: LIVE LOCATION SCREEN (Image 2 - Screen 3)
+       ========================================================================= */
+    .screen-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .screen-header-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .btn-back-arrow {
+      background: none;
+      border: none;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .full-live-map-card {
+      width: 100%;
+      height: 250px;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      border: 1px solid var(--border-rose);
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    #liveLocationMap {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* User Profile Card on Live Location */
+    .location-user-card {
+      background: #FFF;
+      border-radius: var(--radius-card);
+      padding: 16px;
+      border: 1px solid var(--border-rose);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    .user-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .user-card-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-card-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #FDA4AF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .user-card-info h4 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .user-card-info p {
+      font-size: 11px;
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .battery-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #10B981;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Stepper / Journey Progress */
+    .journey-stepper-wrap {
+      background: #FFF;
+      border-radius: var(--radius-card);
+      padding: 16px;
+      border: 1px solid var(--border-rose);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 14px;
+    }
+
+    .stepper-head {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .stepper-head h4 {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .stepper-pct {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--crimson);
+    }
+
+    .stepper-line-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .stepper-line-bg {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background: #E5E7EB;
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+
+    .stepper-line-fill {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      width: 50%;
+      height: 4px;
+      background: #10B981;
+      z-index: 2;
+      transform: translateY(-50%);
+    }
+
+    .stepper-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #FFF;
+      border: 3px solid #10B981;
+      z-index: 3;
+    }
+
+    .stepper-dot.active {
+      border-color: var(--crimson);
+      background: var(--crimson);
+    }
+
+    .stepper-dot.pending {
+      border-color: #D1D5DB;
+    }
+
+    .stepper-labels-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Route Alert Card */
+    .route-deviation-card {
+      background: #FFF1F2;
+      border: 1px solid #FECDD3;
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .route-alert-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: #E11D48;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Live Location Bottom Buttons */
+    .location-actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* =========================================================================
+       SCREEN 5: ALERTS & HISTORY SCREEN (Image 2 - Screen 4)
+       ========================================================================= */
+    .history-tabs-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab-chip {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: #FFF;
+      border: 1px solid var(--border-rose);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .tab-chip.active {
+      background: var(--crimson);
+      color: #FFF;
+      border-color: var(--crimson);
+      box-shadow: 0 4px 10px rgba(225, 29, 72, 0.25);
+    }
+
+    .recent-alerts-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .recent-alerts-header h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .history-alert-card {
+      background: #FFF;
+      border-radius: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--border-rose);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .history-card-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .history-tag {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .history-tag.red { background: #FEE2E2; color: #DC2626; }
+    .history-tag.amber { background: #FEF3C7; color: #D97706; }
+    .history-tag.green { background: #D1FAE5; color: #059669; }
+
+    .history-card-info h5 {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .history-card-info p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* Emergency Contacts Carousel Row */
+    .contacts-carousel-wrap {
+      margin-top: 10px;
+    }
+
+    .contacts-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .contacts-avatar-row {
+      display: flex;
+      justify-content: space-between;
+      background: #FFF;
+      border-radius: var(--radius-card);
+      padding: 14px;
+      border: 1px solid var(--border-rose);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .contact-bubble {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .contact-bubble-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #FFF1F2;
+      color: var(--crimson);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 1.5px solid #FECDD3;
+    }
+
+    .contact-bubble span {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* =========================================================================
+       SCREEN 6: USER SAFE ZONES (USER ADDS, NO HARDCODED ZONES!)
+       ========================================================================= */
+    #zonesInteractiveMap {
+      width: 100%;
+      height: 220px;
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-rose);
+      margin-bottom: 14px;
+    }
+
+    /* =========================================================================
+       SCREEN 7: ACTIVE EMERGENCY SOS SCREEN
+       ========================================================================= */
+    #viewSosActive {
+      background: #FFF1F2;
+      text-align: center;
+    }
+
+    .sos-beacon-pulse {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--crimson);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 10px auto 12px auto;
+      box-shadow: 0 0 25px rgba(225, 29, 72, 0.8);
+      animation: alertBeacon 0.9s infinite alternate;
+    }
+
+    @keyframes alertBeacon {
+      from { transform: scale(1); box-shadow: 0 0 15px rgba(225, 29, 72, 0.6); }
+      to { transform: scale(1.1); box-shadow: 0 0 35px rgba(225, 29, 72, 1); }
+    }
+
+    .live-camera-preview-box {
+      width: 100%;
+      height: 140px;
+      border-radius: 16px;
+      background: #000;
+      overflow: hidden;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    #sosVideoBroadcast {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* =========================================================================
+       SCREEN 8: COVERT STEGANOGRAPHIC CALCULATOR (STEALTH PIN)
+       ========================================================================= */
+    .calc-shell {
+      background: #0F172A;
+      color: #FFF;
+      border-radius: 28px;
+      padding: 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .calc-screen-display {
+      text-align: right;
+      padding: 20px 10px;
+    }
+
+    .calc-expression {
+      font-size: 14px;
+      color: #94A3B8;
+      min-height: 20px;
+    }
+
+    .calc-result {
+      font-size: 40px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .calc-keypad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .calc-key {
+      height: 60px;
+      border-radius: 30px;
+      background: #1E293B;
+      color: #FFF;
+      font-size: 20px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .calc-key.op { background: #334155; color: #38BDF8; }
+    .calc-key.eval { background: var(--crimson); color: #FFF; }
+
+    /* =========================================================================
+       BOTTOM NAVIGATION BAR (Matches Image 2 Screen 2, 3, 4)
+       ========================================================================= */
+    .bottom-nav-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: #FFF;
+      border-top: 1px solid var(--border-rose);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 8px);
+      z-index: 100;
+      box-shadow: 0 -4px 15px rgba(225, 29, 72, 0.04);
+    }
+
+    .nav-tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 10.5px;
+      font-weight: 700;
+      position: relative;
+      transition: color 0.15s;
+    }
+
+    .nav-tab-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+    }
+
+    .nav-tab-item.active {
+      color: var(--crimson);
+    }
+
+    .nav-tab-item.active svg {
+      fill: rgba(225, 29, 72, 0.12);
+    }
+
+    .nav-badge-pill {
+      position: absolute;
+      top: -2px;
+      right: -4px;
+      background: #EF4444;
+      color: #FFF;
+      font-size: 9px;
+      font-weight: 800;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: absolute;
+      top: 50px;
+      left: 20px;
+      right: 20px;
+      background: #111827;
+      color: #FFF;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      animation: toastIn 0.2s ease-out;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-<div class="app-viewport">
-  <div class="status-notch"></div>
+  <!-- MOBILE PHONE VIEWPORT -->
+  <div class="app-viewport">
 
-  <!-- Toast Notification -->
-  <div id="toastAlert" class="toast-alert">
-    <span id="toastIcon">🛡️</span>
-    <span id="toastMsg">Notification message</span>
-  </div>
-
-  <!-- =========================================================================
-       SCREEN 1: LOGIN / REGISTRATION SCREEN
-       ========================================================================= -->
-  <div id="screenAuth" class="screen active">
-    <div class="auth-logo-box">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="M12 8v4"/><path d="M12 16h.01"/>
-      </svg>
-    </div>
-
-    <div style="text-align:center; margin-bottom:20px;">
-      <h1 style="font-size:24px; font-weight:800; color:var(--text-main);">SafeZone</h1>
-      <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Autonomous Women Safety & Emergency Response</p>
-    </div>
-
-    <div class="auth-tab-row">
-      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</div>
-      <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</div>
-    </div>
-
-    <div id="authForm" class="card" style="padding:22px;">
-      <div class="form-group" id="groupFullName" style="display:none;">
-        <label class="form-label">Full Name</label>
-        <input type="text" id="regName" class="form-input" placeholder="e.g. Priya Sharma">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Mobile Number</label>
-        <input type="tel" id="authPhone" class="form-input" placeholder="10-digit mobile number" maxlength="10" value="8073521221">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Security PIN (4 Digits)</label>
-        <input type="password" id="authPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4" value="1234">
-      </div>
-
-      <div class="form-group" id="groupBlood" style="display:none;">
-        <label class="form-label">Blood Group</label>
-        <input type="text" id="regBlood" class="form-input" placeholder="e.g. O+, B+, A+">
-      </div>
-
-      <button id="btnAuthSubmit" class="btn-primary" style="margin-top:10px;">
-        <span id="authSubmitText">Sign In →</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       SCREEN 2: SETUP WIZARD (SAFEZONE & CONTACTS SETUP REQUIRED BY VICTIM)
-       ========================================================================= -->
-  <div id="screenSetup" class="screen">
-    <div class="page-header">
-      <div class="page-title-box">
-        <h2 id="setupTitle">Setup Your Safety Profile</h2>
-        <p id="setupSub">Step 1 of 3: Add Emergency Contacts</p>
+    <!-- Top Status Notch -->
+    <div class="mobile-status-notch">
+      <span id="notchClock">9:41</span>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="font-size:11px;">●●●</span>
+        <span>📶</span>
+        <span id="notchBatteryIcon">🔋</span>
       </div>
     </div>
 
-    <div class="wizard-step-indicator">
-      <div class="w-step-dot active" id="stepDot1"></div>
-      <div class="w-step-dot" id="stepDot2"></div>
-      <div class="w-step-dot" id="stepDot3"></div>
+    <!-- Toast Notification -->
+    <div id="appToast" class="toast-msg">
+      <span id="toastIcon">🛡️</span>
+      <span id="toastText">Jagruthi protection active</span>
     </div>
 
-    <!-- Step 1: Add Emergency Contacts (User Adds Their Own Contacts) -->
-    <div id="setupStep1">
-      <div class="card">
-        <h3 style="font-size:15px; font-weight:800; margin-bottom:4px;">Emergency Contacts</h3>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">These numbers will automatically receive instant SOS SMS and direct emergency calls.</p>
-        
-        <div id="setupContactsList" style="margin-bottom:14px;">
-          <!-- Dynamically added contacts render here -->
-        </div>
-
-        <div style="background:#F9FAFB; border:1px dashed #D1D5DB; border-radius:14px; padding:12px; margin-bottom:14px;">
-          <input type="text" id="newContactName" class="form-input" placeholder="Contact Name (e.g. Mom, Brother)" style="margin-bottom:8px;">
-          <input type="tel" id="newContactPhone" class="form-input" placeholder="10-digit Phone Number" maxlength="10">
-          <button id="btnAddContactItem" class="btn-secondary" style="margin-top:8px; padding:10px; font-size:12.5px;">+ Add This Contact</button>
-        </div>
-      </div>
-
-      <button id="btnNextStep1" class="btn-primary">Next: Define Safe Zones →</button>
-    </div>
-
-    <!-- Step 2: Add Safe Zones (User Adds Their Own Safe Zones) -->
-    <div id="setupStep2" style="display:none;">
-      <div class="card">
-        <h3 style="font-size:15px; font-weight:800; margin-bottom:4px;">Define Your Safe Zones</h3>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Add your safe locations (Home, College, Hostel). When you exit these perimeters, SafeZone monitors your journey.</p>
-
-        <div id="setupZonesList" style="margin-bottom:14px;">
-          <!-- Dynamically added zones render here -->
-        </div>
-
-        <div style="background:#F9FAFB; border:1px dashed #D1D5DB; border-radius:14px; padding:12px; margin-bottom:14px;">
-          <input type="text" id="newZoneName" class="form-input" placeholder="Zone Name (e.g. My Home, College)" style="margin-bottom:8px;">
-          <button id="btnUseCurrentGpsZone" class="btn-secondary" style="margin-bottom:8px; padding:10px; font-size:12px; color:var(--emerald);">
-            📍 Use My Current Live Location
-          </button>
-          <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:4px;">
-            <span>Radius:</span>
-            <span id="radiusLabel">300 meters</span>
-          </div>
-          <input type="range" id="newZoneRadius" min="100" max="600" step="50" value="300" style="width:100%; accent-color:var(--crimson);">
-          <button id="btnAddZoneItem" class="btn-secondary" style="margin-top:10px; padding:10px; font-size:12.5px;">+ Save Safe Zone</button>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px;">
-        <button id="btnBackStep2" class="btn-secondary" style="flex:1;">← Back</button>
-        <button id="btnNextStep2" class="btn-primary" style="flex:1;">Next: Permissions →</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Permissions & Covert PIN -->
-    <div id="setupStep3" style="display:none;">
-      <div class="card">
-        <h3 style="font-size:15px; font-weight:800; margin-bottom:4px;">Permissions & Stealth PIN</h3>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Ensure location and sensors are allowed. Configure your stealth calculator PIN.</p>
-
-        <div class="form-group">
-          <label class="form-label">Stealth Calculator Covert PIN</label>
-          <input type="text" id="setupCovertPin" class="form-input" value="9999" maxlength="6">
-          <span style="font-size:11px; color:var(--text-muted);">Typing this PIN followed by = in the calculator silently sends SOS.</span>
-        </div>
-
-        <div style="background:var(--emerald-bg); border:1px solid var(--emerald-border); border-radius:14px; padding:12px; font-size:12px; color:#065F46; line-height:1.4;">
-          ✔️ High-Accuracy Live GPS Active<br>
-          ✔️ 5-Shake Motion Sensor Enabled<br>
-          ✔️ Distress Keyword Listener Enabled ("Help", "Bachao")
-        </div>
-      </div>
-
-      <div style="display:flex; gap:10px;">
-        <button id="btnBackStep3" class="btn-secondary" style="flex:1;">← Back</button>
-        <button id="btnFinishSetup" class="btn-primary" style="flex:1;">Activate SafeZone →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       SCREEN 3: CLEAN MAIN DASHBOARD (SINGLE-PAGE FOCUSED INTERFACE)
-       ========================================================================= -->
-  <div id="screenHome" class="screen">
-    <!-- Top Header -->
-    <div class="page-header">
-      <div class="page-title-box">
-        <p style="font-size:12px; color:var(--text-muted);">SafeZone Active</p>
-        <h2 id="homeGreetingName">Hello, Stay Safe!</h2>
-      </div>
-
-      <div style="display:flex; gap:8px;">
-        <!-- Covert Calculator Stealth Mode -->
-        <button class="icon-btn" id="btnOpenCalculator" title="Covert Calculator">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><path d="M16 10h.01"></path><path d="M12 10h.01"></path><path d="M8 10h.01"></path><path d="M16 14h.01"></path><path d="M12 14h.01"></path><path d="M8 14h.01"></path><path d="M12 18h.01"></path><path d="M8 18h.01"></path></svg>
-        </button>
-
-        <!-- Profile / Setup Editor -->
-        <button class="icon-btn" id="btnEditProfile" title="Profile Settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Live GPS Location Card (Shows REAL coordinates!) -->
-    <div class="card" style="padding:16px 18px; margin-bottom:20px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span class="status-badge green" id="gpsStatusBadge">● Real-Time Live GPS Active</span>
-        <button id="btnRefreshGps" style="background:none; border:none; color:var(--crimson); font-size:11.5px; font-weight:700; cursor:pointer;">Update GPS</button>
-      </div>
-      <div style="font-family:'Courier New', monospace; font-size:13px; font-weight:700; color:var(--text-main); margin-top:4px;">
-        LAT: <span id="dashLat">Acquiring...</span> | LNG: <span id="dashLng">Acquiring...</span>
-      </div>
-      <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">
-        Precision: <span id="dashAcc">±...</span> • Speed: <span id="dashSpeed">0 km/h</span> • Battery: <span id="dashBattery">85%</span>
-      </div>
-    </div>
-
-    <!-- Central Hero 3-Second Hold SOS Target -->
-    <div class="hero-sos-container">
-      <div class="target-ring-wrap">
-        <div class="pulse-layer p1"></div>
-        <div class="pulse-layer p2"></div>
-        <div class="pulse-layer p3"></div>
-
-        <!-- Circular Progress Ring SVG -->
-        <svg class="progress-svg" viewBox="0 0 160 160">
-          <circle class="progress-circle-bg" cx="80" cy="80" r="70" />
-          <circle id="sosProgressBar" class="progress-circle-bar" cx="80" cy="80" r="70" />
+    <!-- =======================================================================
+         SCREEN 1: WELCOME SCREEN (Image 2 - Screen 1)
+         ======================================================================= -->
+    <div id="viewWelcome" class="screen-view active no-bottom-nav">
+      <div class="welcome-brand-wrap">
+        <!-- Jagruthi Lotus Emblem with Woman Silhouette -->
+        <svg class="lotus-hero-logo" viewBox="0 0 100 100" fill="none">
+          <path d="M50 12 C35 28 20 50 20 72 C20 86 35 92 50 92 C65 92 80 86 80 72 C80 50 65 28 50 12 Z" fill="url(#heroGrad1)"/>
+          <path d="M50 32 C42 44 32 60 35 76 C38 86 46 89 50 89 C54 89 62 86 65 76 C68 60 58 44 50 32 Z" fill="url(#heroGrad2)"/>
+          <path d="M50 48 C46 56 42 66 45 76 C47 82 50 84 50 84 C50 84 53 82 55 76 C58 66 54 56 50 48 Z" fill="#FFFFFF"/>
+          <defs>
+            <linearGradient id="heroGrad1" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FF2A6D"/>
+              <stop offset="1" stop-color="#9333EA"/>
+            </linearGradient>
+            <linearGradient id="heroGrad2" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FB7185"/>
+              <stop offset="1" stop-color="#E11D48"/>
+            </linearGradient>
+          </defs>
         </svg>
 
-        <!-- Core Button -->
-        <div id="btnMainSos" class="sos-core-btn">
-          <div class="sos-btn-title">SOS</div>
-          <div class="sos-btn-sub">PRESS & HOLD</div>
+        <h1 class="welcome-title">Jagruthi</h1>
+        <div class="welcome-subtitle">Parent & Personal Safety</div>
+        <div class="welcome-motto">Keep Them Safe • Always Connected</div>
+      </div>
+
+      <!-- Welcome Illustration Vector -->
+      <div class="welcome-illustration-box">
+        <svg viewBox="0 0 320 220" fill="none">
+          <!-- City silhouette background -->
+          <path d="M20 200 L20 140 L50 140 L50 160 L80 160 L80 120 L110 120 L110 170 L140 170 L140 130 L180 130 L180 200 Z" fill="#FFE4E8" opacity="0.6"/>
+          <path d="M160 200 L160 150 L200 150 L200 110 L230 110 L230 170 L260 170 L260 130 L300 130 L300 200 Z" fill="#FFCCD5" opacity="0.6"/>
+          <!-- Protective shield & heart -->
+          <circle cx="240" cy="90" r="28" fill="#FFF" stroke="#FECDD3" stroke-width="2"/>
+          <path d="M240 78 L254 84 V94 C254 102 248 108 240 110 C232 108 226 102 226 94 V84 Z" fill="#E11D48" opacity="0.8"/>
+          <!-- Mother & Daughter Profile Silhouette -->
+          <circle cx="120" cy="90" r="32" fill="#E11D48" opacity="0.15"/>
+          <circle cx="120" cy="85" r="22" fill="#BE123C"/>
+          <path d="M95 145 C95 115 145 115 145 145 V200 H95 Z" fill="#BE123C"/>
+          <circle cx="170" cy="115" r="16" fill="#FB7185"/>
+          <path d="M152 160 C152 135 188 135 188 160 V200 H152 Z" fill="#FB7185"/>
+        </svg>
+      </div>
+
+      <!-- 3 Feature Pills -->
+      <div class="feature-pills-row">
+        <div class="feat-pill">
+          <div class="feat-pill-icon">📍</div>
+          <span>Live Location</span>
+        </div>
+        <div class="feat-pill">
+          <div class="feat-pill-icon">🔔</div>
+          <span>Instant Alerts</span>
+        </div>
+        <div class="feat-pill">
+          <div class="feat-pill-icon">👥</div>
+          <span>Emergency Support</span>
         </div>
       </div>
 
-      <div id="sosHoldPrompt" style="font-size:14px; font-weight:800; color:var(--crimson); margin-bottom:2px;">Tap and Hold for 3 Seconds</div>
-      <div id="sosHoldTimer" style="font-size:11.5px; color:var(--text-muted);">Prevents accidental pocket triggers</div>
+      <!-- Actions -->
+      <div class="welcome-actions-wrap">
+        <button class="btn-crimson" onclick="openScreen('viewAuth')">
+          Get Started →
+        </button>
+        <button class="btn-signin-link" onclick="openScreen('viewAuth')">
+          Sign In
+        </button>
+      </div>
     </div>
 
-    <!-- Page Navigation Stack (Clean, One-Screen-At-A-Time Navigation) -->
-    <div style="margin-top:10px;">
-      <!-- 1. Dedicated Journey Tracker -->
-      <div class="nav-card-item" onclick="openScreen('screenJourney')">
-        <div class="nav-card-left">
-          <div class="nav-card-icon">🗺️</div>
-          <div class="nav-card-info">
-            <h4>Live Journey Tracker</h4>
-            <p>Active route map & corridor deviation monitor</p>
+    <!-- =======================================================================
+         SCREEN 2: SIGN IN / REGISTRATION
+         ======================================================================= -->
+    <div id="viewAuth" class="screen-view no-bottom-nav">
+      <div style="margin:20px 0 16px 0; text-align:center;">
+        <h2 style="font-size:22px; font-weight:800; color:var(--text-main);">Welcome to Jagruthi</h2>
+        <p style="font-size:12.5px; color:var(--text-muted); margin-top:2px;">Safe & Secure Personal Emergency Dispatch</p>
+      </div>
+
+      <div class="auth-tab-pill">
+        <div class="auth-tab-btn active" id="btnTabSignIn" onclick="toggleAuthTab('login')">Sign In</div>
+        <div class="auth-tab-btn" id="btnTabRegister" onclick="toggleAuthTab('register')">Register</div>
+      </div>
+
+      <div class="ui-card">
+        <div class="form-group" id="groupName" style="display:none;">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="inputName" class="form-input" placeholder="Enter your full name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mobile Number</label>
+          <input type="tel" id="inputPhone" class="form-input" placeholder="Enter 10-digit mobile number" maxlength="10">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">4-Digit Security PIN</label>
+          <input type="password" id="inputPin" class="form-input" placeholder="Create 4-digit PIN" maxlength="4">
+        </div>
+
+        <div class="form-group" id="groupEmergency" style="display:none;">
+          <label class="form-label">Primary Guardian Phone Number</label>
+          <input type="tel" id="inputGuardianPhone" class="form-input" placeholder="Guardian 10-digit number" maxlength="10">
+        </div>
+
+        <button class="btn-crimson" style="margin-top:10px;" onclick="handleAuthSubmit()">
+          <span id="btnAuthText">Sign In →</span>
+        </button>
+      </div>
+
+      <div style="text-align:center; margin-top:14px;">
+        <button class="btn-signin-link" onclick="openScreen('viewWelcome')">← Back to Welcome</button>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         SCREEN 3: HOME DASHBOARD (Image 2 - Screen 2)
+         ======================================================================= -->
+    <div id="viewHome" class="screen-view">
+      <!-- Top Header -->
+      <div class="home-header">
+        <div class="home-profile-row">
+          <div class="home-avatar-circle" id="userAvatarLetter">U</div>
+          <div class="home-greeting-box">
+            <h3 id="homeGreetingTitle">Hello, User</h3>
+            <p>Stay connected, Stay worry-free</p>
           </div>
         </div>
-        <div class="nav-card-arrow">→</div>
+
+        <div style="display:flex; gap:8px;">
+          <!-- Covert Calculator Button -->
+          <button class="btn-header-icon" title="Stealth Calculator" onclick="openScreen('viewCalc')">
+            🧮
+          </button>
+          <!-- Notification Bell -->
+          <button class="btn-header-icon" onclick="openScreen('viewHistory')">
+            🔔
+            <span class="badge-dot">2</span>
+          </button>
+        </div>
       </div>
 
-      <!-- 2. Emergency Contacts -->
-      <div class="nav-card-item" onclick="openScreen('screenContacts')">
-        <div class="nav-card-left">
-          <div class="nav-card-icon">👥</div>
-          <div class="nav-card-info">
-            <h4>My Emergency Contacts (<span id="contactsCount">0</span>)</h4>
-            <p>Manage guardians for automatic call & SMS</p>
+      <!-- Safe Area Banner -->
+      <div class="safe-status-banner" onclick="openScreen('viewZones')">
+        <div class="banner-left">
+          <div class="banner-shield">🛡️</div>
+          <div class="banner-text">
+            <h4 id="homeSafeStatusTitle">You are in Safe Area</h4>
+            <p>Live location is being monitored</p>
           </div>
         </div>
-        <div class="nav-card-arrow">→</div>
+        <span style="font-weight:800; color:#059669;">❯</span>
       </div>
 
-      <!-- 3. Safe Zones -->
-      <div class="nav-card-item" onclick="openScreen('screenZones')">
-        <div class="nav-card-left">
-          <div class="nav-card-icon">🏰</div>
-          <div class="nav-card-info">
-            <h4>My Safe Zones (<span id="zonesCount">0</span>)</h4>
-            <p>Geofenced perimeters & automatic alerts</p>
-          </div>
+      <!-- Live Location Mini-Map Card -->
+      <div class="home-map-card">
+        <div class="home-map-header">
+          <h4>Live Location</h4>
+          <a onclick="openScreen('viewLiveLocation')">View Full Map ></a>
         </div>
-        <div class="nav-card-arrow">→</div>
+        <div class="home-mini-map-box">
+          <div id="homeMiniMap"></div>
+          <div class="map-eta-pill" id="miniMapEtaBadge">● Live GPS Active</div>
+        </div>
+      </div>
+
+      <!-- 3 Telemetry Cards Row -->
+      <div class="telemetry-row">
+        <div class="telemetry-card">
+          <div class="telemetry-icon">📍</div>
+          <div class="telemetry-label">Current Location</div>
+          <div class="telemetry-val" id="telemetryLocName">Acquiring...</div>
+          <div class="telemetry-sub" id="telemetryCoords">GPS Ready</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-icon">🔋</div>
+          <div class="telemetry-label">Phone Battery</div>
+          <div class="telemetry-val" id="telemetryBattery">85%</div>
+          <div class="telemetry-sub">Updated just now</div>
+        </div>
+
+        <div class="telemetry-card">
+          <div class="telemetry-icon">⚡</div>
+          <div class="telemetry-label">Journey Status</div>
+          <div class="telemetry-val" style="color:#059669;">On Route</div>
+          <div class="telemetry-sub">Normal Status</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Grid -->
+      <div class="quick-actions-box">
+        <h4>Quick Actions</h4>
+        <div class="quick-actions-grid">
+          <button class="action-circle-btn" onclick="callPrimaryGuardian()">
+            <div class="action-btn-icon green">📞</div>
+            <span class="action-btn-text">Call</span>
+          </button>
+
+          <button class="action-circle-btn" onclick="triggerSOS('MANUAL_QUICK_SOS')">
+            <div class="action-btn-icon sos">SOS</div>
+            <span class="action-btn-text">Send SOS</span>
+          </button>
+
+          <button class="action-circle-btn" onclick="openScreen('viewLiveLocation')">
+            <div class="action-btn-icon purple">〰️</div>
+            <span class="action-btn-text">View Route</span>
+          </button>
+
+          <button class="action-circle-btn" onclick="openScreen('viewZones')">
+            <div class="action-btn-icon amber">🛡️</div>
+            <span class="action-btn-text">Safe Zones</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- =========================================================================
-       SCREEN 4: DEDICATED JOURNEY TRACKER PAGE
-       ========================================================================= -->
-  <div id="screenJourney" class="screen">
-    <div class="page-header">
-      <div class="page-title-box">
-        <h2>Live Journey Tracker</h2>
-        <p>Real-time breadcrumbs on device coordinates</p>
+    <!-- =======================================================================
+         SCREEN 4: LIVE LOCATION SCREEN (Image 2 - Screen 3)
+         ======================================================================= -->
+    <div id="viewLiveLocation" class="screen-view">
+      <div class="screen-header-bar">
+        <button class="btn-back-arrow" onclick="openScreen('viewHome')">❮</button>
+        <span class="screen-header-title">Live Location</span>
+        <button class="btn-back-arrow" onclick="recenterLiveMap()">🎯</button>
       </div>
-      <button class="icon-btn" onclick="openScreen('screenHome')">✕</button>
-    </div>
 
-    <div class="map-box">
-      <div id="journeyMap" style="width:100%; height:100%;"></div>
-    </div>
+      <!-- Interactive Map -->
+      <div class="full-live-map-card">
+        <div id="liveLocationMap"></div>
+        <div class="map-eta-pill">ETA: 15 min • Safe Zone</div>
+      </div>
 
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+      <!-- User Card -->
+      <div class="location-user-card">
+        <div class="user-card-top">
+          <div class="user-card-left">
+            <div class="user-card-avatar" id="liveAvatarLetter">👤</div>
+            <div class="user-card-info">
+              <h4 id="liveUserName">Protected User</h4>
+              <p>● Live • Just now</p>
+            </div>
+          </div>
+          <div class="battery-pill" id="liveBatteryPill">78% 🔋</div>
+        </div>
+        <div style="font-size:12.5px; color:var(--text-main); font-weight:700;" id="liveStreetAddress">
+          Near Live GPS Position
+        </div>
+        <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+          On route to Safe Zone • High Precision GPS
+        </div>
+      </div>
+
+      <!-- Journey Progress Stepper -->
+      <div class="journey-stepper-wrap">
+        <div class="stepper-head">
+          <h4>Journey Progress</h4>
+          <span class="stepper-pct">67%</span>
+        </div>
+        <div class="stepper-line-container">
+          <div class="stepper-line-bg"></div>
+          <div class="stepper-line-fill"></div>
+          <div class="stepper-dot"></div>
+          <div class="stepper-dot active"></div>
+          <div class="stepper-dot pending"></div>
+        </div>
+        <div class="stepper-labels-row">
+          <span>Home<br>8:30 AM</span>
+          <span style="text-align:center; color:var(--crimson); font-weight:800;">On Route<br>9:05 AM</span>
+          <span style="text-align:right;">Safe Zone<br>9:20 AM</span>
+        </div>
+      </div>
+
+      <!-- Route Status -->
+      <div class="route-deviation-card">
+        <div class="route-alert-icon">🛡️</div>
         <div>
-          <div style="font-size:11px; color:var(--text-muted); font-weight:700;">CURRENT LOCATION</div>
-          <div id="journeyCoordText" style="font-family:'Courier New', monospace; font-size:13px; font-weight:700; margin-top:2px;">Acquiring...</div>
-        </div>
-        <span class="status-badge green">Within Corridor</span>
-      </div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; text-align:center;">
-        <div style="background:#F9FAFB; padding:12px; border-radius:12px;">
-          <div style="font-size:10.5px; color:var(--text-muted); font-weight:700;">CURRENT SPEED</div>
-          <div id="journeySpeedVal" style="font-size:18px; font-weight:800; color:var(--text-main); margin-top:2px;">0 km/h</div>
-        </div>
-        <div style="background:#F9FAFB; padding:12px; border-radius:12px;">
-          <div style="font-size:10.5px; color:var(--text-muted); font-weight:700;">ACCURACY</div>
-          <div id="journeyAccVal" style="font-size:18px; font-weight:800; color:var(--text-main); margin-top:2px;">±0 m</div>
+          <strong style="font-size:12.5px; color:#BE123C;">Corridor Verified</strong>
+          <div style="font-size:11px; color:#9F1239;">Within safe path corridor. No deviation detected.</div>
         </div>
       </div>
 
-      <button class="btn-primary" onclick="recenterJourneyMap()">🎯 Center on My Location</button>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       SCREEN 5: DEDICATED EMERGENCY CONTACTS PAGE
-       ========================================================================= -->
-  <div id="screenContacts" class="screen">
-    <div class="page-header">
-      <div class="page-title-box">
-        <h2>My Emergency Contacts</h2>
-        <p>Automatic SMS & Direct Call Recipients</p>
+      <!-- Actions -->
+      <div class="location-actions-row">
+        <button class="btn-outline" onclick="shareLiveGpsLocation()">
+          💬 Share Link
+        </button>
+        <button class="btn-crimson" onclick="callPrimaryGuardian()">
+          📞 Call Guardian
+        </button>
       </div>
-      <button class="icon-btn" onclick="openScreen('screenHome')">✕</button>
     </div>
 
-    <div id="contactsListPage" style="margin-bottom:16px;">
-      <!-- Contacts render here -->
-    </div>
-
-    <div class="card">
-      <h3 style="font-size:14px; font-weight:800; margin-bottom:8px;">Add New Contact</h3>
-      <input type="text" id="addPageContactName" class="form-input" placeholder="Name (e.g. Dad)" style="margin-bottom:8px;">
-      <input type="tel" id="addPageContactPhone" class="form-input" placeholder="10-digit Phone Number" maxlength="10" style="margin-bottom:8px;">
-      <button class="btn-primary" onclick="addNewContactFromPage()">Save Contact</button>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       SCREEN 6: DEDICATED MY SAFE ZONES PAGE
-       ========================================================================= -->
-  <div id="screenZones" class="screen">
-    <div class="page-header">
-      <div class="page-title-box">
-        <h2>My Safe Zones</h2>
-        <p>Add & Manage Your Custom Geofences</p>
+    <!-- =======================================================================
+         SCREEN 5: ALERTS & HISTORY SCREEN (Image 2 - Screen 4)
+         ======================================================================= -->
+    <div id="viewHistory" class="screen-view">
+      <div class="screen-header-bar">
+        <button class="btn-back-arrow" onclick="openScreen('viewHome')">❮</button>
+        <span class="screen-header-title">Alerts & History</span>
+        <div style="width:24px;"></div>
       </div>
-      <button class="icon-btn" onclick="openScreen('screenHome')">✕</button>
+
+      <!-- Tabs -->
+      <div class="history-tabs-row">
+        <div class="tab-chip active">All Alerts</div>
+        <div class="tab-chip" onclick="openScreen('viewLiveLocation')">Journey History</div>
+        <div class="tab-chip" onclick="openScreen('viewZones')">Safe Zones</div>
+      </div>
+
+      <!-- Recent Alerts List -->
+      <div class="recent-alerts-header">
+        <h4>Recent Alerts</h4>
+        <span style="font-size:11.5px; color:var(--crimson); font-weight:700;">View All ></span>
+      </div>
+
+      <div id="alertsHistoryList">
+        <div class="history-alert-card">
+          <div class="history-card-left">
+            <div class="history-tag red">SOS</div>
+            <div class="history-card-info">
+              <h5>SOS Triggered <span style="font-size:10px; background:#FEE2E2; color:#DC2626; padding:1px 6px; border-radius:6px;">Live</span></h5>
+              <p>Emergency alert dispatched with live GPS</p>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--text-sub);">❯</span>
+        </div>
+
+        <div class="history-alert-card">
+          <div class="history-card-left">
+            <div class="history-tag amber">〰️</div>
+            <div class="history-card-info">
+              <h5>Route Deviation</h5>
+              <p>User deviated 120m from expected path</p>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--text-sub);">❯</span>
+        </div>
+
+        <div class="history-alert-card">
+          <div class="history-card-left">
+            <div class="history-tag green">📍</div>
+            <div class="history-card-info">
+              <h5>Reached Safe Zone</h5>
+              <p>Arrived safely at College Campus</p>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--text-sub);">❯</span>
+        </div>
+
+        <div class="history-alert-card">
+          <div class="history-card-left">
+            <div class="history-tag green">🚪</div>
+            <div class="history-card-info">
+              <h5>Left Safe Zone</h5>
+              <p>Departed Home Safe Perimeter</p>
+            </div>
+          </div>
+          <span style="font-size:12px; color:var(--text-sub);">❯</span>
+        </div>
+      </div>
+
+      <!-- Emergency Contacts Carousel -->
+      <div class="contacts-carousel-wrap">
+        <div class="contacts-header-row">
+          <h4 style="font-size:14px; font-weight:800;">Emergency Contacts</h4>
+          <span style="font-size:11.5px; color:var(--crimson); font-weight:700; cursor:pointer;" onclick="openAddContactPrompt()">+ Add Contact</span>
+        </div>
+
+        <div class="contacts-avatar-row" id="contactsAvatarRow">
+          <div class="contact-bubble" onclick="callPrimaryGuardian()">
+            <div class="contact-bubble-icon">👤</div>
+            <span id="contact1Label">Guardian</span>
+          </div>
+          <div class="contact-bubble" onclick="directCallPrompt('Mother')">
+            <div class="contact-bubble-icon">📞</div>
+            <span>Mother</span>
+          </div>
+          <div class="contact-bubble" onclick="directCallPrompt('Father')">
+            <div class="contact-bubble-icon">📞</div>
+            <span>Father</span>
+          </div>
+          <div class="contact-bubble" onclick="directCall('112')">
+            <div class="contact-bubble-icon" style="background:#EDE9FE; color:#6D28D9; border-color:#DDD6FE;">👮</div>
+            <span>Police 112</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="map-box">
-      <div id="zonesMap" style="width:100%; height:100%;"></div>
+    <!-- =======================================================================
+         SCREEN 6: USER SAFE ZONES (USER ADDS, NO HARDCODED ZONES!)
+         ======================================================================= -->
+    <div id="viewZones" class="screen-view">
+      <div class="screen-header-bar">
+        <button class="btn-back-arrow" onclick="openScreen('viewHome')">❮</button>
+        <span class="screen-header-title">My Safe Zones</span>
+        <div style="width:24px;"></div>
+      </div>
+
+      <div id="zonesInteractiveMap"></div>
+
+      <!-- Add Safe Zone Card (User adds custom safe zones) -->
+      <div class="ui-card">
+        <h4 style="font-size:14px; font-weight:800; margin-bottom:4px;">Add Custom Safe Zone</h4>
+        <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">Tap on the map or use your current location to define a protected perimeter.</p>
+
+        <div class="form-group">
+          <label class="form-label">Zone Name</label>
+          <input type="text" id="zoneInputName" class="form-input" placeholder="e.g. My College, Home, Hostel">
+        </div>
+
+        <button class="btn-outline" style="margin-bottom:12px;" onclick="setZoneToCurrentLocation()">
+          📍 Set to My Current GPS Location
+        </button>
+
+        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:4px;">
+          <span>Geofence Radius:</span>
+          <span id="zoneRadiusDisplay" style="color:var(--crimson);">300 meters</span>
+        </div>
+        <input type="range" id="zoneRadiusSlider" min="100" max="800" step="50" value="300" style="width:100%; accent-color:var(--crimson); margin-bottom:14px;">
+
+        <button class="btn-crimson" onclick="saveCustomSafeZone()">
+          + Save This Safe Zone
+        </button>
+      </div>
+
+      <!-- Existing Safe Zones List -->
+      <div id="userZonesList">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
 
-    <div id="zonesListPage" style="margin-bottom:16px;">
-      <!-- Zones render here -->
-    </div>
+    <!-- =======================================================================
+         SCREEN 7: ACTIVE EMERGENCY SOS (FAST VIDEO + DISPATCH)
+         ======================================================================= -->
+    <div id="viewSosActive" class="screen-view no-bottom-nav">
+      <div class="sos-beacon-pulse">🚨</div>
+      <h2 style="font-size:22px; font-weight:900; color:var(--crimson);">EMERGENCY DISPATCH ACTIVE</h2>
+      <p id="sosActiveTriggerCause" style="font-size:12.5px; font-weight:700; color:var(--text-main); margin-top:3px;">
+        Triggered by: EMERGENCY_SOS
+      </p>
 
-    <div class="card">
-      <h3 style="font-size:14px; font-weight:800; margin-bottom:8px;">Add New Safe Zone</h3>
-      <input type="text" id="addPageZoneName" class="form-input" placeholder="Zone Name (e.g. My College, Office)" style="margin-bottom:8px;">
-      <button class="btn-secondary" onclick="setZoneToCurrentGps()" style="margin-bottom:8px; color:var(--emerald);">
-        📍 Set to My Current GPS Location
+      <div class="ui-card" style="text-align:left; margin-top:14px;">
+        <h4 style="font-size:13px; font-weight:800; margin-bottom:8px;">Dispatch Status</h4>
+        <div style="font-size:12px; line-height:1.7;">
+          <div><span style="color:#059669; font-weight:800;">✓</span> Live GPS streamed to Police Console</div>
+          <div><span style="color:#059669; font-weight:800;">✓</span> Automated SMS dispatched to Guardians</div>
+          <div><span style="color:#059669; font-weight:800;">✓</span> Fast sub-second video frames broadcasting live</div>
+        </div>
+      </div>
+
+      <!-- Live Video Camera View -->
+      <div class="live-camera-preview-box">
+        <video id="sosVideoBroadcast" autoplay playsinline muted></video>
+        <div style="position:absolute; top:8px; left:8px; background:rgba(225,29,72,0.9); color:#FFF; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px;">
+          ● BROADCASTING
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <button class="btn-outline" onclick="shareLiveGpsLocation()">
+          🔗 Share Guardian Link
+        </button>
+        <button class="btn-crimson" onclick="callPrimaryGuardian()">
+          📞 Direct Call
+        </button>
+      </div>
+
+      <button class="btn-crimson" style="background:#374151;" onclick="promptDeactivatePin()">
+        Stand Down / I Am Safe (Enter PIN)
       </button>
-      <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:4px;">
-        <span>Radius:</span>
-        <span id="pageRadiusLabel">300 meters</span>
-      </div>
-      <input type="range" id="pageRadiusSlider" min="100" max="600" step="50" value="300" style="width:100%; accent-color:var(--crimson); margin-bottom:12px;">
-      <button class="btn-primary" onclick="addNewZoneFromPage()">Save Safe Zone</button>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       SCREEN 7: DEDICATED ACTIVE EMERGENCY SOS SCREEN
-       ========================================================================= -->
-  <div id="screenSosActive" class="screen" style="background:#FFF1F2;">
-    <div style="text-align:center; padding:10px 0 20px 0;">
-      <div style="width:64px; height:64px; border-radius:50%; background:var(--crimson); color:#FFF; display:flex; align-items:center; justify-content:center; margin:0 auto 10px auto; font-size:30px; animation:alertPulse 1s infinite;">
-        🚨
-      </div>
-      <h2 style="font-size:22px; font-weight:900; color:var(--crimson);">EMERGENCY ACTIVE</h2>
-      <p id="sosTriggerCause" style="font-size:13px; font-weight:700; color:var(--text-main); margin-top:2px;">Triggered by: MANUAL_HOLD_3S</p>
     </div>
 
-    <div class="card">
-      <h4 style="font-size:13.5px; font-weight:800; margin-bottom:10px;">Automated Dispatch Status</h4>
-      
-      <div style="display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #F3F4F6;">
-        <span style="color:var(--emerald); font-weight:800;">✓</span>
-        <div style="font-size:12px;">
-          <strong>Live Coordinates Streamed</strong>
-          <div id="sosLiveCoords">Capturing GPS...</div>
+    <!-- =======================================================================
+         SCREEN 8: COVERT STEGANOGRAPHIC CALCULATOR (STEALTH PIN)
+         ======================================================================= -->
+    <div id="viewCalc" class="screen-view no-bottom-nav" style="padding:10px;">
+      <div class="calc-shell">
+        <div style="display:flex; justify-content:space-between; align-items:center; color:#94A3B8;">
+          <button onclick="openScreen('viewHome')" style="background:none; border:none; color:#94A3B8; font-size:18px; cursor:pointer;">✕</button>
+          <span style="font-size:13px; font-weight:600;">Calculator</span>
+          <span style="font-size:11px;">RAD</span>
         </div>
-      </div>
 
-      <div style="display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #F3F4F6;">
-        <span style="color:var(--emerald); font-weight:800;">✓</span>
-        <div style="font-size:12px;">
-          <strong>Automated SMS Dispatched</strong>
-          <div id="sosSmsReport">Sent to emergency contacts with Google Maps link</div>
+        <div class="calc-screen-display">
+          <div class="calc-expression" id="calcSubExpr"></div>
+          <div class="calc-result" id="calcMainNum">0</div>
         </div>
-      </div>
 
-      <div style="display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #F3F4F6;">
-        <span style="color:var(--emerald); font-weight:800;">✓</span>
-        <div style="font-size:12px;">
-          <strong>Automated Emergency Call</strong>
-          <div id="sosCallReport">Connecting to primary guardian...</div>
-        </div>
-      </div>
+        <div class="calc-keypad">
+          <button class="calc-key op" onclick="pressCalc('C')">C</button>
+          <button class="calc-key op" onclick="pressCalc('+/-')">±</button>
+          <button class="calc-key op" onclick="pressCalc('%')">%</button>
+          <button class="calc-key op" onclick="pressCalc('/')">÷</button>
 
-      <div style="display:flex; gap:10px; align-items:center; padding:8px 0;">
-        <span style="color:var(--emerald); font-weight:800;">✓</span>
-        <div style="font-size:12px;">
-          <strong>Ambient Video/Audio Broadcast Live</strong>
-          <div id="sosStreamReport">Peer room: safezone-victim</div>
+          <button class="calc-key" onclick="pressCalc('7')">7</button>
+          <button class="calc-key" onclick="pressCalc('8')">8</button>
+          <button class="calc-key" onclick="pressCalc('9')">9</button>
+          <button class="calc-key op" onclick="pressCalc('*')">×</button>
+
+          <button class="calc-key" onclick="pressCalc('4')">4</button>
+          <button class="calc-key" onclick="pressCalc('5')">5</button>
+          <button class="calc-key" onclick="pressCalc('6')">6</button>
+          <button class="calc-key op" onclick="pressCalc('-')">−</button>
+
+          <button class="calc-key" onclick="pressCalc('1')">1</button>
+          <button class="calc-key" onclick="pressCalc('2')">2</button>
+          <button class="calc-key" onclick="pressCalc('3')">3</button>
+          <button class="calc-key op" onclick="pressCalc('+')">+</button>
+
+          <button class="calc-key" style="grid-column:span 2; border-radius:30px;" onclick="pressCalc('0')">0</button>
+          <button class="calc-key" onclick="pressCalc('.')">.</button>
+          <button class="calc-key eval" onclick="pressCalc('=')">=</button>
         </div>
       </div>
     </div>
 
-    <!-- Live Local Camera Preview -->
-    <div id="localVideoContainer" style="width:100%; height:130px; border-radius:16px; background:#000; overflow:hidden; margin-bottom:14px; position:relative;">
-      <video id="sosVideoFeed" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
-      <div style="position:absolute; top:8px; left:8px; background:rgba(225,29,72,0.9); color:#FFF; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px;">
-        LIVE BROADCASTING
-      </div>
-    </div>
-
-    <div style="display:flex; gap:10px; margin-bottom:14px;">
-      <button class="btn-secondary" onclick="shareGuardianLiveTrackingLink()" style="flex:1;">
-        🔗 Share Guardian Link
+    <!-- =======================================================================
+         BOTTOM NAVIGATION BAR (Matches Image 2 Screen 2, 3, 4)
+         ======================================================================= -->
+    <nav class="bottom-nav-bar" id="appBottomNav">
+      <!-- 1. Home -->
+      <button class="nav-tab-item active" id="tabHome" onclick="openScreen('viewHome')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
       </button>
-      <button class="btn-secondary" onclick="makeEmergencyPhoneCallDirect()" style="flex:1;">
-        📞 Call Guardian
+
+      <!-- 2. Live Location -->
+      <button class="nav-tab-item" id="tabLiveLocation" onclick="openScreen('viewLiveLocation')">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span>Live Location</span>
       </button>
-    </div>
 
-    <button class="btn-primary" onclick="promptStandDownPin()" style="background:#374151;">
-      Stand Down / I Am Safe (Enter PIN)
-    </button>
+      <!-- 3. Alerts -->
+      <button class="nav-tab-item" id="tabAlerts" onclick="openScreen('viewHistory')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span>Alerts</span>
+        <span class="nav-badge-pill">2</span>
+      </button>
+
+      <!-- 4. Safe Zones -->
+      <button class="nav-tab-item" id="tabSafeZones" onclick="openScreen('viewZones')">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Safe Zones</span>
+      </button>
+
+      <!-- 5. Profile -->
+      <button class="nav-tab-item" id="tabProfile" onclick="openScreen('viewAuth')">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+
   </div>
 
-  <!-- =========================================================================
-       SCREEN 8: COVERT STEGANOGRAPHIC CALCULATOR (STEALTH MODE)
-       ========================================================================= -->
-  <div id="screenCalc" class="screen calc-screen">
-    <div>
-      <div style="display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:13px; margin-bottom:10px;">
-        <button onclick="openScreen('screenHome')" style="background:none; border:none; color:#94A3B8; font-size:18px; cursor:pointer;">✕</button>
-        <span>Calculator</span>
-        <span style="font-size:11px;">DEG</span>
-      </div>
-
-      <div class="calc-display">
-        <div class="calc-sub-expr" id="calcSubExpr"></div>
-        <div class="calc-main-num" id="calcMainNum">0</div>
-      </div>
-    </div>
-
-    <div class="calc-grid">
-      <button class="c-btn op" onclick="pressCalc('C')">C</button>
-      <button class="c-btn op" onclick="pressCalc('+/-')">±</button>
-      <button class="c-btn op" onclick="pressCalc('%')">%</button>
-      <button class="c-btn op" onclick="pressCalc('/')">÷</button>
-
-      <button class="c-btn" onclick="pressCalc('7')">7</button>
-      <button class="c-btn" onclick="pressCalc('8')">8</button>
-      <button class="c-btn" onclick="pressCalc('9')">9</button>
-      <button class="c-btn op" onclick="pressCalc('*')">×</button>
-
-      <button class="c-btn" onclick="pressCalc('4')">4</button>
-      <button class="c-btn" onclick="pressCalc('5')">5</button>
-      <button class="c-btn" onclick="pressCalc('6')">6</button>
-      <button class="c-btn op" onclick="pressCalc('-')">−</button>
-
-      <button class="c-btn" onclick="pressCalc('1')">1</button>
-      <button class="c-btn" onclick="pressCalc('2')">2</button>
-      <button class="c-btn" onclick="pressCalc('3')">3</button>
-      <button class="c-btn op" onclick="pressCalc('+')">+</button>
-
-      <button class="c-btn" style="grid-column:span 2;" onclick="pressCalc('0')">0</button>
-      <button class="c-btn" onclick="pressCalc('.')">.</button>
-      <button class="c-btn eq" onclick="pressCalc('=')">=</button>
-    </div>
-
-    <p style="text-align:center; font-size:11px; color:#64748B; margin-top:10px;">
-      Stealth Covert Mode: Enter PIN and press = to secretly dispatch SOS.
-    </p>
-  </div>
-</div>
-
-<script>
-/* ==========================================================================
-   SAFEZONE STATE MANAGEMENT & LIVE GPS TRACKER
-   ========================================================================== */
-const SafeZone = {
-  user: {
-    name: 'Priya Sharma',
-    phone: '9876543210',
-    pin: '1234',
-    blood: 'O+',
-    covertPin: '9999',
-    isSetupComplete: false
-  },
-  contacts: [], // User adds their own contacts!
-  safeZones: [], // User adds their own safe zones!
-  telemetry: {
-    lat: 28.6139,
-    lng: 77.2090,
-    accuracy: 10,
-    speed: 0,
-    battery: 85,
-    isAlertActive: false,
-    trigger: 'NONE'
-  },
-  shakeState: { count: 0, lastTime: 0 },
-  audioContext: null,
-  sirenInterval: null,
-  webrtcStream: null,
-  peer: null,
-  syncChannel: null
-};
-
-/* ==========================================================================
-   REAL LIVE GPS TRACKER (Pulls actual device GPS!)
-   ========================================================================== */
-function initLiveLocationTracking() {
-  if ('geolocation' in navigator) {
-    const updateLocation = (pos) => {
-      SafeZone.telemetry.lat = pos.coords.latitude;
-      SafeZone.telemetry.lng = pos.coords.longitude;
-      SafeZone.telemetry.accuracy = Math.round(pos.coords.accuracy);
-      SafeZone.telemetry.speed = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
-
-      // Update UI elements
-      document.getElementById('dashLat').innerText = SafeZone.telemetry.lat.toFixed(6);
-      document.getElementById('dashLng').innerText = SafeZone.telemetry.lng.toFixed(6);
-      document.getElementById('dashAcc').innerText = '±' + SafeZone.telemetry.accuracy + 'm';
-      document.getElementById('dashSpeed').innerText = SafeZone.telemetry.speed + ' km/h';
-      
-      const coordStr = `${SafeZone.telemetry.lat.toFixed(5)}, ${SafeZone.telemetry.lng.toFixed(5)}`;
-      const jCoord = document.getElementById('journeyCoordText');
-      if (jCoord) jCoord.innerText = coordStr;
-      const sCoord = document.getElementById('sosLiveCoords');
-      if (sCoord) sCoord.innerText = `${coordStr} (±${SafeZone.telemetry.accuracy}m)`;
-
-      // Sync live position to Monitor Console
-      broadcastTelemetry(SafeZone.telemetry.isAlertActive ? SafeZone.telemetry.trigger : 'LIVE_GPS');
-
-      // Update maps if open
-      if (journeyMap && journeyMarker) {
-        journeyMarker.setLatLng([SafeZone.telemetry.lat, SafeZone.telemetry.lng]);
-        if (journeyCircle) journeyCircle.setLatLng([SafeZone.telemetry.lat, SafeZone.telemetry.lng]);
-      }
+  <!-- JAVASCRIPT STATE ENGINE & CORE LOGIC -->
+  <script>
+    // =========================================================================
+    // APPLICATION STATE (LOCAL STORAGE PERSISTENCE - NO HARDCODED NAMES)
+    // =========================================================================
+    const AppState = {
+      user: {
+        name: '',
+        phone: '8073521221',
+        pin: '1234',
+        covertPin: '9999',
+        guardianPhone: '8073521221',
+        isLoggedIn: false
+      },
+      telemetry: {
+        lat: 13.2925,
+        lng: 77.5306,
+        accuracy: 10,
+        speed: 0,
+        battery: 85,
+        isAlertActive: false,
+        trigger: 'NORMAL'
+      },
+      contacts: [],
+      safeZones: [] // User adds their own safe zones!
     };
 
-    navigator.geolocation.getCurrentPosition(updateLocation, (err) => console.log('GPS error:', err), { enableHighAccuracy: true });
-    navigator.geolocation.watchPosition(updateLocation, (err) => console.log('Watch error:', err), { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
-  }
-
-  // Battery status
-  if (navigator.getBattery) {
-    navigator.getBattery().then(b => {
-      SafeZone.telemetry.battery = Math.round(b.level * 100);
-      document.getElementById('dashBattery').innerText = SafeZone.telemetry.battery + '%';
-    });
-  }
-}
-
-/* ==========================================================================
-   PERSISTENCE & SYNCHRONIZATION
-   ========================================================================== */
-function loadSavedState() {
-  const savedUser = localStorage.getItem('safezone_user_profile');
-  if (savedUser) SafeZone.user = JSON.parse(savedUser);
-  const savedContacts = localStorage.getItem('safezone_user_contacts');
-  if (savedContacts) SafeZone.contacts = JSON.parse(savedContacts);
-  const savedZones = localStorage.getItem('safezone_user_zones');
-  if (savedZones) SafeZone.safeZones = JSON.parse(savedZones);
-
-  try {
-    SafeZone.syncChannel = new BroadcastChannel('safezone_sync');
-    SafeZone.syncChannel.onmessage = (e) => {
-      if (e.data && e.data.type === 'MONITOR_COMMAND') {
-        if (e.data.action === 'REMOTE_SIREN') toggleSirenAlarm(true);
-        if (e.data.action === 'STAND_DOWN') deactivateSOS();
+    // Load from LocalStorage
+    function loadSavedState() {
+      const savedUser = localStorage.getItem('jagruthi_user_profile') || localStorage.getItem('safezone_user_profile');
+      if (savedUser) {
+        try {
+          const parsed = JSON.parse(savedUser);
+          AppState.user = { ...AppState.user, ...parsed };
+        } catch(e) {}
       }
-    };
-  } catch (err) {}
-}
 
-function saveState() {
-  localStorage.setItem('safezone_user_profile', JSON.stringify(SafeZone.user));
-  localStorage.setItem('safezone_user_contacts', JSON.stringify(SafeZone.contacts));
-  localStorage.setItem('safezone_user_zones', JSON.stringify(SafeZone.safeZones));
-}
+      const savedContacts = localStorage.getItem('jagruthi_contacts') || localStorage.getItem('safezone_contacts');
+      if (savedContacts) {
+        try { AppState.contacts = JSON.parse(savedContacts); } catch(e) {}
+      }
 
-function broadcastTelemetry(triggerType) {
-  const cleanPhone = (SafeZone.user.phone || '8073521221').replace(/[^0-9]/g, '').slice(-10) || '8073521221';
-  SafeZone.user.phone = cleanPhone;
-  const payload = {
-    victimPhone: cleanPhone,
-    victimName: SafeZone.user.name || 'Protected User',
-    lat: SafeZone.telemetry.lat,
-    lng: SafeZone.telemetry.lng,
-    accuracy: SafeZone.telemetry.accuracy,
-    speed: SafeZone.telemetry.speed,
-    battery: SafeZone.telemetry.battery || 85,
-    trigger: triggerType,
-    is_alert_active: SafeZone.telemetry.isAlertActive,
-    timestamp: Date.now()
-  };
+      const savedZones = localStorage.getItem('jagruthi_safezones') || localStorage.getItem('safezone_custom_zones');
+      if (savedZones) {
+        try { AppState.safeZones = JSON.parse(savedZones); } catch(e) {}
+      }
+    }
 
-  localStorage.setItem('safezone_alert_' + cleanPhone, JSON.stringify(payload));
-  if (SafeZone.syncChannel) {
-    SafeZone.syncChannel.postMessage({
-      type: SafeZone.telemetry.isAlertActive ? 'ALERT_DISPATCH' : 'TELEMETRY_UPDATE',
-      data: payload
-    });
-  }
+    function persistState() {
+      localStorage.setItem('jagruthi_user_profile', JSON.stringify(AppState.user));
+      localStorage.setItem('safezone_user_profile', JSON.stringify(AppState.user));
+      localStorage.setItem('jagruthi_contacts', JSON.stringify(AppState.contacts));
+      localStorage.setItem('jagruthi_safezones', JSON.stringify(AppState.safeZones));
+    }
 
-  // Cloud Firestore REST sync
-  try {
-    fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${cleanPhone}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    // =========================================================================
+    // HIGH ACCURACY GPS TRACKER
+    // =========================================================================
+    let gpsWatchId = null;
+
+    function initHighAccuracyGPS() {
+      if (!navigator.geolocation) return;
+
+      const opts = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      };
+
+      function handlePosition(pos) {
+        AppState.telemetry.lat = pos.coords.latitude;
+        AppState.telemetry.lng = pos.coords.longitude;
+        AppState.telemetry.accuracy = Math.round(pos.coords.accuracy || 5);
+        AppState.telemetry.speed = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0;
+
+        // Update UI
+        const coordsText = `${AppState.telemetry.lat.toFixed(4)}, ${AppState.telemetry.lng.toFixed(4)}`;
+        document.getElementById('telemetryCoords').innerText = `±${AppState.telemetry.accuracy}m`;
+        document.getElementById('telemetryLocName').innerText = coordsText;
+        document.getElementById('liveStreetAddress').innerText = `GPS: ${coordsText} (±${AppState.telemetry.accuracy}m)`;
+
+        // Update Maps
+        if (homeMiniMarker && homeMiniMap) {
+          homeMiniMarker.setLatLng([AppState.telemetry.lat, AppState.telemetry.lng]);
+          homeMiniMap.setView([AppState.telemetry.lat, AppState.telemetry.lng], 14);
+        }
+        if (liveFullMarker && liveLocationMap) {
+          liveFullMarker.setLatLng([AppState.telemetry.lat, AppState.telemetry.lng]);
+          if (liveAccuracyCircle) liveAccuracyCircle.setLatLng([AppState.telemetry.lat, AppState.telemetry.lng]);
+        }
+
+        // Broadcast to Firestore
+        broadcastTelemetry(AppState.telemetry.isAlertActive ? AppState.telemetry.trigger : 'LIVE_GPS');
+      }
+
+      navigator.geolocation.getCurrentPosition(handlePosition, () => {}, opts);
+      gpsWatchId = navigator.geolocation.watchPosition(handlePosition, (err) => console.log('GPS error:', err), opts);
+
+      // Battery
+      if (navigator.getBattery) {
+        navigator.getBattery().then(b => {
+          AppState.telemetry.battery = Math.round(b.level * 100);
+          document.getElementById('telemetryBattery').innerText = AppState.telemetry.battery + '%';
+          document.getElementById('liveBatteryPill').innerText = AppState.telemetry.battery + '% 🔋';
+        });
+      }
+    }
+
+    // =========================================================================
+    // CLOUD FIRESTORE TELEMETRY BROADCASTER
+    // =========================================================================
+    function broadcastTelemetry(triggerType) {
+      const phone = AppState.user.phone || '8073521221';
+      const name = AppState.user.name || 'Protected User';
+
+      const payload = {
         fields: {
-          victimPhone: { stringValue: cleanPhone },
-          victimName: { stringValue: SafeZone.user.name || 'Protected User' },
-          lat: { doubleValue: SafeZone.telemetry.lat },
-          lng: { doubleValue: SafeZone.telemetry.lng },
-          accuracy: { doubleValue: SafeZone.telemetry.accuracy },
-          speed: { doubleValue: SafeZone.telemetry.speed },
-          battery: { doubleValue: SafeZone.telemetry.battery || 85 },
+          victimPhone: { stringValue: phone },
+          victimName: { stringValue: name },
+          lat: { doubleValue: AppState.telemetry.lat },
+          lng: { doubleValue: AppState.telemetry.lng },
+          accuracy: { doubleValue: AppState.telemetry.accuracy },
+          speed: { doubleValue: AppState.telemetry.speed },
+          battery: { doubleValue: AppState.telemetry.battery },
           trigger: { stringValue: triggerType },
-          is_alert_active: { booleanValue: SafeZone.telemetry.isAlertActive },
+          is_alert_active: { booleanValue: AppState.telemetry.isAlertActive },
           timestamp: { timestampValue: new Date().toISOString() }
         }
-      })
-    }).then(r => console.log('Firestore synced:', r.status)).catch(e => console.error('Firestore sync err:', e));
-  } catch (e) {}
-}
+      };
 
-/* ==========================================================================
-   NAVIGATION / SCREEN SWITCHING (ONE THING PER PAGE)
-   ========================================================================== */
-function openScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const target = document.getElementById(screenId);
-  if (target) {
-    target.classList.add('active');
-    target.scrollTop = 0;
-  }
-
-  if (screenId === 'screenJourney') initJourneyMap();
-  if (screenId === 'screenZones') initZonesMap();
-  if (screenId === 'screenContacts') renderContactsPage();
-}
-
-/* ==========================================================================
-   AUTHENTICATION & WIZARD SETUP
-   ========================================================================= */
-let authMode = 'login';
-
-function switchAuthTab(mode) {
-  authMode = mode;
-  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
-  document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
-  document.getElementById('groupFullName').style.display = mode === 'register' ? 'block' : 'none';
-  document.getElementById('groupBlood').style.display = mode === 'register' ? 'block' : 'none';
-  document.getElementById('authSubmitText').innerText = mode === 'register' ? 'Continue to Safety Setup →' : 'Sign In →';
-}
-
-document.getElementById('btnAuthSubmit').addEventListener('click', () => {
-  const phone = document.getElementById('authPhone').value.trim();
-  const pin = document.getElementById('authPin').value.trim();
-
-  if (phone.length < 10) {
-    showToast('Enter a valid 10-digit phone number', '⚠️');
-    return;
-  }
-
-  if (authMode === 'register') {
-    SafeZone.user.name = document.getElementById('regName').value.trim() || 'User';
-    SafeZone.user.phone = phone;
-    SafeZone.user.pin = pin || '1234';
-    SafeZone.user.blood = document.getElementById('regBlood').value.trim() || 'O+';
-    SafeZone.user.isSetupComplete = false;
-    saveState();
-    openScreen('screenSetup');
-  } else {
-    // Sign In: Directly enter dashboard and ensure safety profile is active
-    const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10) || '8073521221';
-    SafeZone.user.phone = cleanPhone;
-    SafeZone.user.pin = pin || '1234';
-    if (!SafeZone.user.name || SafeZone.user.name === 'Priya Sharma') {
-      SafeZone.user.name = 'Protected User';
+      fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${phone}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
     }
-    SafeZone.user.isSetupComplete = true;
-    if (SafeZone.contacts.length === 0) {
-      SafeZone.contacts = [
-        { id: '1', name: 'Emergency Helpline', phone: '112' },
-        { id: '2', name: 'Primary Guardian', phone: cleanPhone }
-      ];
+
+    // =========================================================================
+    // FAST LIVE SURVEILLANCE VIDEO BROADCAST (600ms INTERVAL)
+    // =========================================================================
+    let videoStream = null;
+    let frameBroadcastTimer = null;
+
+    function startFastSurveillanceBroadcast() {
+      const video = document.getElementById('sosVideoBroadcast');
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 240;
+      const ctx = canvas.getContext('2d');
+
+      function captureAndSend() {
+        if (video && video.videoWidth > 0) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          // Forensic watermark
+          ctx.fillStyle = 'rgba(0,0,0,0.65)';
+          ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
+          ctx.fillStyle = '#10B981';
+          ctx.font = 'bold 9.5px monospace';
+          ctx.fillText(`● LIVE JAGRUTHI | +91 ${AppState.user.phone} | ${new Date().toLocaleTimeString()} | ${AppState.telemetry.lat.toFixed(4)},${AppState.telemetry.lng.toFixed(4)}`, 6, canvas.height - 8);
+        } else {
+          // Forensic HUD frame when camera initializing
+          ctx.fillStyle = '#111827';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#E11D48';
+          ctx.font = 'bold 12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('EMERGENCY LIVE SURVEILLANCE', canvas.width/2, 40);
+          ctx.fillStyle = '#38BDF8';
+          ctx.font = '10px monospace';
+          ctx.fillText(`TARGET: +91 ${AppState.user.phone} (${AppState.user.name})`, canvas.width/2, canvas.height/2 + 30);
+          ctx.fillText(`GPS: ${AppState.telemetry.lat.toFixed(5)}, ${AppState.telemetry.lng.toFixed(5)}`, canvas.width/2, canvas.height/2 + 48);
+          ctx.textAlign = 'left';
+        }
+
+        const frameData = canvas.toDataURL('image/jpeg', 0.5);
+
+        // Broadcast to Firestore
+        fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${AppState.user.phone}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              victimPhone: { stringValue: AppState.user.phone },
+              victimName: { stringValue: AppState.user.name },
+              lat: { doubleValue: AppState.telemetry.lat },
+              lng: { doubleValue: AppState.telemetry.lng },
+              accuracy: { doubleValue: AppState.telemetry.accuracy },
+              speed: { doubleValue: AppState.telemetry.speed },
+              battery: { doubleValue: AppState.telemetry.battery },
+              trigger: { stringValue: AppState.telemetry.trigger },
+              is_alert_active: { booleanValue: true },
+              camera_frame: { stringValue: frameData },
+              timestamp: { timestampValue: new Date().toISOString() }
+            }
+          })
+        }).catch(() => {});
+      }
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true })
+          .then(stream => {
+            videoStream = stream;
+            video.srcObject = stream;
+            if (frameBroadcastTimer) clearInterval(frameBroadcastTimer);
+            frameBroadcastTimer = setInterval(captureAndSend, 600); // Super fast 600ms!
+            setTimeout(captureAndSend, 200);
+          })
+          .catch(() => {
+            if (frameBroadcastTimer) clearInterval(frameBroadcastTimer);
+            frameBroadcastTimer = setInterval(captureAndSend, 600);
+            captureAndSend();
+          });
+      } else {
+        if (frameBroadcastTimer) clearInterval(frameBroadcastTimer);
+        frameBroadcastTimer = setInterval(captureAndSend, 600);
+        captureAndSend();
+      }
     }
-    saveState();
-    document.getElementById('homeGreetingName').innerText = `Hello, ${SafeZone.user.name}!`;
-    updateDashboardCounts();
-    renderSetupContactsList();
-    showToast(`Signed in as +91 ${cleanPhone}`, '🛡️');
-    openScreen('screenHome');
-  }
-});
 
-// Setup Wizard Next/Back
-document.getElementById('btnNextStep1').addEventListener('click', () => {
-  if (SafeZone.contacts.length === 0) {
-    showToast('Please add at least 1 emergency contact!', '⚠️');
-    return;
-  }
-  document.getElementById('setupStep1').style.display = 'none';
-  document.getElementById('setupStep2').style.display = 'block';
-  document.getElementById('setupTitle').innerText = 'Step 2: Safe Zones';
-  document.getElementById('setupSub').innerText = 'Define safe perimeters for auto-tracking';
-  document.getElementById('stepDot1').classList.remove('active');
-  document.getElementById('stepDot2').classList.add('active');
-});
-
-document.getElementById('btnBackStep2').addEventListener('click', () => {
-  document.getElementById('setupStep2').style.display = 'none';
-  document.getElementById('setupStep1').style.display = 'block';
-  document.getElementById('stepDot2').classList.remove('active');
-  document.getElementById('stepDot1').classList.add('active');
-});
-
-document.getElementById('btnNextStep2').addEventListener('click', () => {
-  document.getElementById('setupStep2').style.display = 'none';
-  document.getElementById('setupStep3').style.display = 'block';
-  document.getElementById('setupTitle').innerText = 'Step 3: Stealth Triggers';
-  document.getElementById('setupSub').innerText = 'Configure covert calculator & sensors';
-  document.getElementById('stepDot2').classList.remove('active');
-  document.getElementById('stepDot3').classList.add('active');
-});
-
-document.getElementById('btnBackStep3').addEventListener('click', () => {
-  document.getElementById('setupStep3').style.display = 'none';
-  document.getElementById('setupStep2').style.display = 'block';
-  document.getElementById('stepDot3').classList.remove('active');
-  document.getElementById('stepDot2').classList.add('active');
-});
-
-document.getElementById('btnFinishSetup').addEventListener('click', () => {
-  SafeZone.user.covertPin = document.getElementById('setupCovertPin').value.trim() || '9999';
-  SafeZone.user.isSetupComplete = true;
-  saveState();
-  document.getElementById('homeGreetingName').innerText = `Hello, ${SafeZone.user.name}!`;
-  updateDashboardCounts();
-  showToast('Safety Profile Activated!', '🛡️');
-  openScreen('screenHome');
-});
-
-// Setup Contact Add
-document.getElementById('btnAddContactItem').addEventListener('click', () => {
-  const name = document.getElementById('newContactName').value.trim();
-  const phone = document.getElementById('newContactPhone').value.trim();
-  if (!name || phone.length < 10) {
-    showToast('Enter valid contact name and phone number', '⚠️');
-    return;
-  }
-  SafeZone.contacts.push({ id: Date.now().toString(), name, phone });
-  document.getElementById('newContactName').value = '';
-  document.getElementById('newContactPhone').value = '';
-  saveState();
-  renderSetupContactsList();
-  showToast(`Added contact: ${name}`, '✓');
-});
-
-function renderSetupContactsList() {
-  const container = document.getElementById('setupContactsList');
-  if (SafeZone.contacts.length === 0) {
-    container.innerHTML = '<p style="font-size:12px; color:var(--text-sub);">No contacts added yet.</p>';
-    return;
-  }
-  container.innerHTML = SafeZone.contacts.map((c, i) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#F9FAFB; border-radius:12px; margin-bottom:6px;">
-      <div>
-        <strong style="font-size:13px;">${c.name}</strong>
-        <div style="font-size:11.5px; color:var(--text-muted);">${c.phone}</div>
-      </div>
-      <button onclick="removeContact(${i})" style="background:none; border:none; color:var(--crimson); font-size:16px; cursor:pointer;">✕</button>
-    </div>
-  `).join('');
-}
-
-function removeContact(index) {
-  SafeZone.contacts.splice(index, 1);
-  saveState();
-  renderSetupContactsList();
-  renderContactsPage();
-  updateDashboardCounts();
-}
-
-// Setup Safe Zone Add
-document.getElementById('newZoneRadius').addEventListener('input', (e) => {
-  document.getElementById('radiusLabel').innerText = e.target.value + ' meters';
-});
-
-let tempZoneCoords = null;
-document.getElementById('btnUseCurrentGpsZone').addEventListener('click', () => {
-  tempZoneCoords = { lat: SafeZone.telemetry.lat, lng: SafeZone.telemetry.lng };
-  showToast(`GPS Position Set: ${SafeZone.telemetry.lat.toFixed(4)}, ${SafeZone.telemetry.lng.toFixed(4)}`, '📍');
-});
-
-document.getElementById('btnAddZoneItem').addEventListener('click', () => {
-  const name = document.getElementById('newZoneName').value.trim();
-  const radius = parseInt(document.getElementById('newZoneRadius').value);
-  if (!name) {
-    showToast('Enter safe zone name', '⚠️');
-    return;
-  }
-  const coords = tempZoneCoords || { lat: SafeZone.telemetry.lat, lng: SafeZone.telemetry.lng };
-  SafeZone.safeZones.push({ id: Date.now().toString(), name, lat: coords.lat, lng: coords.lng, radius });
-  document.getElementById('newZoneName').value = '';
-  tempZoneCoords = null;
-  saveState();
-  renderSetupZonesList();
-  showToast(`Safe zone "${name}" created!`, '🏰');
-});
-
-function renderSetupZonesList() {
-  const container = document.getElementById('setupZonesList');
-  if (SafeZone.safeZones.length === 0) {
-    container.innerHTML = '<p style="font-size:12px; color:var(--text-sub);">No safe zones defined yet.</p>';
-    return;
-  }
-  container.innerHTML = SafeZone.safeZones.map((z, i) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#F9FAFB; border-radius:12px; margin-bottom:6px;">
-      <div>
-        <strong style="font-size:13px;">${z.name}</strong>
-        <div style="font-size:11.5px; color:var(--text-muted);">${z.radius}m radius</div>
-      </div>
-      <button onclick="removeZone(${i})" style="background:none; border:none; color:var(--crimson); font-size:16px; cursor:pointer;">✕</button>
-    </div>
-  `).join('');
-}
-
-function removeZone(index) {
-  SafeZone.safeZones.splice(index, 1);
-  saveState();
-  renderSetupZonesList();
-  renderZonesPage();
-  updateDashboardCounts();
-}
-
-function updateDashboardCounts() {
-  document.getElementById('contactsCount').innerText = SafeZone.contacts.length;
-  document.getElementById('zonesCount').innerText = SafeZone.safeZones.length;
-}
-
-/* ==========================================================================
-   SCREEN 5 & 6 PAGE RENDERING
-   ========================================================================== */
-function renderContactsPage() {
-  const container = document.getElementById('contactsListPage');
-  if (SafeZone.contacts.length === 0) {
-    container.innerHTML = '<div class="card"><p style="font-size:13px; color:var(--text-muted);">No contacts added. Add your trusted guardians below.</p></div>';
-    return;
-  }
-  container.innerHTML = SafeZone.contacts.map((c, i) => `
-    <div class="card" style="padding:14px 16px; margin-bottom:10px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <strong style="font-size:14px;">${c.name}</strong>
-          <div style="font-size:12px; color:var(--text-muted);">${c.phone}</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="tel:${c.phone}" class="icon-btn" onclick="directCall('${c.phone}')">📞</a>
-          <button class="icon-btn" onclick="directSms('${c.phone}')">✉️</button>
-          <button class="icon-btn" onclick="removeContact(${i})" style="color:#EF4444;">✕</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function addNewContactFromPage() {
-  const name = document.getElementById('addPageContactName').value.trim();
-  const phone = document.getElementById('addPageContactPhone').value.trim();
-  if (!name || phone.length < 10) {
-    showToast('Enter valid contact name and phone number', '⚠️');
-    return;
-  }
-  SafeZone.contacts.push({ id: Date.now().toString(), name, phone });
-  document.getElementById('addPageContactName').value = '';
-  document.getElementById('addPageContactPhone').value = '';
-  saveState();
-  renderContactsPage();
-  updateDashboardCounts();
-  showToast(`Contact saved: ${name}`, '✓');
-}
-
-function renderZonesPage() {
-  const container = document.getElementById('zonesListPage');
-  if (SafeZone.safeZones.length === 0) {
-    container.innerHTML = '<div class="card"><p style="font-size:13px; color:var(--text-muted);">No safe zones defined yet.</p></div>';
-    return;
-  }
-  container.innerHTML = SafeZone.safeZones.map((z, i) => `
-    <div class="card" style="padding:14px 16px; margin-bottom:10px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <strong style="font-size:14px;">${z.name}</strong>
-          <div style="font-size:12px; color:var(--text-muted);">${z.radius}m perimeter</div>
-        </div>
-        <button class="icon-btn" onclick="removeZone(${i})" style="color:#EF4444;">✕</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-document.getElementById('pageRadiusSlider').addEventListener('input', (e) => {
-  document.getElementById('pageRadiusLabel').innerText = e.target.value + ' meters';
-});
-
-let pageTempZoneCoords = null;
-function setZoneToCurrentGps() {
-  pageTempZoneCoords = { lat: SafeZone.telemetry.lat, lng: SafeZone.telemetry.lng };
-  showToast(`Set to current GPS (${SafeZone.telemetry.lat.toFixed(4)}, ${SafeZone.telemetry.lng.toFixed(4)})`, '📍');
-}
-
-function addNewZoneFromPage() {
-  const name = document.getElementById('addPageZoneName').value.trim();
-  const radius = parseInt(document.getElementById('pageRadiusSlider').value);
-  if (!name) {
-    showToast('Enter safe zone name', '⚠️');
-    return;
-  }
-  const coords = pageTempZoneCoords || { lat: SafeZone.telemetry.lat, lng: SafeZone.telemetry.lng };
-  SafeZone.safeZones.push({ id: Date.now().toString(), name, lat: coords.lat, lng: coords.lng, radius });
-  document.getElementById('addPageZoneName').value = '';
-  pageTempZoneCoords = null;
-  saveState();
-  renderZonesPage();
-  updateDashboardCounts();
-  initZonesMap();
-  showToast(`Safe zone "${name}" created!`, '🏰');
-}
-
-/* ==========================================================================
-   AUTOMATIC EMERGENCY DISPATCH (CALL + SMS + WEBRTC STREAMING)
-   ========================================================================== */
-let holdTimer = null;
-let holdStartTime = 0;
-const HOLD_DURATION = 1500;
-const circumference = 2 * Math.PI * 70;
-
-const mainSosBtn = document.getElementById('btnMainSos');
-const sosBar = document.getElementById('sosProgressBar');
-
-function startHoldSos() {
-  if (SafeZone.telemetry.isAlertActive) return;
-  holdStartTime = Date.now();
-  document.getElementById('sosHoldPrompt').innerText = 'HOLDING...';
-  
-  if (navigator.vibrate) navigator.vibrate(50);
-  if (window.AndroidBridge) window.AndroidBridge.vibrateDevice(50);
-
-  holdTimer = setInterval(() => {
-    const elapsed = Date.now() - holdStartTime;
-    const progress = Math.min(elapsed / HOLD_DURATION, 1);
-    sosBar.style.strokeDashoffset = circumference * (1 - progress);
-    
-    const rem = Math.max(0, ((HOLD_DURATION - elapsed) / 1000).toFixed(1));
-    document.getElementById('sosHoldTimer').innerText = `Triggering in ${rem}s...`;
-
-    if (progress >= 1) {
-      clearInterval(holdTimer);
-      holdTimer = null;
-      triggerEmergencySOS('MANUAL_HOLD_SOS');
+    function stopFastSurveillanceBroadcast() {
+      if (frameBroadcastTimer) {
+        clearInterval(frameBroadcastTimer);
+        frameBroadcastTimer = null;
+      }
+      if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        videoStream = null;
+      }
+      const vid = document.getElementById('sosVideoBroadcast');
+      if (vid) vid.srcObject = null;
     }
-  }, 35);
-}
 
-function cancelHoldSos() {
-  if (holdTimer) {
-    clearInterval(holdTimer);
-    holdTimer = null;
-    sosBar.style.strokeDashoffset = circumference;
-    if (!SafeZone.telemetry.isAlertActive) {
-      document.getElementById('sosHoldPrompt').innerText = 'Tap and Hold for 3 Seconds';
-      document.getElementById('sosHoldTimer').innerText = 'Prevents accidental pocket triggers';
-    }
-  }
-}
+    // =========================================================================
+    // EMERGENCY TRIGGER DISPATCH
+    // =========================================================================
+    function triggerSOS(triggerSource) {
+      AppState.telemetry.isAlertActive = true;
+      AppState.telemetry.trigger = triggerSource || 'EMERGENCY_SOS';
+      document.getElementById('sosActiveTriggerCause').innerText = `Triggered by: ${AppState.telemetry.trigger}`;
 
-mainSosBtn.addEventListener('pointerdown', startHoldSos);
-window.addEventListener('pointerup', cancelHoldSos);
-window.addEventListener('pointercancel', cancelHoldSos);
+      broadcastTelemetry(AppState.telemetry.trigger);
 
-function triggerEmergencySOS(triggerType) {
-  SafeZone.telemetry.isAlertActive = true;
-  SafeZone.telemetry.trigger = triggerType;
-  document.getElementById('sosTriggerCause').innerText = `Triggered by: ${triggerType}`;
+      // Automated SMS & Call
+      const gMaps = `https://maps.google.com/?q=${AppState.telemetry.lat},${AppState.telemetry.lng}`;
+      const sosMsg = `JAGRUTHI EMERGENCY: ${AppState.user.name} needs help! Live GPS: ${gMaps}`;
 
-  // Broadcast to cloud & monitoring console with REAL live GPS
-  broadcastTelemetry(triggerType);
-
-  // 1. AUTOMATIC BACKGROUND SMS DISPATCH
-  const gMapsLink = `https://maps.google.com/?q=${SafeZone.telemetry.lat},${SafeZone.telemetry.lng}`;
-  const sosMsg = `EMERGENCY ALERT: ${SafeZone.user.name} is in immediate danger! Current live location: ${gMapsLink}`;
-
-  if (window.AndroidBridge) {
-    // Native direct SMS without opening dialog
-    SafeZone.contacts.forEach(c => {
-      window.AndroidBridge.sendSMS(c.phone, sosMsg);
-    });
-    // Direct call to first contact on native Android
-    if (SafeZone.contacts.length > 0) {
-      window.AndroidBridge.makeCall(SafeZone.contacts[0].phone);
-    }
-  } else {
-    // Browser environment: log dispatch without redirecting away so camera and GPS stay active
-    console.log('SafeZone Web Emergency Dispatched:', sosMsg);
-  }
-
-  // 2. START AUTOMATIC WEBRTC LIVE VIDEO/AUDIO STREAM & FRAME BROADCAST
-  startAmbientWebRtcStream();
-
-  // Show Active SOS Screen
-  openScreen('screenSosActive');
-  showToast(`🚨 SOS Triggered: ${triggerType}`, '🚨');
-}
-
-function shareGuardianLiveTrackingLink() {
-  const guardianUrl = `https://lokesh-comrade.github.io/SafeZone/monitor/monitor.html?phone=${SafeZone.user.phone}`;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(guardianUrl);
-  }
-  showToast('Guardian Tracking Link Copied!', '📋');
-  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent('SafeZone Emergency: Track my live location & surveillance feed here: ' + guardianUrl)}`);
-}
-
-function directCall(phone) {
-  if (window.AndroidBridge) {
-    window.AndroidBridge.makeCall(phone);
-  } else {
-    window.location.href = `tel:${phone}`;
-  }
-}
-
-function directSms(phone) {
-  const gMaps = `https://maps.google.com/?q=${SafeZone.telemetry.lat},${SafeZone.telemetry.lng}`;
-  const msg = `SafeZone alert from ${SafeZone.user.name}. My current location: ${gMaps}`;
-  if (window.AndroidBridge) {
-    window.AndroidBridge.sendSMS(phone, msg);
-    showToast(`SMS dispatched to ${phone}`, '✉️');
-  } else {
-    window.open(`sms:${phone}?body=${encodeURIComponent(msg)}`);
-  }
-}
-
-function makeEmergencyPhoneCallDirect() {
-  if (SafeZone.contacts.length > 0) {
-    directCall(SafeZone.contacts[0].phone);
-  } else {
-    directCall('112');
-  }
-}
-
-function deactivateSOS() {
-  SafeZone.telemetry.isAlertActive = false;
-  SafeZone.telemetry.trigger = 'NONE';
-  broadcastTelemetry('NONE');
-
-  sosBar.style.strokeDashoffset = circumference;
-  document.getElementById('sosHoldPrompt').innerText = 'Tap and Hold for 3 Seconds';
-  document.getElementById('sosHoldTimer').innerText = 'Prevents accidental pocket triggers';
-
-  stopAmbientWebRtcStream();
-
-  showToast('SafeZone Stand Down Confirmed', '🛡️');
-  openScreen('screenHome');
-}
-
-function promptStandDownPin() {
-  const entered = prompt('Enter your 4-digit Security PIN to Stand Down:');
-  if (entered === SafeZone.user.pin) {
-    deactivateSOS();
-  } else if (entered !== null) {
-    showToast('Incorrect PIN!', '⚠️');
-  }
-}
-
-/* ==========================================================================
-   HARDWARE SENSOR HOOKS: 5-SHAKE, VOICE, & COVERT CALCULATOR
-   ========================================================================== */
-function initMotionShake() {
-  if (window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', (e) => {
-      const acc = e.accelerationIncludingGravity || e.acceleration;
-      if (!acc) return;
-      const force = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
-      const now = Date.now();
-      if (force > 17) {
-        if (now - SafeZone.shakeState.lastTime > 180) {
-          if (now - SafeZone.shakeState.lastTime > 2500) SafeZone.shakeState.count = 0;
-          SafeZone.shakeState.count++;
-          SafeZone.shakeState.lastTime = now;
-          if (SafeZone.shakeState.count >= 4) {
-            SafeZone.shakeState.count = 0;
-            triggerEmergencySOS('SHAKE_SENSOR');
-          }
+      if (window.AndroidBridge) {
+        if (AppState.user.guardianPhone) {
+          window.AndroidBridge.sendSMS(AppState.user.guardianPhone, sosMsg);
+          window.AndroidBridge.makeCall(AppState.user.guardianPhone);
         }
       }
-    });
-  }
-}
 
-window.triggerSOS = function(type) {
-  triggerEmergencySOS(type || 'HARDWARE_GESTURE');
-};
-
-function initVoiceKeyword() {
-  const Recog = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!Recog) return;
-  try {
-    const speech = new Recog();
-    speech.continuous = true;
-    speech.interimResults = true;
-    speech.lang = 'en-US';
-    speech.onresult = (e) => {
-      for (let i = e.resultIndex; i < e.results.length; ++i) {
-        const text = e.results[i][0].transcript.toLowerCase();
-        if (/\b(help|emergency|bachao|save me|police)\b/i.test(text)) {
-          triggerEmergencySOS('VOICE_KEYWORD');
-          break;
-        }
-      }
-    };
-    speech.onend = () => { try { speech.start(); } catch(err){} };
-    speech.start();
-  } catch(e) {}
-}
-
-// Covert Calculator Logic
-let calcInput = '';
-let calcPrev = '';
-let calcOp = '';
-
-function pressCalc(v) {
-  if (v === 'C') {
-    calcInput = ''; calcPrev = ''; calcOp = '';
-    updateCalcUI('0', '');
-    return;
-  }
-
-  if (v === '=') {
-    // COVERT SILENT TRIGGER CHECK
-    const targetPin = SafeZone.user.covertPin || '9999';
-    if (calcInput === targetPin || calcPrev === targetPin || calcInput.endsWith(targetPin)) {
-      // SILENT EMERGENCY TRIGGER!
-      triggerEmergencySOS('COVERT_PIN_' + targetPin);
-      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-      updateCalcUI(targetPin, `${targetPin} =`);
-      return;
+      startFastSurveillanceBroadcast();
+      openScreen('viewSosActive');
+      showToast('🚨 SOS Emergency Activated!', '🚨');
     }
 
-    try {
-      if (calcPrev && calcOp && calcInput) {
-        const res = eval(`${calcPrev} ${calcOp} ${calcInput}`);
-        updateCalcUI(String(res), `${calcPrev} ${calcOp} ${calcInput} =`);
-        calcInput = String(res); calcPrev = ''; calcOp = '';
-      }
-    } catch(err) {
-      updateCalcUI('Error', '');
-    }
-    return;
-  }
+    function standDownSOS() {
+      AppState.telemetry.isAlertActive = false;
+      AppState.telemetry.trigger = 'NORMAL';
+      stopFastSurveillanceBroadcast();
 
-  if (['+', '-', '*', '/'].includes(v)) {
-    if (calcInput) {
-      calcPrev = calcInput; calcOp = v; calcInput = '';
-      updateCalcUI('0', `${calcPrev} ${v}`);
-    }
-    return;
-  }
-
-  if (calcInput.length < 12) {
-    calcInput += v;
-    updateCalcUI(calcInput, calcPrev ? `${calcPrev} ${calcOp}` : '');
-  }
-}
-
-function updateCalcUI(main, sub) {
-  document.getElementById('calcMainNum').innerText = main || '0';
-  document.getElementById('calcSubExpr').innerText = sub || '';
-}
-
-/* ==========================================================================
-   LIVE SURVEILLANCE BROADCAST (CAMERA SNAPSHOTS & PEERJS)
-   ========================================================================== */
-let surveillanceBroadcastTimer = null;
-
-function startAmbientWebRtcStream() {
-  const vid = document.getElementById('sosVideoFeed');
-  const canvas = document.createElement('canvas');
-  canvas.width = 320;
-  canvas.height = 240;
-  const ctx = canvas.getContext('2d');
-
-  function captureAndBroadcastFrame() {
-    if (vid && vid.videoWidth > 0) {
-      // Real live camera stream
-      ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(0,0,0,0.65)';
-      ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
-      ctx.fillStyle = '#10B981';
-      ctx.font = 'bold 9.5px monospace';
-      ctx.fillText(`● LIVE CAM | ${SafeZone.user.phone} | ${new Date().toLocaleTimeString()} | ${SafeZone.telemetry.lat.toFixed(4)},${SafeZone.telemetry.lng.toFixed(4)}`, 6, canvas.height - 8);
-    } else {
-      // Tactical Radar Forensic HUD frame when camera is starting or permission waiting
-      ctx.fillStyle = '#090D16';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 32) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 24) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-      }
-
-      ctx.strokeStyle = '#EF4444';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2 - 10, 36, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2 - 10, 15, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#EF4444';
-      ctx.font = 'bold 11px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('EMERGENCY LIVE SURVEILLANCE', canvas.width / 2, 32);
-
-      ctx.fillStyle = '#38BDF8';
-      ctx.font = '10px monospace';
-      ctx.fillText(`VICTIM: ${SafeZone.user.phone} (${SafeZone.user.name})`, canvas.width / 2, canvas.height / 2 + 45);
-      ctx.fillText(`GPS: ${SafeZone.telemetry.lat.toFixed(5)}, ${SafeZone.telemetry.lng.toFixed(5)}`, canvas.width / 2, canvas.height / 2 + 60);
-
-      ctx.fillStyle = '#94A3B8';
-      ctx.font = '9px monospace';
-      ctx.fillText(new Date().toISOString(), canvas.width / 2, canvas.height / 2 + 75);
-      ctx.textAlign = 'left';
-    }
-
-    const frameData = canvas.toDataURL('image/jpeg', 0.55);
-    localStorage.setItem('safezone_surveillance_frame_' + SafeZone.user.phone, frameData);
-    if (SafeZone.syncChannel) {
-      SafeZone.syncChannel.postMessage({
-        type: 'SURVEILLANCE_FRAME',
-        phone: SafeZone.user.phone,
-        frame: frameData,
-        timestamp: Date.now()
-      });
-    }
-
-    // Push frame to Cloud Firestore so cross-device monitoring console sees it live!
-    try {
-      fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${SafeZone.user.phone}`, {
+      // Clear alert in Firestore
+      fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${AppState.user.phone}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fields: {
-            victimPhone: { stringValue: SafeZone.user.phone },
-            victimName: { stringValue: SafeZone.user.name || 'Protected User' },
-            lat: { doubleValue: SafeZone.telemetry.lat },
-            lng: { doubleValue: SafeZone.telemetry.lng },
-            accuracy: { doubleValue: SafeZone.telemetry.accuracy },
-            speed: { doubleValue: SafeZone.telemetry.speed },
-            battery: { doubleValue: SafeZone.telemetry.battery || 85 },
-            trigger: { stringValue: SafeZone.telemetry.trigger || 'EMERGENCY_SOS' },
-            is_alert_active: { booleanValue: true },
-            camera_frame: { stringValue: frameData },
+            victimPhone: { stringValue: AppState.user.phone },
+            victimName: { stringValue: AppState.user.name },
+            lat: { doubleValue: AppState.telemetry.lat },
+            lng: { doubleValue: AppState.telemetry.lng },
+            is_alert_active: { booleanValue: false },
+            trigger: { stringValue: 'NORMAL' },
+            camera_frame: { stringValue: '' },
             timestamp: { timestampValue: new Date().toISOString() }
           }
         })
       }).catch(() => {});
-    } catch(e) {}
-  }
 
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true })
-      .then(stream => {
-        SafeZone.webrtcStream = stream;
-        vid.srcObject = stream;
-        if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
-        surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
-        setTimeout(captureAndBroadcastFrame, 300);
-      })
-      .catch((err) => {
-        console.log('Camera permission fallback, streaming telemetry frame:', err);
-        if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
-        surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
-        captureAndBroadcastFrame();
-      });
-  } else {
-    if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
-    surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
-    captureAndBroadcastFrame();
-  }
-}
+      showToast('Stand Down Confirmed. All clear.', '🛡️');
+      openScreen('viewHome');
+    }
 
-function stopAmbientWebRtcStream() {
-  if (surveillanceBroadcastTimer) {
-    clearInterval(surveillanceBroadcastTimer);
-    surveillanceBroadcastTimer = null;
-  }
-  if (SafeZone.webrtcStream) {
-    SafeZone.webrtcStream.getTracks().forEach(t => t.stop());
-    SafeZone.webrtcStream = null;
-  }
-  localStorage.removeItem('safezone_surveillance_frame_' + SafeZone.user.phone);
+    function promptDeactivatePin() {
+      const pin = prompt('Enter 4-digit PIN to deactivate emergency:');
+      if (pin === AppState.user.pin) {
+        standDownSOS();
+      } else if (pin !== null) {
+        showToast('Incorrect PIN!', '⚠️');
+      }
+    }
 
-  // Clear alert state and camera frame in Cloud Firestore
-  try {
-    fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${SafeZone.user.phone}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          victimPhone: { stringValue: SafeZone.user.phone },
-          victimName: { stringValue: SafeZone.user.name },
-          lat: { doubleValue: SafeZone.telemetry.lat },
-          lng: { doubleValue: SafeZone.telemetry.lng },
-          is_alert_active: { booleanValue: false },
-          trigger: { stringValue: 'NORMAL' },
-          camera_frame: { stringValue: '' },
-          timestamp: { timestampValue: new Date().toISOString() }
+    // =========================================================================
+    // SCREEN NAVIGATION (ONE THING PER PAGE)
+    // =========================================================================
+    function openScreen(screenId) {
+      document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) {
+        target.classList.add('active');
+        target.scrollTop = 0;
+      }
+
+      // Bottom nav visibility
+      const bottomNav = document.getElementById('appBottomNav');
+      if (screenId === 'viewWelcome' || screenId === 'viewAuth' || screenId === 'viewSosActive' || screenId === 'viewCalc') {
+        bottomNav.style.display = 'none';
+      } else {
+        bottomNav.style.display = 'flex';
+      }
+
+      // Update active nav tab
+      document.querySelectorAll('.nav-tab-item').forEach(t => t.classList.remove('active'));
+      if (screenId === 'viewHome') document.getElementById('tabHome')?.classList.add('active');
+      if (screenId === 'viewLiveLocation') {
+        document.getElementById('tabLiveLocation')?.classList.add('active');
+        initLiveLocationMap();
+      }
+      if (screenId === 'viewHistory') document.getElementById('tabAlerts')?.classList.add('active');
+      if (screenId === 'viewZones') {
+        document.getElementById('tabSafeZones')?.classList.add('active');
+        initZonesMap();
+        renderUserSafeZones();
+      }
+    }
+
+    // =========================================================================
+    // AUTHENTICATION LOGIC (CLEAN - NO HARDCODED NAMES)
+    // =========================================================================
+    let currentAuthMode = 'login';
+
+    function toggleAuthTab(mode) {
+      currentAuthMode = mode;
+      document.getElementById('btnTabSignIn').classList.toggle('active', mode === 'login');
+      document.getElementById('btnTabRegister').classList.toggle('active', mode === 'register');
+      document.getElementById('groupName').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('groupEmergency').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('btnAuthText').innerText = mode === 'register' ? 'Complete Registration →' : 'Sign In →';
+    }
+
+    function handleAuthSubmit() {
+      const phone = document.getElementById('inputPhone').value.trim();
+      const pin = document.getElementById('inputPin').value.trim();
+
+      if (phone.length < 10) {
+        showToast('Please enter a valid 10-digit mobile number', '⚠️');
+        return;
+      }
+
+      if (currentAuthMode === 'register') {
+        const name = document.getElementById('inputName').value.trim();
+        const guardian = document.getElementById('inputGuardianPhone').value.trim();
+
+        if (!name) {
+          showToast('Please enter your full name', '⚠️');
+          return;
         }
-      })
-    }).catch(() => {});
-  } catch(e) {}
-}
 
-/* ==========================================================================
-   MAP INITIALIZATION (REAL DEVICE GPS)
-   ========================================================================== */
-let journeyMap = null;
-let journeyMarker = null;
-let journeyCircle = null;
-let zonesMap = null;
+        AppState.user.name = name;
+        AppState.user.phone = phone;
+        AppState.user.pin = pin || '1234';
+        AppState.user.guardianPhone = guardian || phone;
+        AppState.user.isLoggedIn = true;
 
-function initJourneyMap() {
-  if (typeof L === 'undefined' || journeyMap) return;
-  const el = document.getElementById('journeyMap');
-  if (!el) return;
+        persistState();
+        updateUIWithUser();
+        showToast(`Welcome, ${name}!`, '✓');
+        openScreen('viewHome');
+      } else {
+        // Sign in
+        AppState.user.phone = phone;
+        AppState.user.pin = pin || '1234';
+        if (!AppState.user.name) AppState.user.name = 'Protected User';
+        AppState.user.isLoggedIn = true;
 
-  journeyMap = L.map('journeyMap', { zoomControl: false }).setView([SafeZone.telemetry.lat, SafeZone.telemetry.lng], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(journeyMap);
+        persistState();
+        updateUIWithUser();
+        showToast('Signed in successfully', '🛡️');
+        openScreen('viewHome');
+      }
+    }
 
-  journeyCircle = L.circle([SafeZone.telemetry.lat, SafeZone.telemetry.lng], {
-    radius: 150, color: '#059669', fillColor: '#ECFDF5', fillOpacity: 0.35
-  }).addTo(journeyMap);
+    function updateUIWithUser() {
+      const name = AppState.user.name || 'User';
+      const initial = name.charAt(0).toUpperCase();
 
-  journeyMarker = L.marker([SafeZone.telemetry.lat, SafeZone.telemetry.lng]).addTo(journeyMap)
-    .bindPopup('<b>Your Live Location</b>').openPopup();
+      document.getElementById('homeGreetingTitle').innerText = `Hello, ${name}`;
+      document.getElementById('userAvatarLetter').innerText = initial;
+      document.getElementById('liveAvatarLetter').innerText = initial;
+      document.getElementById('liveUserName').innerText = name;
+      if (AppState.user.guardianPhone) {
+        document.getElementById('contact1Label').innerText = 'Guardian';
+      }
+    }
 
-  setTimeout(() => journeyMap.invalidateSize(), 200);
-}
+    // =========================================================================
+    // MAPS (LEAFLET INTERACTIVE INTEGRATION)
+    // =========================================================================
+    let homeMiniMap = null;
+    let homeMiniMarker = null;
+    let liveLocationMap = null;
+    let liveFullMarker = null;
+    let liveAccuracyCircle = null;
+    let zonesMap = null;
+    let zonesTempCircle = null;
 
-function recenterJourneyMap() {
-  if (journeyMap) {
-    journeyMap.setView([SafeZone.telemetry.lat, SafeZone.telemetry.lng], 16);
-    if (journeyMarker) journeyMarker.setLatLng([SafeZone.telemetry.lat, SafeZone.telemetry.lng]);
-  }
-}
+    function initHomeMiniMap() {
+      if (homeMiniMap || typeof L === 'undefined') return;
+      const el = document.getElementById('homeMiniMap');
+      if (!el) return;
 
-function initZonesMap() {
-  if (typeof L === 'undefined' || zonesMap) return;
-  const el = document.getElementById('zonesMap');
-  if (!el) return;
+      homeMiniMap = L.map('homeMiniMap', { zoomControl: false, attributionControl: false })
+        .setView([AppState.telemetry.lat, AppState.telemetry.lng], 14);
 
-  zonesMap = L.map('zonesMap', { zoomControl: false }).setView([SafeZone.telemetry.lat, SafeZone.telemetry.lng], 14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(zonesMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(homeMiniMap);
 
-  SafeZone.safeZones.forEach(z => {
-    L.circle([z.lat, z.lng], {
-      radius: z.radius, color: '#059669', fillColor: '#10B981', fillOpacity: 0.25
-    }).addTo(zonesMap).bindPopup(`<b>${z.name}</b><br>Radius: ${z.radius}m`);
-  });
+      const markerIcon = L.divIcon({
+        html: `<div style="background:#E11D48; color:#FFF; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #FFF; box-shadow:0 2px 6px rgba(0,0,0,0.3); font-size:11px;">📍</div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
 
-  setTimeout(() => zonesMap.invalidateSize(), 200);
-}
+      homeMiniMarker = L.marker([AppState.telemetry.lat, AppState.telemetry.lng], { icon: markerIcon }).addTo(homeMiniMap);
+    }
 
-/* ==========================================================================
-   TOAST HELPER
-   ========================================================================== */
-function showToast(msg, icon = '🛡️') {
-  const toast = document.getElementById('toastAlert');
-  document.getElementById('toastMsg').innerText = msg;
-  document.getElementById('toastIcon').innerText = icon;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
+    function initLiveLocationMap() {
+      if (liveLocationMap || typeof L === 'undefined') return;
+      const el = document.getElementById('liveLocationMap');
+      if (!el) return;
 
-/* ==========================================================================
-   INITIALIZATION
-   ========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-  loadSavedState();
-  initLiveLocationTracking();
-  initMotionShake();
-  initVoiceKeyword();
+      liveLocationMap = L.map('liveLocationMap', { zoomControl: false, attributionControl: false })
+        .setView([AppState.telemetry.lat, AppState.telemetry.lng], 15);
 
-  renderSetupContactsList();
-  renderSetupZonesList();
-  updateDashboardCounts();
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(liveLocationMap);
 
-  document.getElementById('btnRefreshGps').addEventListener('click', () => {
-    initLiveLocationTracking();
-    showToast('GPS coordinates refreshed from satellite!', '📍');
-  });
+      liveAccuracyCircle = L.circle([AppState.telemetry.lat, AppState.telemetry.lng], {
+        radius: 100, color: '#10B981', fillColor: '#ECFDF5', fillOpacity: 0.3
+      }).addTo(liveLocationMap);
 
-  document.getElementById('btnOpenCalculator').addEventListener('click', () => openScreen('screenCalc'));
-  document.getElementById('btnEditProfile').addEventListener('click', () => openScreen('screenSetup'));
+      const markerIcon = L.divIcon({
+        html: `<div style="background:#E11D48; color:#FFF; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #FFF; box-shadow:0 4px 10px rgba(225,29,72,0.5); font-size:14px;">📍</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
 
-  // If already setup, go to dashboard
-  if (SafeZone.user.isSetupComplete) {
-    document.getElementById('homeGreetingName').innerText = `Hello, ${SafeZone.user.name}!`;
-    openScreen('screenHome');
-  }
-});
-</script>
+      liveFullMarker = L.marker([AppState.telemetry.lat, AppState.telemetry.lng], { icon: markerIcon }).addTo(liveLocationMap);
+      setTimeout(() => liveLocationMap.invalidateSize(), 200);
+    }
+
+    function recenterLiveMap() {
+      if (liveLocationMap) {
+        liveLocationMap.setView([AppState.telemetry.lat, AppState.telemetry.lng], 16);
+      }
+    }
+
+    // =========================================================================
+    // USER SAFE ZONES (USER ADDS, ZERO HARDCODED ZONES!)
+    // =========================================================================
+    let tempZonePosition = null;
+
+    function initZonesMap() {
+      if (zonesMap || typeof L === 'undefined') return;
+      const el = document.getElementById('zonesInteractiveMap');
+      if (!el) return;
+
+      zonesMap = L.map('zonesInteractiveMap', { zoomControl: true, attributionControl: false })
+        .setView([AppState.telemetry.lat, AppState.telemetry.lng], 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(zonesMap);
+
+      // Tap on map to set custom safe zone location
+      zonesMap.on('click', (e) => {
+        tempZonePosition = e.latlng;
+        updateZonesMapPreview();
+        showToast(`Selected map position: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`, '📍');
+      });
+
+      document.getElementById('zoneRadiusSlider').addEventListener('input', (e) => {
+        document.getElementById('zoneRadiusDisplay').innerText = e.target.value + ' meters';
+        updateZonesMapPreview();
+      });
+
+      setTimeout(() => zonesMap.invalidateSize(), 200);
+    }
+
+    function setZoneToCurrentLocation() {
+      tempZonePosition = { lat: AppState.telemetry.lat, lng: AppState.telemetry.lng };
+      if (zonesMap) zonesMap.setView([AppState.telemetry.lat, AppState.telemetry.lng], 15);
+      updateZonesMapPreview();
+      showToast('Set to current live GPS position', '📍');
+    }
+
+    function updateZonesMapPreview() {
+      if (!zonesMap) return;
+      const pos = tempZonePosition || { lat: AppState.telemetry.lat, lng: AppState.telemetry.lng };
+      const radius = parseInt(document.getElementById('zoneRadiusSlider').value);
+
+      if (zonesTempCircle) zonesMap.removeLayer(zonesTempCircle);
+
+      zonesTempCircle = L.circle([pos.lat, pos.lng], {
+        radius: radius,
+        color: '#10B981',
+        fillColor: '#10B981',
+        fillOpacity: 0.25,
+        weight: 2
+      }).addTo(zonesMap);
+    }
+
+    function saveCustomSafeZone() {
+      const name = document.getElementById('zoneInputName').value.trim();
+      const radius = parseInt(document.getElementById('zoneRadiusSlider').value);
+      if (!name) {
+        showToast('Please enter a name for this safe zone', '⚠️');
+        return;
+      }
+
+      const coords = tempZonePosition || { lat: AppState.telemetry.lat, lng: AppState.telemetry.lng };
+      const newZone = {
+        id: Date.now().toString(),
+        name: name,
+        lat: coords.lat,
+        lng: coords.lng,
+        radius: radius
+      };
+
+      AppState.safeZones.push(newZone);
+      persistState();
+      renderUserSafeZones();
+      document.getElementById('zoneInputName').value = '';
+      showToast(`Safe zone "${name}" created!`, '🛡️');
+    }
+
+    function renderUserSafeZones() {
+      const container = document.getElementById('userZonesList');
+      if (!container) return;
+
+      if (AppState.safeZones.length === 0) {
+        container.innerHTML = `
+          <div class="ui-card" style="text-align:center; padding:18px;">
+            <p style="font-size:13px; color:var(--text-muted);">No safe zones defined yet.</p>
+            <p style="font-size:11.5px; color:var(--text-sub); margin-top:4px;">Add your home, college, or hostel above.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = AppState.safeZones.map((z, idx) => `
+        <div class="ui-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div>
+            <strong style="font-size:13.5px; color:var(--text-main);">${z.name}</strong>
+            <div style="font-size:11.5px; color:#059669; font-weight:700;">${z.radius}m perimeter</div>
+          </div>
+          <button onclick="removeSafeZone(${idx})" style="background:none; border:none; color:var(--crimson); font-size:16px; cursor:pointer;">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function removeSafeZone(idx) {
+      AppState.safeZones.splice(idx, 1);
+      persistState();
+      renderUserSafeZones();
+      showToast('Safe zone removed', '🛡️');
+    }
+
+    // =========================================================================
+    // COVERT CALCULATOR (STEALTH MODE DISPATCH)
+    // =========================================================================
+    let calcVal = '';
+    let calcOp = '';
+    let calcPrev = '';
+
+    function pressCalc(v) {
+      if (v === 'C') {
+        calcVal = ''; calcOp = ''; calcPrev = '';
+        updateCalcDisplay('0', '');
+        return;
+      }
+
+      if (v === '=') {
+        // COVERT EMERGENCY PIN TRIGGER
+        const covertPin = AppState.user.covertPin || '9999';
+        if (calcVal === covertPin || calcVal.endsWith(covertPin)) {
+          triggerSOS('COVERT_PIN_STEALTH');
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+          updateCalcDisplay(covertPin, `${covertPin} =`);
+          return;
+        }
+
+        try {
+          if (calcPrev && calcOp && calcVal) {
+            const res = eval(`${calcPrev} ${calcOp} ${calcVal}`);
+            updateCalcDisplay(String(res), `${calcPrev} ${calcOp} ${calcVal} =`);
+            calcVal = String(res); calcPrev = ''; calcOp = '';
+          }
+        } catch(e) {
+          updateCalcDisplay('Error', '');
+        }
+        return;
+      }
+
+      if (['+', '-', '*', '/'].includes(v)) {
+        if (calcVal) {
+          calcPrev = calcVal; calcOp = v; calcVal = '';
+          updateCalcDisplay('0', `${calcPrev} ${v}`);
+        }
+        return;
+      }
+
+      if (calcVal.length < 12) {
+        calcVal += v;
+        updateCalcDisplay(calcVal, calcPrev ? `${calcPrev} ${calcOp}` : '');
+      }
+    }
+
+    function updateCalcDisplay(main, sub) {
+      document.getElementById('calcMainNum').innerText = main || '0';
+      document.getElementById('calcSubExpr').innerText = sub || '';
+    }
+
+    // =========================================================================
+    // SENSORS: 5-SHAKE DETECTION
+    // =========================================================================
+    let shakeCount = 0;
+    let lastShakeTime = 0;
+
+    function initShakeSensor() {
+      if (!window.DeviceMotionEvent) return;
+      window.addEventListener('devicemotion', (e) => {
+        const acc = e.accelerationIncludingGravity || e.acceleration;
+        if (!acc) return;
+        const total = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
+        const now = Date.now();
+        if (total > 18) {
+          if (now - lastShakeTime > 180) {
+            if (now - lastShakeTime > 2500) shakeCount = 0;
+            shakeCount++;
+            lastShakeTime = now;
+            if (shakeCount >= 4) {
+              shakeCount = 0;
+              triggerSOS('SHAKE_5X_SENSOR');
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // DIRECT ACTIONS
+    // =========================================================================
+    function callPrimaryGuardian() {
+      const phone = AppState.user.guardianPhone || AppState.user.phone || '112';
+      directCall(phone);
+    }
+
+    function directCall(phone) {
+      if (window.AndroidBridge) {
+        window.AndroidBridge.makeCall(phone);
+      } else {
+        window.open(`tel:${phone}`);
+      }
+    }
+
+    function directCallPrompt(label) {
+      const p = prompt(`Enter phone number for ${label}:`, '112');
+      if (p) directCall(p);
+    }
+
+    function shareLiveGpsLocation() {
+      const url = `https://lokesh-comrade.github.io/SafeZone/monitor/monitor.html?phone=${AppState.user.phone}`;
+      if (navigator.clipboard) navigator.clipboard.writeText(url);
+      showToast('Live tracking link copied to clipboard!', '📋');
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent('Jagruthi Live Tracking: ' + url)}`);
+    }
+
+    function openAddContactPrompt() {
+      const name = prompt('Enter contact name:');
+      const phone = prompt('Enter 10-digit phone number:');
+      if (name && phone) {
+        AppState.contacts.push({ name, phone });
+        persistState();
+        showToast(`Added contact ${name}`, '✓');
+      }
+    }
+
+    function showToast(msg, icon = '🛡️') {
+      const toast = document.getElementById('appToast');
+      document.getElementById('toastIcon').innerText = icon;
+      document.getElementById('toastText').innerText = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => { toast.style.display = 'none'; }, 2600);
+    }
+
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSavedState();
+      initHighAccuracyGPS();
+      initShakeSensor();
+      initHomeMiniMap();
+
+      // Check if user already logged in
+      if (AppState.user.name && AppState.user.phone) {
+        updateUIWithUser();
+        openScreen('viewHome');
+      } else {
+        openScreen('viewWelcome');
+      }
+
+      // Top Clock
+      setInterval(() => {
+        const d = new Date();
+        document.getElementById('notchClock').innerText = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
