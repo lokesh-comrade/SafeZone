@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.SafeZone" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#E11D48</item>
+        <item name="colorPrimaryVariant">#BE123C</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#FFF5F7</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
+</resources>

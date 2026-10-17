@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeZone - Women Safety Monitoring & Response System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FFF5F7;
+      --card: #FFFFFF;
+      --crimson: #E11D48;
+      --crimson-dark: #BE123C;
+      --border: #FFE4E8;
+      --text: #1F2937;
+      --muted: #6B7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 40px rgba(225, 29, 72, 0.08);
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFF1F2;
+      border: 1px solid var(--border);
+      color: var(--crimson);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    h1 span { color: var(--crimson); }
+    p.lead {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    @media (max-width: 580px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .container { padding: 28px 20px; }
+      h1 { font-size: 26px; }
+    }
+    .launch-card {
+      background: #FFF5F7;
+      border: 1.5px solid var(--border);
+      border-radius: 22px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .launch-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(225, 29, 72, 0.12);
+      border-color: var(--crimson);
+    }
+    .launch-card.highlight {
+      background: linear-gradient(145deg, #E11D48, #BE123C);
+      color: #FFF;
+      border: none;
+      box-shadow: 0 16px 32px rgba(225, 29, 72, 0.25);
+    }
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      font-size: 12.5px;
+      line-height: 1.4;
+      opacity: 0.85;
+      margin-bottom: 16px;
+    }
+    .btn-action {
+      font-size: 13px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .download-strip {
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 18px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .download-link {
+      background: var(--text);
+      color: #FFF;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 12px;
+      transition: opacity 0.15s;
+    }
+    .download-link:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="badge">🛡️ Production Ecosystem</div>
+    <h1>SafeZone <span>Portal</span></h1>
+    <p class="lead">Two-tier autonomous women’s safety and emergency response ecosystem featuring real-time breadcrumb tracking, multi-modal emergency dispatch, and live WebRTC ambient surveillance.</p>
+
+    <div class="cards-grid">
+      <!-- Tier 1: Mobile Web Client -->
+      <a href="app/app.html" class="launch-card highlight">
+        <div>
+          <div class="card-icon">📱</div>
+          <div class="card-title">Mobile App Client</div>
+          <div class="card-desc">Jagruthi design paradigm, 3s hold SOS, 5-shake sensor, voice trigger, and covert calculator PIN.</div>
+        </div>
+        <div class="btn-action">Launch Mobile App →</div>
+      </a>
+
+      <!-- Tier 2: Police Tactical Console -->
+      <a href="monitor/monitor.html" class="launch-card">
+        <div>
+          <div class="card-icon">🖥️</div>
+          <div class="card-title">Dispatch Console</div>
+          <div class="card-desc">Police & guardian tactical map, real-time Haversine velocity, and ambient WebRTC surveillance feed.</div>
+        </div>
+        <div class="btn-action" style="color:var(--crimson);">Launch Monitor →</div>
+      </a>
+    </div>
+
+    <!-- Android APK direct download -->
+    <div class="download-strip">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span>🤖</span>
+        <span>Native Android Package (app-debug.apk)</span>
+      </div>
+      <a href="app-debug.apk" download class="download-link">Download APK (5.5 MB)</a>
+    </div>
+  </div>
+
+</body>
+</html>
