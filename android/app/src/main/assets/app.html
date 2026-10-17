@@ -1192,10 +1192,12 @@ function broadcastTelemetry(triggerType) {
       body: JSON.stringify({
         fields: {
           victimPhone: { stringValue: SafeZone.user.phone },
+          victimName: { stringValue: SafeZone.user.name || 'Protected User' },
           lat: { doubleValue: SafeZone.telemetry.lat },
           lng: { doubleValue: SafeZone.telemetry.lng },
           accuracy: { doubleValue: SafeZone.telemetry.accuracy },
           speed: { doubleValue: SafeZone.telemetry.speed },
+          battery: { doubleValue: SafeZone.telemetry.battery || 85 },
           trigger: { stringValue: triggerType },
           is_alert_active: { booleanValue: SafeZone.telemetry.isAlertActive },
           timestamp: { timestampValue: new Date().toISOString() }
@@ -1568,17 +1570,13 @@ function triggerEmergencySOS(triggerType) {
     SafeZone.contacts.forEach(c => {
       window.AndroidBridge.sendSMS(c.phone, sosMsg);
     });
-    // Direct call to first contact
+    // Direct call to first contact on native Android
     if (SafeZone.contacts.length > 0) {
       window.AndroidBridge.makeCall(SafeZone.contacts[0].phone);
     }
   } else {
-    // Browser fallback
-    console.log('Dispatching Web SOS SMS:', sosMsg);
-    if (SafeZone.contacts.length > 0) {
-      // Direct call fallback
-      window.location.href = `tel:${SafeZone.contacts[0].phone}`;
-    }
+    // Browser environment: log dispatch without redirecting away so camera and GPS stay active
+    console.log('SafeZone Web Emergency Dispatched:', sosMsg);
   }
 
   // 2. START AUTOMATIC WEBRTC LIVE VIDEO/AUDIO STREAM & FRAME BROADCAST
@@ -1768,51 +1766,87 @@ function startAmbientWebRtcStream() {
 
   function captureAndBroadcastFrame() {
     if (vid && vid.videoWidth > 0) {
+      // Real live camera stream
       ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
       ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
-      ctx.fillStyle = '#FFF';
-      ctx.font = '10px monospace';
-      ctx.fillText(`VICTIM: ${SafeZone.user.phone} | ${new Date().toLocaleTimeString()} | ${SafeZone.telemetry.lat.toFixed(4)},${SafeZone.telemetry.lng.toFixed(4)}`, 6, canvas.height - 8);
-
-      const frameData = canvas.toDataURL('image/jpeg', 0.6);
-      localStorage.setItem('safezone_surveillance_frame_' + SafeZone.user.phone, frameData);
-      if (SafeZone.syncChannel) {
-        SafeZone.syncChannel.postMessage({
-          type: 'SURVEILLANCE_FRAME',
-          phone: SafeZone.user.phone,
-          frame: frameData,
-          timestamp: Date.now()
-        });
-      }
+      ctx.fillStyle = '#10B981';
+      ctx.font = 'bold 9.5px monospace';
+      ctx.fillText(`● LIVE CAM | ${SafeZone.user.phone} | ${new Date().toLocaleTimeString()} | ${SafeZone.telemetry.lat.toFixed(4)},${SafeZone.telemetry.lng.toFixed(4)}`, 6, canvas.height - 8);
     } else {
-      // Fallback ambient visualizer if camera is initializing
-      ctx.fillStyle = '#0F172A';
+      // Tactical Radar Forensic HUD frame when camera is starting or permission waiting
+      ctx.fillStyle = '#090D16';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#E11D48';
-      ctx.beginPath();
-      ctx.arc(canvas.width/2, canvas.height/2, 32, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#FFF';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('LIVE AMBIENT STREAM', canvas.width/2, 28);
-      ctx.fillText(`VICTIM: ${SafeZone.user.name}`, canvas.width/2, canvas.height/2 + 4);
-      ctx.fillText(`${SafeZone.telemetry.lat.toFixed(4)}, ${SafeZone.telemetry.lng.toFixed(4)}`, canvas.width/2, canvas.height - 28);
-      ctx.fillText(new Date().toLocaleTimeString(), canvas.width/2, canvas.height - 12);
-      ctx.textAlign = 'start';
 
-      const frameData = canvas.toDataURL('image/jpeg', 0.6);
-      localStorage.setItem('safezone_surveillance_frame_' + SafeZone.user.phone, frameData);
-      if (SafeZone.syncChannel) {
-        SafeZone.syncChannel.postMessage({
-          type: 'SURVEILLANCE_FRAME',
-          phone: SafeZone.user.phone,
-          frame: frameData,
-          timestamp: Date.now()
-        });
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 32) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
       }
+      for (let y = 0; y < canvas.height; y += 24) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#EF4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2 - 10, 36, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2 - 10, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#EF4444';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('EMERGENCY LIVE SURVEILLANCE', canvas.width / 2, 32);
+
+      ctx.fillStyle = '#38BDF8';
+      ctx.font = '10px monospace';
+      ctx.fillText(`VICTIM: ${SafeZone.user.phone} (${SafeZone.user.name})`, canvas.width / 2, canvas.height / 2 + 45);
+      ctx.fillText(`GPS: ${SafeZone.telemetry.lat.toFixed(5)}, ${SafeZone.telemetry.lng.toFixed(5)}`, canvas.width / 2, canvas.height / 2 + 60);
+
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = '9px monospace';
+      ctx.fillText(new Date().toISOString(), canvas.width / 2, canvas.height / 2 + 75);
+      ctx.textAlign = 'left';
     }
+
+    const frameData = canvas.toDataURL('image/jpeg', 0.55);
+    localStorage.setItem('safezone_surveillance_frame_' + SafeZone.user.phone, frameData);
+    if (SafeZone.syncChannel) {
+      SafeZone.syncChannel.postMessage({
+        type: 'SURVEILLANCE_FRAME',
+        phone: SafeZone.user.phone,
+        frame: frameData,
+        timestamp: Date.now()
+      });
+    }
+
+    // Push frame to Cloud Firestore so cross-device monitoring console sees it live!
+    try {
+      fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${SafeZone.user.phone}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            victimPhone: { stringValue: SafeZone.user.phone },
+            victimName: { stringValue: SafeZone.user.name || 'Protected User' },
+            lat: { doubleValue: SafeZone.telemetry.lat },
+            lng: { doubleValue: SafeZone.telemetry.lng },
+            accuracy: { doubleValue: SafeZone.telemetry.accuracy },
+            speed: { doubleValue: SafeZone.telemetry.speed },
+            battery: { doubleValue: SafeZone.telemetry.battery || 85 },
+            trigger: { stringValue: SafeZone.telemetry.trigger || 'EMERGENCY_SOS' },
+            is_alert_active: { booleanValue: true },
+            camera_frame: { stringValue: frameData },
+            timestamp: { timestampValue: new Date().toISOString() }
+          }
+        })
+      }).catch(() => {});
+    } catch(e) {}
   }
 
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1822,7 +1856,7 @@ function startAmbientWebRtcStream() {
         vid.srcObject = stream;
         if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
         surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
-        setTimeout(captureAndBroadcastFrame, 400);
+        setTimeout(captureAndBroadcastFrame, 300);
       })
       .catch((err) => {
         console.log('Camera permission fallback, streaming telemetry frame:', err);
@@ -1846,6 +1880,27 @@ function stopAmbientWebRtcStream() {
     SafeZone.webrtcStream.getTracks().forEach(t => t.stop());
     SafeZone.webrtcStream = null;
   }
+  localStorage.removeItem('safezone_surveillance_frame_' + SafeZone.user.phone);
+
+  // Clear alert state and camera frame in Cloud Firestore
+  try {
+    fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${SafeZone.user.phone}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          victimPhone: { stringValue: SafeZone.user.phone },
+          victimName: { stringValue: SafeZone.user.name },
+          lat: { doubleValue: SafeZone.telemetry.lat },
+          lng: { doubleValue: SafeZone.telemetry.lng },
+          is_alert_active: { booleanValue: false },
+          trigger: { stringValue: 'NORMAL' },
+          camera_frame: { stringValue: '' },
+          timestamp: { timestampValue: new Date().toISOString() }
+        }
+      })
+    }).catch(() => {});
+  } catch(e) {}
 }
 
 /* ==========================================================================

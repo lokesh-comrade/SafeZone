@@ -1281,36 +1281,112 @@
         }
       }, 1000);
 
-      // Cloud Firestore Polling (women-safety-platform-243f9)
+      // Cloud Firestore Alerts Collection Polling (Auto-Detect ANY Victim Emergency across all devices)
+      let isFetchingAlerts = false;
       setInterval(() => {
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${ConsoleState.targetPhone}`;
-        fetch(firestoreUrl)
+        if (isFetchingAlerts) return;
+        isFetchingAlerts = true;
+
+        const collectionUrl = 'https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts';
+        fetch(collectionUrl)
           .then(res => res.json())
-          .then(doc => {
-            if (doc && doc.fields) {
+          .then(data => {
+            isFetchingAlerts = false;
+            if (!data || !data.documents) return;
+
+            // Search for any active emergency across all victim documents
+            let activeDoc = null;
+
+            // Check if current target phone or any victim has is_alert_active === true
+            for (const doc of data.documents) {
               const f = doc.fields;
-              const lat = f.lat ? f.lat.doubleValue : ConsoleState.lat;
-              const lng = f.lng ? f.lng.doubleValue : ConsoleState.lng;
-              const trigger = f.trigger ? f.trigger.stringValue : 'NORMAL';
-              const active = f.is_alert_active ? f.is_alert_active.booleanValue : false;
-              
-              if (active !== ConsoleState.isAlertActive) {
-                ConsoleState.isAlertActive = active;
-                ConsoleState.trigger = active ? trigger : 'NORMAL';
-                updateTargetPosition(lat, lng, 6, ConsoleState.trigger);
-                updateHudUI();
-                if (active) {
-                  playConsoleSiren();
-                } else {
-                  stopConsoleSiren();
+              if (!f) continue;
+              const isActive = f.is_alert_active ? f.is_alert_active.booleanValue : false;
+              if (isActive) {
+                const docPhone = f.victimPhone ? f.victimPhone.stringValue : (f.phone ? f.phone.stringValue : doc.name.split('/').pop().replace('user_', ''));
+                if (docPhone === ConsoleState.targetPhone) {
+                  activeDoc = doc;
+                  break;
                 }
-              } else if (!active && (lat !== ConsoleState.lat || lng !== ConsoleState.lng)) {
-                updateTargetPosition(lat, lng, 6, 'NORMAL');
+                if (!activeDoc) {
+                  activeDoc = doc;
+                }
+              }
+            }
+
+            if (activeDoc) {
+              const f = activeDoc.fields;
+              const phone = f.victimPhone ? f.victimPhone.stringValue : (f.phone ? f.phone.stringValue : activeDoc.name.split('/').pop().replace('user_', ''));
+              const name = f.victimName ? f.victimName.stringValue : (f.user_name ? f.user_name.stringValue : 'Protected User');
+              const lat = f.lat ? f.lat.doubleValue : (f.latitude ? f.latitude.doubleValue : ConsoleState.lat);
+              const lng = f.lng ? f.lng.doubleValue : (f.longitude ? f.longitude.doubleValue : ConsoleState.lng);
+              const accuracy = f.accuracy ? f.accuracy.doubleValue : 6.0;
+              const speed = f.speed ? f.speed.doubleValue : 0;
+              const trigger = f.trigger ? f.trigger.stringValue : (f.trigger_source ? f.trigger_source.stringValue : 'EMERGENCY_SOS');
+              const cameraFrame = f.camera_frame ? f.camera_frame.stringValue : '';
+              const battery = f.battery ? f.battery.doubleValue : (f.battery_level ? parseInt(f.battery_level.stringValue) : ConsoleState.battery);
+
+              if (ConsoleState.targetPhone !== phone) {
+                ConsoleState.targetPhone = phone;
+                const phoneInput = document.getElementById('inputTargetPhone');
+                if (phoneInput) phoneInput.value = phone;
+                const peerLbl = document.getElementById('peerLabelPhone');
+                if (peerLbl) peerLbl.innerText = 'PEER: safezone-' + phone;
+                appendAuditLog(`🚨 AUTO-INTERCEPT LOCKED ONTO VICTIM: +91 ${phone} (${name})`);
+              }
+
+              ConsoleState.targetName = name;
+              ConsoleState.speed = speed;
+              if (battery) ConsoleState.battery = battery;
+
+              if (!ConsoleState.isAlertActive) {
+                ConsoleState.isAlertActive = true;
+                ConsoleState.trigger = trigger;
+                appendAuditLog(`🚨 EMERGENCY ACTIVE: ${name} triggered ${trigger}!`);
+                playConsoleSiren();
+              } else {
+                ConsoleState.trigger = trigger;
+              }
+
+              updateTargetPosition(lat, lng, accuracy, ConsoleState.trigger);
+              updateHudUI();
+
+              if (cameraFrame) {
+                displaySurveillanceFrame(cameraFrame);
+              }
+            } else {
+              // No active emergency anywhere in Firestore
+              if (ConsoleState.isAlertActive) {
+                ConsoleState.isAlertActive = false;
+                ConsoleState.trigger = 'NORMAL';
+                stopConsoleSiren();
+                updateHudUI();
+                const img = document.getElementById('pipSurveillanceImg');
+                if (img) img.style.display = 'none';
+                const placeholder = document.getElementById('pipPlaceholder');
+                if (placeholder) placeholder.style.display = 'flex';
+                appendAuditLog('🛡️ All alerts stand down confirmed. System returned to STANDBY');
+              } else {
+                // In normal standby, keep coordinates fresh for target if doc exists
+                const targetDoc = data.documents.find(d => {
+                  const p = d.fields && (d.fields.victimPhone?.stringValue || d.fields.phone?.stringValue || d.name.split('/').pop().replace('user_', ''));
+                  return p === ConsoleState.targetPhone;
+                });
+                if (targetDoc && targetDoc.fields) {
+                  const f = targetDoc.fields;
+                  const lat = f.lat ? f.lat.doubleValue : (f.latitude ? f.latitude.doubleValue : null);
+                  const lng = f.lng ? f.lng.doubleValue : (f.longitude ? f.longitude.doubleValue : null);
+                  if (lat !== null && lng !== null && (lat !== ConsoleState.lat || lng !== ConsoleState.lng)) {
+                    updateTargetPosition(lat, lng, f.accuracy ? f.accuracy.doubleValue : 6.0, 'NORMAL');
+                  }
+                }
               }
             }
           })
-          .catch(() => {});
-      }, 4000);
+          .catch(() => {
+            isFetchingAlerts = false;
+          });
+      }, 2000);
     }
 
     /* ==========================================================================
@@ -1467,10 +1543,35 @@
               victimPhone: { stringValue: ConsoleState.targetPhone },
               is_alert_active: { booleanValue: false },
               trigger: { stringValue: 'NORMAL' },
+              camera_frame: { stringValue: '' },
               timestamp: { timestampValue: new Date().toISOString() }
             }
           })
         }).catch(() => {});
+
+        // Also stand down any active document in the alerts collection
+        fetch('https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts')
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.documents) {
+              data.documents.forEach(doc => {
+                if (doc.fields && doc.fields.is_alert_active && doc.fields.is_alert_active.booleanValue === true) {
+                  fetch(`https://firestore.googleapis.com/v1/${doc.name}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      fields: {
+                        is_alert_active: { booleanValue: false },
+                        trigger: { stringValue: 'NORMAL' },
+                        camera_frame: { stringValue: '' },
+                        timestamp: { timestampValue: new Date().toISOString() }
+                      }
+                    })
+                  }).catch(() => {});
+                }
+              });
+            }
+          }).catch(() => {});
 
         updateHudUI();
         if (targetMarker) {
