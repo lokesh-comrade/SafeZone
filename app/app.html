@@ -19,13 +19,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Leaflet CSS for Journey & Safe Zones Maps -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Offline Local Assets with CDN Fallback -->
+  <link rel="stylesheet" href="leaflet.css" onerror="this.onerror=null;this.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';" />
+  <script src="peerjs.min.js" onerror="console.log('Falling back to CDN PeerJS');"></script>
+  <script src="leaflet.js" onerror="console.log('Falling back to CDN Leaflet');"></script>
 
-  <!-- PeerJS for WebRTC Ambient Streaming -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
@@ -2375,6 +2373,10 @@ document.querySelectorAll('.calc-btn').forEach(btn => {
 function initPeerJS() {
   SafeZone.webrtc.localPeerId = 'safezone-' + SafeZone.user.phone;
   try {
+    if (typeof Peer === 'undefined') {
+      console.warn('PeerJS library not available offline');
+      return;
+    }
     const peer = new Peer(SafeZone.webrtc.localPeerId, {
       debug: 1
     });
@@ -2532,7 +2534,7 @@ let journeyMarker = null;
 
 function initJourneyMap() {
   const mapElem = document.getElementById('journeyMap');
-  if (!mapElem || journeyMap) return;
+  if (!mapElem || journeyMap || typeof L === 'undefined') return;
 
   journeyMap = L.map('journeyMap', { zoomControl: false }).setView([SafeZone.telemetry.lat, SafeZone.telemetry.lng], 14);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -2562,7 +2564,7 @@ function initJourneyMap() {
 
 function initZonesMap() {
   const mapElem = document.getElementById('zonesMap');
-  if (!mapElem || zonesMap) return;
+  if (!mapElem || zonesMap || typeof L === 'undefined') return;
 
   zonesMap = L.map('zonesMap', { zoomControl: false }).setView([SafeZone.telemetry.lat, SafeZone.telemetry.lng], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

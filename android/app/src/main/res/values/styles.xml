@@ -1,8 +1,8 @@
 <resources>
-    <style name="Theme.SafeZone" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.SafeZone" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">#E11D48</item>
-        <item name="colorPrimaryVariant">#BE123C</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryDark">#BE123C</item>
+        <item name="colorAccent">#E11D48</item>
         <item name="android:statusBarColor">#FFF5F7</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
