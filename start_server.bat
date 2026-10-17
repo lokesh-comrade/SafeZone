@@ -8,7 +8,7 @@ echo.
 echo Starting SafeZone Local Server on port 8080...
 echo.
 
-cd /d "%~dp0"
+cd /d "C:\Users\admin\.gemini\antigravity\scratch\safezone"
 start "" http://localhost:8080/index.html
 python server.py
 
