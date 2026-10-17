@@ -6,9 +6,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Jagruthi - Police & Dispatch Dashboard</title>
+  <title>SafeZone - Police & Tactical Dispatch Command</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,22 +19,23 @@
 
   <style>
     :root {
-      --sidebar-bg: #121626;
-      --sidebar-card: #181E33;
-      --body-bg: #F4F6FA;
+      --sidebar-bg: #0F1422;
+      --sidebar-card: #161D31;
+      --body-bg: #F3F5FA;
       --card-bg: #FFFFFF;
-      --border: #E5E7EB;
-      --crimson: #E11D48;
-      --crimson-gradient: linear-gradient(135deg, #FF2A6D, #BE123C);
+      --border: #E2E8F0;
+      --crimson: #EF4444;
+      --crimson-dark: #DC2626;
+      --crimson-gradient: linear-gradient(135deg, #EF4444, #B91C1C);
       --purple: #8B5CF6;
       --emerald: #10B981;
       --amber: #F59E0B;
-      --cyan: #06B6D4;
-      --text-main: #111827;
-      --text-muted: #6B7280;
-      --text-light: #9CA3AF;
+      --cyan: #0EA5E9;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,9 +49,127 @@
       overflow: hidden;
     }
 
-    /* ==========================================================================
-       LEFT SIDEBAR (Dark Navy Purple Theme from Image 3)
-       ========================================================================== */
+    /* =========================================================================
+       POLICE LOGIN MODAL GATEWAY
+       ========================================================================= */
+    #policeLoginModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 20, 34, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      background: #FFFFFF;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 440px;
+      padding: 32px 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+      text-align: center;
+      position: relative;
+    }
+
+    .login-badge-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #1E3A8A, #0F172A);
+      color: #38BDF8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px auto;
+      box-shadow: 0 8px 20px rgba(30, 58, 138, 0.35);
+    }
+
+    .login-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      margin-bottom: 24px;
+    }
+
+    .login-form-group {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .login-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .login-input:focus {
+      border-color: #0EA5E9;
+      background: #FFF;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    }
+
+    .btn-police-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1E3A8A, #1D4ED8);
+      color: #FFF;
+      border: none;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+      transition: all 0.15s;
+    }
+
+    .btn-police-submit:hover {
+      background: linear-gradient(135deg, #1E40AF, #2563EB);
+      transform: translateY(-1px);
+    }
+
+    .btn-quick-demo {
+      background: none;
+      border: none;
+      color: #0EA5E9;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 14px;
+      text-decoration: underline;
+    }
+
+    /* =========================================================================
+       SIDEBAR (Dark Tactical Theme)
+       ========================================================================= */
     aside.police-sidebar {
       width: 250px;
       background: var(--sidebar-bg);
@@ -58,25 +177,33 @@
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      border-right: 1px solid rgba(255,255,255,0.08);
+      border-right: 1px solid rgba(255,255,255,0.06);
       z-index: 100;
     }
 
     .sidebar-brand-box {
-      padding: 22px 20px;
+      padding: 20px;
       display: flex;
       align-items: center;
       gap: 12px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
-    .lotus-logo-svg {
-      width: 36px;
-      height: 36px;
+    .brand-icon-shield {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #EF4444, #B91C1C);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #FFF;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
     }
 
-    .brand-text-wrap h2 {
+    .brand-text h2 {
       font-size: 19px;
       font-weight: 800;
       letter-spacing: -0.3px;
@@ -84,9 +211,9 @@
       line-height: 1.1;
     }
 
-    .brand-text-wrap p {
-      font-size: 11px;
-      color: #F43F5E;
+    .brand-text p {
+      font-size: 10.5px;
+      color: #38BDF8;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -122,10 +249,10 @@
     }
 
     .menu-item.active {
-      background: var(--crimson-gradient);
+      background: linear-gradient(135deg, #1E3A8A, #2563EB);
       color: #FFF;
       font-weight: 700;
-      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
     }
 
     .menu-left {
@@ -137,40 +264,70 @@
     .menu-badge {
       font-size: 11px;
       font-weight: 800;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 10px;
       background: #EF4444;
       color: #FFF;
     }
 
-    .sidebar-footer-card {
+    .sidebar-officer-card {
       margin: 14px;
       padding: 14px;
-      background: linear-gradient(135deg, rgba(225,29,72,0.18), rgba(139,92,246,0.18));
-      border: 1px solid rgba(225,29,72,0.3);
+      background: var(--sidebar-card);
       border-radius: 14px;
-      text-align: center;
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .sidebar-footer-card p {
-      font-size: 11.5px;
-      color: #F1F5F9;
-      font-weight: 700;
+    .officer-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #1E3A8A;
+      color: #38BDF8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
 
-    /* ==========================================================================
-       MAIN CONTENT DASHBOARD
-       ========================================================================== */
-    main.police-main-area {
+    /* =========================================================================
+       MAIN CONTENT WRAPPER
+       ========================================================================= */
+    .police-main {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      background: #F8FAFC;
+      overflow-x: hidden;
     }
 
-    /* Top Search & Profile Bar */
-    header.dashboard-topbar {
+    /* Emergency Alert Highlight Banner (Visible when active emergency exists) */
+    .emergency-highlight-banner {
+      display: none;
+      background: linear-gradient(90deg, #DC2626, #EF4444);
+      color: #FFF;
+      padding: 10px 24px;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      animation: alertPulseBanner 1.5s infinite alternate;
+      border-bottom: 2px solid #B91C1C;
+      z-index: 50;
+    }
+
+    @keyframes alertPulseBanner {
+      0% { background-color: #DC2626; box-shadow: 0 0 15px rgba(220, 38, 38, 0.6); }
+      100% { background-color: #B91C1C; box-shadow: 0 0 25px rgba(220, 38, 38, 0.9); }
+    }
+
+    /* Top Search & Command Status Bar */
+    .topbar {
       height: 64px;
       background: #FFF;
       border-bottom: 1px solid var(--border);
@@ -179,101 +336,71 @@
       justify-content: space-between;
       padding: 0 24px;
       flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 40;
     }
 
-    .search-input-box {
-      width: 440px;
+    .search-target-box {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: #F1F5F9;
-      border: 1px solid #E2E8F0;
-      border-radius: 12px;
-      padding: 8px 14px;
+      border-radius: 20px;
+      padding: 6px 14px;
+      width: 360px;
     }
 
-    .search-input-box input {
+    .search-target-box input {
       border: none;
       background: transparent;
       outline: none;
-      width: 100%;
       font-size: 13px;
+      width: 100%;
       color: var(--text-main);
-      font-family: inherit;
     }
 
-    .topbar-right-cluster {
+    .topbar-right-actions {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
-    .btn-silence-siren {
-      background: #FEE2E2;
-      border: 1px solid #FCA5A5;
-      color: #DC2626;
+    .live-status-pill {
       font-size: 12px;
       font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: none;
+      padding: 5px 12px;
+      border-radius: 20px;
+      display: flex;
       align-items: center;
       gap: 6px;
+      background: #D1FAE5;
+      color: #059669;
     }
 
-    .officer-profile-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
+    .live-status-pill.emergency {
+      background: #FEE2E2;
+      color: #DC2626;
+      border: 1px solid #FECDD3;
     }
 
-    .officer-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #0F172A;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .officer-info h4 {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1.2;
-    }
-
-    .officer-info p {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* Dashboard Interior Grid Container */
-    .dashboard-viewport {
-      padding: 20px 24px 30px;
+    /* =========================================================================
+       5 TOP KPI CARDS
+       ========================================================================= */
+    .content-area {
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
-    /* ==========================================================================
-       TOP 5 KPI CARDS (Matching Image 3)
-       ========================================================================== */
-    .kpi-row-5 {
+    .kpi-grid {
       display: grid;
-      grid-template-columns: 1.25fr 1fr 1fr 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
     }
 
-    @media (max-width: 1200px) {
-      .kpi-row-5 { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    .kpi-stat-card {
+    .kpi-card {
       background: #FFF;
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -282,85 +409,74 @@
       align-items: center;
       gap: 14px;
       box-shadow: var(--shadow-sm);
-      position: relative;
+      transition: all 0.2s;
     }
 
-    .kpi-stat-card.alert-active {
-      background: var(--crimson-gradient);
-      color: #FFF;
-      border: none;
-      box-shadow: 0 6px 18px rgba(225, 29, 72, 0.35);
+    .kpi-card.urgent-sos {
+      border: 2px solid var(--crimson);
+      background: #FFF5F5;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25);
     }
 
-    .kpi-icon-pill {
+    .kpi-icon-wrap {
       width: 44px;
       height: 44px;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 20px;
       flex-shrink: 0;
     }
 
-    .kpi-stat-card.alert-active .kpi-icon-pill {
-      background: rgba(255,255,255,0.2);
-    }
+    .kpi-card.urgent-sos .kpi-icon-wrap { background: #FEE2E2; color: #DC2626; }
+    .kpi-icon-wrap.purple { background: #EDE9FE; color: #7C3AED; }
+    .kpi-icon-wrap.emerald { background: #D1FAE5; color: #059669; }
+    .kpi-icon-wrap.blue { background: #DBEAFE; color: #2563EB; }
+    .kpi-icon-wrap.cyan { background: #CFFAFE; color: #0891B2; }
 
-    .kpi-icon-pill.purple { background: #EDE9FE; color: var(--purple); }
-    .kpi-icon-pill.emerald { background: #D1FAE5; color: var(--emerald); }
-    .kpi-icon-pill.blue { background: #E0F2FE; color: #0284C7; }
-    .kpi-icon-pill.cyan { background: #CFFAFE; color: var(--cyan); }
-
-    .kpi-details-text h3 {
+    .kpi-num {
       font-size: 22px;
       font-weight: 800;
+      color: var(--text-main);
       line-height: 1.1;
-      font-family: 'JetBrains Mono', monospace;
     }
 
-    .kpi-details-text p {
+    .kpi-sub {
       font-size: 11.5px;
-      color: var(--text-muted);
       font-weight: 600;
+      color: var(--text-muted);
       margin-top: 3px;
     }
 
-    .kpi-stat-card.alert-active .kpi-details-text p {
-      color: rgba(255,255,255,0.85);
-    }
-
-    /* ==========================================================================
-       MIDDLE ROW: LIVE LOCATION MAP & RECENT ALERTS LIST (Image 3)
-       ========================================================================== */
-    .middle-grid {
+    /* =========================================================================
+       MIDDLE SECTION: LIVE TRACKING MAP & RECENT ALERTS FEED
+       ========================================================================= */
+    .map-feed-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 18px;
+      gap: 20px;
     }
 
-    @media (max-width: 1080px) {
-      .middle-grid { grid-template-columns: 1fr; }
-    }
-
-    .panel-card {
+    .dashboard-panel {
       background: #FFF;
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 18px 20px;
-      box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
 
-    .panel-header-bar {
+    .panel-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      justify-content: space-between;
     }
 
-    .panel-header-title {
+    .panel-title {
       font-size: 15px;
       font-weight: 800;
       color: var(--text-main);
@@ -369,119 +485,127 @@
       gap: 8px;
     }
 
-    .map-filter-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    /* Live Location Map */
+    .map-box {
+      width: 100%;
+      height: 380px;
+      position: relative;
     }
 
-    .filter-chip {
-      font-size: 11px;
+    #policeTacticalMap {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-info-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      font-size: 12px;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: #F1F5F9;
-      color: var(--text-muted);
-      border: 1px solid #E2E8F0;
+      z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 5px;
-      cursor: pointer;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .filter-chip.active {
-      background: #EFF6FF;
-      color: #2563EB;
-      border-color: #BFDBFE;
-    }
-
-    #liveMapContainer {
-      height: 380px;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid #E2E8F0;
+    .map-info-badge.emergency {
+      border-color: var(--crimson);
+      background: rgba(254, 242, 242, 0.98);
+      color: var(--crimson-dark);
     }
 
     /* Recent Alerts Feed */
-    .alerts-feed-list {
+    .recent-alerts-feed {
+      padding: 12px 16px;
+      overflow-y: auto;
+      max-height: 380px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-height: 380px;
-      overflow-y: auto;
     }
 
-    .alert-feed-item {
+    .alert-feed-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
       padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: #FFF;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transition: all 0.15s;
       cursor: pointer;
+      transition: all 0.15s;
     }
 
-    .alert-feed-item:hover {
-      background: #F8FAFC;
+    .alert-feed-card:hover {
+      background: #F1F5F9;
       border-color: #CBD5E1;
     }
 
-    .alert-feed-item.critical {
-      background: #FFF1F2;
-      border-color: #FECDD3;
+    .alert-feed-card.highlight-emergency {
+      background: #FFF5F5;
+      border: 1.5px solid #FCA5A5;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
     }
 
-    .alert-badge-square {
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 10px;
+    .alert-feed-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-type-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
       font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-      text-transform: uppercase;
+      flex-shrink: 0;
     }
 
-    .alert-badge-square.sos { background: #EF4444; color: #FFF; }
-    .alert-badge-square.deviation { background: #F59E0B; color: #FFF; }
-    .alert-badge-square.safezone { background: #10B981; color: #FFF; }
+    .alert-type-icon.sos { background: #FEE2E2; color: #DC2626; }
+    .alert-type-icon.route { background: #FEF3C7; color: #D97706; }
+    .alert-type-icon.safe { background: #D1FAE5; color: #059669; }
 
-    .alert-feed-info {
-      flex: 1;
-      margin: 0 12px;
-    }
-
-    .alert-feed-title {
+    .alert-info-title {
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
       color: var(--text-main);
     }
 
-    .alert-feed-sub {
+    .alert-info-sub {
       font-size: 11px;
       color: var(--text-muted);
       margin-top: 2px;
     }
 
-    /* ==========================================================================
-       BOTTOM ROW: 3-COLUMN TACTICAL STRIP (Matching Image 3)
-       ========================================================================== */
-    .bottom-strip-3 {
+    /* =========================================================================
+       BOTTOM 3-COLUMN TACTICAL STRIP:
+       1. LIVE EVIDENCE STREAMING OF TRIGGERED PHONES
+       2. ACTIVE ALERT DETAILS
+       3. NEARBY POLICE STATIONS
+       ========================================================================= */
+    .tactical-strip-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 0.9fr;
-      gap: 18px;
+      grid-template-columns: 1.2fr 1.2fr 1fr;
+      gap: 20px;
     }
 
-    @media (max-width: 1150px) {
-      .bottom-strip-3 { grid-template-columns: 1fr; }
-    }
-
-    /* Column 1: Live Evidence Stream */
-    .evidence-video-box {
+    /* Live Evidence Stream */
+    .evidence-stream-box {
       width: 100%;
       height: 200px;
-      background: #000;
-      border-radius: 12px;
+      background: #0B0F19;
+      border-radius: 14px;
       overflow: hidden;
       position: relative;
       display: flex;
@@ -489,89 +613,99 @@
       justify-content: center;
     }
 
-    #liveSurveillanceFeed {
+    #streamVideoImg {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: none;
     }
 
-    .video-standby-placeholder {
+    .stream-standby-placeholder {
       display: flex;
       flex-direction: column;
       align-items: center;
-      color: #94A3B8;
-      text-align: center;
-      padding: 16px;
+      gap: 8px;
+      color: #64748B;
+      font-size: 12px;
     }
 
-    .live-rec-pill {
+    .stream-badge-live {
       position: absolute;
       top: 10px;
       left: 10px;
-      background: rgba(225, 29, 72, 0.9);
+      background: rgba(220, 38, 38, 0.9);
       color: #FFF;
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 800;
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       gap: 5px;
-      letter-spacing: 0.5px;
     }
 
-    .rec-pulse-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #FFF;
-      animation: blink 1s infinite alternate;
+    .device-switcher-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      overflow-x: auto;
     }
 
-    @keyframes blink { from { opacity: 0.3; } to { opacity: 1; } }
+    .device-chip {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
+      cursor: pointer;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
 
-    .video-ctrl-strip {
+    .device-chip.active {
+      background: #1E3A8A;
+      color: #FFF;
+      border-color: #1E3A8A;
+    }
+
+    /* Active Alert Details */
+    .details-row-item {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-      padding: 0 4px;
+      padding: 8px 0;
+      border-bottom: 1px solid #F1F5F9;
+      font-size: 12.5px;
     }
 
-    /* Column 2: Active Alert Details */
-    .alert-details-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 14px;
-      font-size: 12px;
-      margin-bottom: 14px;
+    .details-row-item:last-child {
+      border-bottom: none;
     }
 
-    .alert-detail-label {
+    .details-row-item span:first-child {
       color: var(--text-muted);
       font-weight: 600;
     }
 
-    .alert-detail-val {
-      font-weight: 800;
+    .details-row-item span:last-child {
+      font-weight: 700;
       color: var(--text-main);
       font-family: 'JetBrains Mono', monospace;
     }
 
-    .action-btn-cluster {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
+    .action-btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
     }
 
     .btn-action-tactical {
-      flex: 1;
       padding: 10px;
       border-radius: 10px;
-      border: none;
       font-size: 12.5px;
-      font-weight: 800;
+      font-weight: 700;
+      border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -581,794 +715,741 @@
     }
 
     .btn-action-tactical.primary {
-      background: var(--crimson-gradient);
+      background: #2563EB;
       color: #FFF;
-      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
     }
 
     .btn-action-tactical.secondary {
       background: #F1F5F9;
       color: var(--text-main);
-      border: 1px solid #CBD5E1;
+      border: 1px solid #E2E8F0;
     }
 
-    .btn-action-tactical.success {
-      background: #10B981;
+    .btn-action-tactical.resolve {
+      background: #059669;
       color: #FFF;
+      grid-column: span 2;
     }
 
-    /* Column 3: Nearby Police Resources */
-    .resource-list {
+    /* Nearby Police Stations */
+    .stations-list {
+      padding: 12px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 240px;
     }
 
-    .resource-item {
+    .station-item-card {
       padding: 10px 12px;
       background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
     }
 
-    .resource-info h5 {
-      font-size: 12px;
-      font-weight: 800;
+    .station-name {
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text-main);
     }
 
-    .resource-info p {
+    .station-dist {
       font-size: 11px;
-      color: var(--text-muted);
+      color: #2563EB;
+      font-weight: 700;
       margin-top: 2px;
     }
 
-    .btn-nav-mini {
-      background: #EFF6FF;
-      color: #2563EB;
-      border: 1px solid #BFDBFE;
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 800;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn-nav-mini:hover {
-      background: #2563EB;
+    .btn-dispatch-unit {
+      background: #1E3A8A;
       color: #FFF;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
   <!-- =========================================================================
-       LEFT SIDEBAR (Matched to Image 3)
+       POLICE LOGIN GATEWAY MODAL
+       ========================================================================= -->
+  <div id="policeLoginModal">
+    <div class="login-box">
+      <div class="login-badge-icon">👮</div>
+      <h2 class="login-title">Police Tactical Command</h2>
+      <p class="login-sub">SafeZone Law Enforcement Emergency Dispatch</p>
+
+      <form onsubmit="handlePoliceLogin(event)">
+        <div class="login-form-group">
+          <label class="login-label">Officer Badge / Station ID</label>
+          <input type="text" id="officerBadgeInput" class="login-input" placeholder="e.g. PCR-104 / Central Division" value="PCR-104" required>
+        </div>
+
+        <div class="login-form-group">
+          <label class="login-label">Police Authorization PIN</label>
+          <input type="password" id="officerPinInput" class="login-input" placeholder="Enter authorization PIN" value="1234" required>
+        </div>
+
+        <button type="submit" class="btn-police-submit">Authorize & Enter Command Center →</button>
+      </form>
+
+      <button class="btn-quick-demo" onclick="bypassPoliceLogin()">Quick Demo Access (Inspector Kumar)</button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       SIDEBAR
        ========================================================================= -->
   <aside class="police-sidebar">
     <div class="sidebar-brand-box">
-      <!-- Lotus Icon -->
-      <svg class="lotus-logo-svg" viewBox="0 0 100 100" fill="none">
-        <path d="M50 15C50 15 62 38 62 55C62 68 50 78 50 78C50 78 38 68 38 55C38 38 50 15 50 15Z" fill="#F43F5E"/>
-        <path d="M50 40C50 40 70 45 78 62C84 75 74 85 74 85C74 85 58 84 50 75C50 75 50 55 50 40Z" fill="#FB7185"/>
-        <path d="M50 40C50 40 30 45 22 62C16 75 26 85 26 85C26 85 42 84 50 75C50 75 50 55 50 40Z" fill="#E11D48"/>
-      </svg>
-      <div class="brand-text-wrap">
-        <h2>Jagruthi</h2>
-        <p>Police Dashboard</p>
+      <div class="brand-icon-shield">🛡️</div>
+      <div class="brand-text">
+        <h2>SafeZone</h2>
+        <p>Police Command</p>
       </div>
     </div>
 
-    <div class="sidebar-menu">
-      <div class="menu-item active">
-        <div class="menu-left"><span>🏠</span> <span>Dashboard</span></div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-left"><span>🚨</span> <span>Live Alerts</span></div>
-        <span class="menu-badge" id="sidebarBadgeCount">0</span>
-      </div>
-      <div class="menu-item">
-        <div class="menu-left"><span>📁</span> <span>Active Cases</span></div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-left"><span>🗺️</span> <span>Live Map</span></div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-left"><span>🛡️</span> <span>Victim Support</span></div>
-      </div>
-      <div class="menu-item">
-        <div class="menu-left"><span>👥</span> <span>Emergency Contacts</span></div>
-      </div>
-      <a href="../analytics/analytics.html" class="menu-item" style="text-decoration:none;">
-        <div class="menu-left"><span>📊</span> <span>Reports & Analytics</span></div>
+    <nav class="sidebar-menu">
+      <a class="menu-item active" href="monitor.html">
+        <div class="menu-left"><span>🖥️</span> Live Dispatch</div>
       </a>
-      <a href="../app/app.html" class="menu-item" style="text-decoration:none;">
-        <div class="menu-left"><span>📱</span> <span>Victim Mobile App</span></div>
+      <a class="menu-item" href="#emergency" onclick="focusActiveAlert()">
+        <div class="menu-left"><span>🚨</span> Active Emergencies</div>
+        <span class="menu-badge" id="menuSosCount">0</span>
       </a>
-      <a href="../index.html" class="menu-item" style="text-decoration:none;">
-        <div class="menu-left"><span>🏠</span> <span>Portal Home</span></div>
+      <a class="menu-item" href="../analytics/analytics.html">
+        <div class="menu-left"><span>📊</span> Threat Analytics</div>
       </a>
-    </div>
+      <a class="menu-item" href="#stations">
+        <div class="menu-left"><span>🚓</span> Patrol Units</div>
+      </a>
+      <a class="menu-item" href="../index.html">
+        <div class="menu-left"><span>🚪</span> System Portal</div>
+      </a>
+    </nav>
 
-    <div class="sidebar-footer-card">
-      <div style="font-size:20px; margin-bottom:4px;">🛡️</div>
-      <p>Together for Safer Communities</p>
+    <div class="sidebar-officer-card">
+      <div class="officer-avatar">👮</div>
+      <div style="overflow:hidden;">
+        <div style="font-size:13px; font-weight:800; color:#FFF;" id="sidebarOfficerName">Inspector Kumar</div>
+        <div style="font-size:11px; color:#38BDF8;" id="sidebarOfficerUnit">Badge #PCR-104</div>
+      </div>
     </div>
   </aside>
 
   <!-- =========================================================================
-       MAIN DASHBOARD AREA (Matched to Image 3)
+       MAIN CONTENT
        ========================================================================= -->
-  <main class="police-main-area">
+  <main class="police-main">
+
+    <!-- Emergency Active Highlight Banner -->
+    <div class="emergency-highlight-banner" id="emergencyBanner">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">🚨</span>
+        <div>
+          <span>HIGH-PRIORITY SOS DISTRESS EMERGENCY ACTIVE</span>
+          <div style="font-size:11.5px; opacity:0.9; font-weight:600;" id="bannerVictimDetails">Victim: Protected User • Live GPS coordinates verified</div>
+        </div>
+      </div>
+      <button onclick="interceptNavigation()" style="background:#FFF; color:#DC2626; border:none; padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">
+        1-Click Navigate Intercept ➔
+      </button>
+    </div>
 
     <!-- Topbar -->
-    <header class="dashboard-topbar">
-      <div class="search-input-box">
+    <header class="topbar">
+      <div class="search-target-box">
         <span>🔍</span>
-        <input type="text" id="inputTargetPhone" placeholder="Search alerts, locations, users, phone number..." maxlength="10">
-        <button id="btnSearchTarget" style="background:#2563EB; color:#FFF; border:none; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:800; cursor:pointer;">Track</button>
+        <input type="text" id="targetSearchInput" placeholder="Filter victim phone (e.g. 8073521221)">
+        <button onclick="applyPhoneSearch()" style="background:#1E3A8A; color:#FFF; border:none; border-radius:12px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer;">Track</button>
       </div>
 
-      <div class="topbar-right-cluster">
-        <button class="btn-silence-siren" id="btnSilenceSiren">
-          <span>🔇</span> Silence Siren
-        </button>
-
-        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted); font-weight:700;" id="topbarClock">
-          IST: --:--:--
+      <div class="topbar-right-actions">
+        <div class="live-status-pill" id="systemStatusPill">
+          <span>●</span>
+          <span id="systemStatusText">STANDBY • ALL CLEAR</span>
         </div>
 
-        <div class="officer-profile-card">
-          <div class="officer-avatar">👮</div>
-          <div class="officer-info">
-            <h4>Inspector Kumar</h4>
-            <p>Police Emergency Command</p>
-          </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted);" id="liveClock">
+          17:15:00 IST
         </div>
       </div>
     </header>
 
-    <div class="dashboard-viewport">
+    <div class="content-area">
 
-      <!-- TOP 5 KPI CARDS (Matching Image 3) -->
-      <div class="kpi-row-5">
-        <!-- 1. Active SOS Alerts -->
-        <div class="kpi-stat-card" id="cardSosAlerts">
-          <div class="kpi-icon-pill" style="background:#FFE4E6; color:#E11D48;" id="sosIconWrap">🚨</div>
-          <div class="kpi-details-text">
-            <h3 id="kpiActiveAlertsCount">0</h3>
-            <p id="kpiActiveAlertsSub">0 Critical • Standby</p>
+      <!-- 5 TOP KPI CARDS -->
+      <section class="kpi-grid">
+        <div class="kpi-card" id="kpiSosCard">
+          <div class="kpi-icon-wrap" id="kpiSosIcon">🚨</div>
+          <div>
+            <div class="kpi-num" id="kpiSosNum">0</div>
+            <div class="kpi-sub" id="kpiSosSub">Active Emergencies</div>
           </div>
         </div>
 
-        <!-- 2. Women Currently Active -->
-        <div class="kpi-stat-card">
-          <div class="kpi-icon-pill purple">📍</div>
-          <div class="kpi-details-text">
-            <h3>128</h3>
-            <p>Women Under Monitoring</p>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap purple">👥</div>
+          <div>
+            <div class="kpi-num">128</div>
+            <div class="kpi-sub">Users Monitored</div>
           </div>
         </div>
 
-        <!-- 3. Resolved Today -->
-        <div class="kpi-stat-card">
-          <div class="kpi-icon-pill emerald">🛡️</div>
-          <div class="kpi-details-text">
-            <h3>24</h3>
-            <p>Incidents Stand Down</p>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap emerald">🛡️</div>
+          <div>
+            <div class="kpi-num">24</div>
+            <div class="kpi-sub">Resolved Today</div>
           </div>
         </div>
 
-        <!-- 4. Registered Users -->
-        <div class="kpi-stat-card">
-          <div class="kpi-icon-pill blue">👥</div>
-          <div class="kpi-details-text">
-            <h3>1,842</h3>
-            <p>Protected Citizens</p>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap blue">📱</div>
+          <div>
+            <div class="kpi-num">1,842</div>
+            <div class="kpi-sub">Registered Victims</div>
           </div>
         </div>
 
-        <!-- 5. IoT & Mobile Online -->
-        <div class="kpi-stat-card">
-          <div class="kpi-icon-pill cyan">📶</div>
-          <div class="kpi-details-text">
-            <h3>98.2%</h3>
-            <p>Cloud GPS Sync Active</p>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap cyan">🚓</div>
+          <div>
+            <div class="kpi-num">98.2%</div>
+            <div class="kpi-sub">Response Rate</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- MIDDLE ROW: MAP (65%) & RECENT ALERTS FEED (35%) (Image 3) -->
-      <div class="middle-grid">
-        <!-- Live Location Map -->
-        <div class="panel-card">
-          <div class="panel-header-bar">
-            <div class="panel-header-title">
-              <span>📍</span> Live Location Map
+      <!-- MIDDLE ROW: LIVE LOCATION MAP (WITH TRACKING TO SAFE ZONE) & RECENT ALERTS -->
+      <section class="map-feed-grid">
+        <!-- Live Map -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📍 Live Tactical Tracking Map</span>
+              <span style="font-size:11px; background:#D1FAE5; color:#059669; padding:2px 8px; border-radius:10px; font-weight:700;">GPS High Precision</span>
             </div>
-            <div class="map-filter-tags">
-              <span class="filter-chip active">● Live Target</span>
-              <span class="filter-chip" id="chipToggleSafeZones">🏰 Safe Zones</span>
-              <span class="filter-chip" id="chipRecenterMap">🎯 Center GPS</span>
+            <div style="display:flex; gap:8px;">
+              <button onclick="recenterMap()" style="background:#F1F5F9; border:1px solid #CBD5E1; border-radius:8px; padding:4px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">
+                🎯 Center Target
+              </button>
             </div>
           </div>
-          <div id="liveMapContainer"></div>
-        </div>
 
-        <!-- Recent Alerts Feed (Image 3) -->
-        <div class="panel-card">
-          <div class="panel-header-bar">
-            <div class="panel-header-title">
-              <span>🚨</span> Real-Time Dispatch Alerts
-            </div>
-            <button onclick="fetchFirestoreAlerts()" style="background:none; border:none; color:#2563EB; font-size:11.5px; font-weight:700; cursor:pointer;">Refresh 🔄</button>
-          </div>
-          <div class="alerts-feed-list" id="alertsFeedContainer">
-            <div style="font-size:12px; color:var(--text-muted); text-align:center; padding:30px 0;">
-              Scanning cloud alerts...
+          <div class="map-box">
+            <div id="policeTacticalMap"></div>
+
+            <div class="map-info-badge" id="mapBadge">
+              <span id="mapBadgeDot">●</span>
+              <span id="mapBadgeText">Monitoring SafeZone GPS Fleet</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- BOTTOM ROW: 3-COLUMN TACTICAL STRIP (Image 3) -->
-      <div class="bottom-strip-3">
-        <!-- 1. Live Evidence Stream (Video Feed from Victim Mobile) -->
-        <div class="panel-card">
-          <div class="panel-header-bar">
-            <div class="panel-header-title">
-              <span>📹</span> Live Evidence Stream
+        <!-- Recent Alerts Feed -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📋 Recent Alerts Feed</span>
             </div>
-            <button id="btnEvidenceSnapshot" style="background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px; cursor:pointer;">📸 Snapshot</button>
+            <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Real-time Cloud Sync</span>
           </div>
 
-          <div class="evidence-video-box">
-            <img id="liveSurveillanceFeed" alt="Live Victim Surveillance Feed" />
-            <div class="video-standby-placeholder" id="surveillanceStandbyBox">
-              <div style="font-size:28px; margin-bottom:6px;">📷</div>
-              <div style="font-size:12.5px; font-weight:800; color:#FFF;">Surveillance in Standby</div>
-              <div style="font-size:11px; margin-top:4px;">Live camera frames broadcast automatically during active SOS.</div>
-            </div>
-            <div class="live-rec-pill" id="liveRecPill" style="display:none;">
-              <div class="rec-pulse-dot"></div>
-              <span>LIVE EVIDENCE</span>
-            </div>
-          </div>
-
-          <div class="video-ctrl-strip">
-            <span style="font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;" id="streamFpsLabel">FPS: 1.5 | FAST CLOUD SYNC</span>
-            <button id="btnMuteConsoleAudio" style="background:transparent; border:none; color:#64748B; font-size:11.5px; font-weight:700; cursor:pointer;">🔊 Audio Siren Ready</button>
-          </div>
-        </div>
-
-        <!-- 2. Active Alert Details (Image 3) -->
-        <div class="panel-card">
-          <div class="panel-header-bar">
-            <div class="panel-header-title">
-              <span>📋</span> Active Target Details
-            </div>
-            <span style="font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px; background:#D1FAE5; color:#059669;" id="targetStatusPill">STANDBY</span>
-          </div>
-
-          <div class="alert-details-grid">
-            <div>
-              <div class="alert-detail-label">Victim Name</div>
-              <div class="alert-detail-val" id="detailVictimName">Protected User</div>
-            </div>
-            <div>
-              <div class="alert-detail-label">Phone Number</div>
-              <div class="alert-detail-val" id="detailVictimPhone">+91 8073521221</div>
-            </div>
-            <div>
-              <div class="alert-detail-label">Current Location</div>
-              <div class="alert-detail-val" id="detailCoordinates">-- , --</div>
-            </div>
-            <div>
-              <div class="alert-detail-label">Trigger Vector</div>
-              <div class="alert-detail-val" id="detailTrigger" style="color:#EF4444;">NORMAL</div>
-            </div>
-            <div>
-              <div class="alert-detail-label">Battery Level</div>
-              <div class="alert-detail-val" id="detailBattery">🔋 85%</div>
-            </div>
-            <div>
-              <div class="alert-detail-label">Velocity</div>
-              <div class="alert-detail-val" id="detailSpeed">0.0 km/h</div>
-            </div>
-          </div>
-
-          <div class="action-btn-cluster">
-            <button class="btn-action-tactical primary" id="btnLaunchGmaps">
-              <span>🚀</span> Intercept Nav
-            </button>
-            <button class="btn-action-tactical secondary" id="btnCallVictim">
-              <span>📞</span> Call User
-            </button>
-            <button class="btn-action-tactical success" id="btnStandDown">
-              <span>🛡️</span> Mark Resolved
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. Nearby Resources (Police Stations with 1-Click Navigate) -->
-        <div class="panel-card">
-          <div class="panel-header-bar">
-            <div class="panel-header-title">
-              <span>🚓</span> Nearby Resources
-            </div>
-            <span style="font-size:11px; color:var(--text-muted);">Police Units</span>
-          </div>
-
-          <div class="resource-list">
-            <div class="resource-item">
-              <div class="resource-info">
-                <h5>City Police Patrol Unit #4</h5>
-                <p>1.2 km away • ETA 3 min</p>
+          <div class="recent-alerts-feed" id="alertsFeedList">
+            <!-- Populated dynamically from Firestore -->
+            <div class="alert-feed-card">
+              <div class="alert-feed-left">
+                <div class="alert-type-icon safe">SZ</div>
+                <div>
+                  <div class="alert-info-title">System Standby</div>
+                  <div class="alert-info-sub">Waiting for distress beacon triggers</div>
+                </div>
               </div>
-              <a href="#" class="btn-nav-mini" id="btnNavPs1">Navigate ➔</a>
+              <span style="font-size:11px; color:#059669; font-weight:700;">Standby</span>
             </div>
-            <div class="resource-item">
-              <div class="resource-info">
-                <h5>Central Police Station HQ</h5>
-                <p>2.8 km away • ETA 6 min</p>
-              </div>
-              <a href="#" class="btn-nav-mini" id="btnNavPs2">Navigate ➔</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTTOM 3-COLUMN TACTICAL STRIP -->
+      <section class="tactical-strip-grid">
+        <!-- 1. Live Evidence Streaming of Triggered Phone -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📹 Live Evidence Surveillance</span>
             </div>
-            <div class="resource-item">
-              <div class="resource-info">
-                <h5>Women Safety Quick Response Outpost</h5>
-                <p>0.8 km away • ETA 2 min</p>
+            <span style="font-size:11px; font-weight:700; color:#EF4444;" id="streamFpsLabel">Sub-Second Live</span>
+          </div>
+
+          <div style="padding:14px;">
+            <div class="evidence-stream-box">
+              <img id="streamVideoImg" alt="Live Evidence">
+              <div class="stream-standby-placeholder" id="streamPlaceholder">
+                <span style="font-size:32px;">📷</span>
+                <span>Standby: Video activates when SOS triggered</span>
               </div>
-              <a href="#" class="btn-nav-mini" id="btnNavPs3">Navigate ➔</a>
+              <div class="stream-badge-live" id="streamLivePill" style="display:none;">
+                <span>●</span> LIVE EVIDENCE
+              </div>
+            </div>
+
+            <!-- Triggered Phone Switcher -->
+            <div class="device-switcher-row" id="deviceSwitcher">
+              <div class="device-chip active" id="chipActiveDevice">Target: 8073521221</div>
             </div>
           </div>
         </div>
 
-      </div>
+        <!-- 2. Active Alert Details -->
+        <div class="dashboard-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🚨 Active Alert Details</span>
+            </div>
+            <span id="detailsStatusBadge" style="font-size:11px; font-weight:700; color:#059669; background:#D1FAE5; padding:2px 8px; border-radius:6px;">Standby</span>
+          </div>
+
+          <div style="padding:14px;">
+            <div class="details-row-item">
+              <span>Target Victim</span>
+              <span id="detVictimName">Protected User</span>
+            </div>
+            <div class="details-row-item">
+              <span>Phone Number</span>
+              <span id="detPhone">+91 8073521221</span>
+            </div>
+            <div class="details-row-item">
+              <span>Trigger Vector</span>
+              <span id="detTrigger" style="color:#0EA5E9;">NORMAL</span>
+            </div>
+            <div class="details-row-item">
+              <span>Live Coordinates</span>
+              <span id="detCoords">13.2925, 77.5306</span>
+            </div>
+            <div class="details-row-item">
+              <span>Speed / Battery</span>
+              <span id="detTelemetry">0 km/h • 85% 🔋</span>
+            </div>
+
+            <div class="action-btn-row">
+              <button class="btn-action-tactical primary" onclick="interceptNavigation()">
+                📍 Intercept Nav
+              </button>
+              <button class="btn-action-tactical secondary" onclick="callVictimDirect()">
+                📞 Call Victim
+              </button>
+              <button class="btn-action-tactical resolve" onclick="markIncidentResolved()">
+                ✓ Mark Resolved / Stand Down
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Nearby Police Stations -->
+        <div class="dashboard-panel" id="stations">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>🚓 Nearby Police Resources</span>
+            </div>
+            <span style="font-size:11px; font-weight:700; color:#2563EB;">3 Units Ready</span>
+          </div>
+
+          <div class="stations-list">
+            <div class="station-item-card">
+              <div>
+                <div class="station-name">Central City Police Station</div>
+                <div class="station-dist">1.2 km away • Sector 4</div>
+              </div>
+              <button class="btn-dispatch-unit" onclick="dispatchUnit('Central Unit #1')">Dispatch</button>
+            </div>
+
+            <div class="station-item-card">
+              <div>
+                <div class="station-name">Highway Patrol PCR-08</div>
+                <div class="station-dist">2.4 km away • Outer Ring</div>
+              </div>
+              <button class="btn-dispatch-unit" onclick="dispatchUnit('PCR Unit #8')">Dispatch</button>
+            </div>
+
+            <div class="station-item-card">
+              <div>
+                <div class="station-name">Metro Women Safety Outpost</div>
+                <div class="station-dist">3.1 km away • Transit Hub</div>
+              </div>
+              <button class="btn-dispatch-unit" onclick="dispatchUnit('Women Outpost #3')">Dispatch</button>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </div>
   </main>
 
-  <!-- =========================================================================
-       AUDIO SIREN & REAL-TIME DISPATCH LOGIC
-       ========================================================================= -->
   <script>
-    const DispatchState = {
+    // =========================================================================
+    // POLICE STATE MANAGEMENT
+    // =========================================================================
+    const PoliceState = {
+      isLoggedIn: false,
+      officerName: 'Inspector Kumar',
+      badgeId: 'PCR-104',
       targetPhone: '8073521221',
       targetName: 'Protected User',
       lat: 13.2925,
       lng: 77.5306,
-      accuracy: 5.0,
+      accuracy: 8,
       speed: 0,
       battery: 85,
-      trigger: 'NORMAL',
       isAlertActive: false,
-      breadcrumbs: []
+      trigger: 'NORMAL',
+      destinationZone: { lat: 13.2990, lng: 77.5350, name: 'Registered Safe Zone' }
     };
 
+    // Check login
+    if (sessionStorage.getItem('safezone_police_auth')) {
+      document.getElementById('policeLoginModal').style.display = 'none';
+      PoliceState.isLoggedIn = true;
+    }
+
+    function handlePoliceLogin(e) {
+      e.preventDefault();
+      const badge = document.getElementById('officerBadgeInput').value.trim();
+      PoliceState.badgeId = badge || 'PCR-104';
+      PoliceState.officerName = 'Officer ' + PoliceState.badgeId;
+      sessionStorage.setItem('safezone_police_auth', 'true');
+      document.getElementById('policeLoginModal').style.display = 'none';
+      document.getElementById('sidebarOfficerUnit').innerText = 'Badge #' + PoliceState.badgeId;
+    }
+
+    function bypassPoliceLogin() {
+      sessionStorage.setItem('safezone_police_auth', 'true');
+      document.getElementById('policeLoginModal').style.display = 'none';
+    }
+
+    // =========================================================================
+    // LEAFLET MAP INITIALIZATION & ROUTE TRACKING TO SAFE ZONE
+    // =========================================================================
     let map = null;
-    let targetMarker = null;
+    let victimMarker = null;
     let accuracyCircle = null;
-    let polylineTrack = null;
-    let safeZoneCircles = [];
+    let safeZoneCircle = null;
+    let trackingRouteLine = null;
 
-    // Audio Context Siren Synthesizer
-    let audioCtx = null;
-    let sirenOsc = null;
-    let sirenGain = null;
-    let sirenInterval = null;
-    let isSirenSilenced = false;
+    function initPoliceMap() {
+      map = L.map('policeTacticalMap', { zoomControl: true }).setView([PoliceState.lat, PoliceState.lng], 14);
 
-    function playSiren() {
-      if (isSirenSilenced || sirenOsc) return;
-      try {
-        const AudioClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioClass) return;
-        if (!audioCtx) audioCtx = new AudioClass();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        sirenOsc = audioCtx.createOscillator();
-        sirenGain = audioCtx.createGain();
-        sirenOsc.type = 'sawtooth';
-        sirenGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        sirenOsc.connect(sirenGain);
-        sirenGain.connect(audioCtx.destination);
-        sirenOsc.start();
-
-        let freq = 600;
-        let goingUp = true;
-        sirenInterval = setInterval(() => {
-          if (!sirenOsc || !audioCtx) return;
-          freq += goingUp ? 50 : -50;
-          if (freq >= 1200) goingUp = false;
-          if (freq <= 500) goingUp = true;
-          sirenOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        }, 30);
-
-        document.getElementById('btnSilenceSiren').style.display = 'inline-flex';
-      } catch (e) {}
-    }
-
-    function stopSiren() {
-      if (sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
-      if (sirenOsc) {
-        try { sirenOsc.stop(); sirenOsc.disconnect(); } catch(e) {}
-        sirenOsc = null;
-      }
-      document.getElementById('btnSilenceSiren').style.display = 'none';
-    }
-
-    // Initialize Leaflet Map
-    function initMap() {
-      map = L.map('liveMapContainer', { zoomControl: true, attributionControl: false })
-        .setView([DispatchState.lat, DispatchState.lng], 15);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-
-      polylineTrack = L.polyline([], { color: '#E11D48', weight: 4, opacity: 0.85 }).addTo(map);
-
-      accuracyCircle = L.circle([DispatchState.lat, DispatchState.lng], {
-        radius: 10, color: '#10B981', fillColor: '#10B981', fillOpacity: 0.15, weight: 1.5
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
       }).addTo(map);
 
-      const beaconIcon = L.divIcon({
-        className: 'custom-beacon-pin',
-        html: `
-          <div style="position:relative; width:30px; height:30px;">
-            <div id="beaconPulseRing" style="position:absolute; width:100%; height:100%; border-radius:50%; background:rgba(16,185,129,0.35);"></div>
-            <div id="beaconCoreDot" style="position:absolute; top:7px; left:7px; width:16px; height:16px; border-radius:50%; background:#10B981; border:2px solid #FFF; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>
-          </div>
-        `,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+      // Safe Zone Perimeter (Green Geofence)
+      safeZoneCircle = L.circle([PoliceState.destinationZone.lat, PoliceState.destinationZone.lng], {
+        radius: 350,
+        color: '#10B981',
+        fillColor: '#10B981',
+        fillOpacity: 0.2,
+        weight: 2
+      }).addTo(map).bindPopup('<b>' + PoliceState.destinationZone.name + '</b><br>Safe Zone Perimeter');
+
+      // Accuracy Circle
+      accuracyCircle = L.circle([PoliceState.lat, PoliceState.lng], {
+        radius: 120,
+        color: '#0EA5E9',
+        fillColor: '#0EA5E9',
+        fillOpacity: 0.15,
+        weight: 1
+      }).addTo(map);
+
+      // Victim Marker
+      const icon = L.divIcon({
+        html: `<div id="mapMarkerInner" style="background:#0EA5E9; color:#FFF; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #FFF; box-shadow:0 3px 8px rgba(0,0,0,0.3); font-size:13px;">📍</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
       });
 
-      targetMarker = L.marker([DispatchState.lat, DispatchState.lng], { icon: beaconIcon }).addTo(map);
+      victimMarker = L.marker([PoliceState.lat, PoliceState.lng], { icon: icon }).addTo(map)
+        .bindPopup('<b>Victim Target</b><br>Live GPS Location');
+
+      // Tracking Line from Victim to Safe Zone
+      trackingRouteLine = L.polyline([
+        [PoliceState.lat, PoliceState.lng],
+        [PoliceState.destinationZone.lat, PoliceState.destinationZone.lng]
+      ], {
+        color: '#3B82F6',
+        weight: 3,
+        dashArray: '6, 8',
+        opacity: 0.7
+      }).addTo(map);
     }
 
-    function updateTargetPosition(lat, lng, accuracy, trigger) {
-      DispatchState.lat = lat;
-      DispatchState.lng = lng;
-      if (accuracy) DispatchState.accuracy = accuracy;
-      if (trigger) DispatchState.trigger = trigger;
+    function updateMapTarget(lat, lng, isEmergency, triggerType) {
+      if (!map) return;
 
-      if (targetMarker) {
-        targetMarker.setLatLng([lat, lng]);
-        const color = DispatchState.isAlertActive ? '#EF4444' : '#10B981';
-        const ringBg = DispatchState.isAlertActive ? 'rgba(239, 68, 68, 0.45)' : 'rgba(16, 185, 129, 0.35)';
+      PoliceState.lat = lat;
+      PoliceState.lng = lng;
 
-        const ring = document.getElementById('beaconPulseRing');
-        const core = document.getElementById('beaconCoreDot');
-        if (ring) ring.style.background = ringBg;
-        if (core) core.style.background = color;
+      if (victimMarker) {
+        victimMarker.setLatLng([lat, lng]);
+        const inner = document.getElementById('mapMarkerInner');
+        if (inner) {
+          inner.style.background = isEmergency ? '#EF4444' : '#0EA5E9';
+          inner.style.boxShadow = isEmergency ? '0 0 16px rgba(239,68,68,0.9)' : '0 3px 8px rgba(0,0,0,0.3)';
+          inner.innerText = isEmergency ? '🚨' : '📍';
+        }
       }
 
       if (accuracyCircle) {
         accuracyCircle.setLatLng([lat, lng]);
-        accuracyCircle.setRadius(DispatchState.accuracy);
-        accuracyCircle.setStyle({
-          color: DispatchState.isAlertActive ? '#EF4444' : '#10B981',
-          fillColor: DispatchState.isAlertActive ? '#EF4444' : '#10B981'
-        });
+        accuracyCircle.setStyle({ color: isEmergency ? '#EF4444' : '#0EA5E9' });
       }
 
-      DispatchState.breadcrumbs.push([lat, lng]);
-      if (polylineTrack) polylineTrack.setLatLngs(DispatchState.breadcrumbs);
-      if (map) map.panTo([lat, lng]);
+      if (trackingRouteLine) {
+        trackingRouteLine.setLatLngs([
+          [lat, lng],
+          [PoliceState.destinationZone.lat, PoliceState.destinationZone.lng]
+        ]);
+        trackingRouteLine.setStyle({ color: isEmergency ? '#EF4444' : '#3B82F6' });
+      }
 
-      // Update Navigation links to nearby resources
-      const gmapsNavUrl = `https://maps.google.com/?q=${lat},${lng}`;
-      document.getElementById('btnNavPs1').href = gmapsNavUrl;
-      document.getElementById('btnNavPs2').href = gmapsNavUrl;
-      document.getElementById('btnNavPs3').href = gmapsNavUrl;
-    }
-
-    function renderSurveillanceFrame(frameBase64) {
-      if (!frameBase64 || frameBase64.length < 50) return;
-      const img = document.getElementById('liveSurveillanceFeed');
-      const placeholder = document.getElementById('surveillanceStandbyBox');
-      const rec = document.getElementById('liveRecPill');
-
-      img.src = frameBase64;
-      img.style.display = 'block';
-      if (placeholder) placeholder.style.display = 'none';
-      if (rec) rec.style.display = 'flex';
-    }
-
-    function updateUIState() {
-      document.getElementById('detailVictimName').innerText = DispatchState.targetName;
-      document.getElementById('detailVictimPhone').innerText = '+91 ' + DispatchState.targetPhone;
-      document.getElementById('detailCoordinates').innerText = `${DispatchState.lat.toFixed(5)}, ${DispatchState.lng.toFixed(5)}`;
-      document.getElementById('detailTrigger').innerText = DispatchState.trigger;
-      document.getElementById('detailBattery').innerText = `🔋 ${DispatchState.battery}%`;
-      document.getElementById('detailSpeed').innerText = `${DispatchState.speed} km/h`;
-
-      const kpiCard = document.getElementById('cardSosAlerts');
-      const kpiCount = document.getElementById('kpiActiveAlertsCount');
-      const kpiSub = document.getElementById('kpiActiveAlertsSub');
-      const statusPill = document.getElementById('targetStatusPill');
-      const sidebarBadge = document.getElementById('sidebarBadgeCount');
-
-      if (DispatchState.isAlertActive) {
-        if (kpiCard) kpiCard.classList.add('alert-active');
-        if (kpiCount) kpiCount.innerText = '1';
-        if (kpiSub) kpiSub.innerText = `🚨 CRITICAL (${DispatchState.trigger})`;
-        if (statusPill) {
-          statusPill.innerText = '● ACTIVE EMERGENCY';
-          statusPill.style.background = '#FEE2E2';
-          statusPill.style.color = '#DC2626';
-        }
-        if (sidebarBadge) sidebarBadge.innerText = '1';
-        playSiren();
+      const badge = document.getElementById('mapBadge');
+      const text = document.getElementById('mapBadgeText');
+      if (isEmergency) {
+        badge.classList.add('emergency');
+        text.innerText = `🚨 EMERGENCY: ${PoliceState.targetName} (${triggerType}) • ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       } else {
-        if (kpiCard) kpiCard.classList.remove('alert-active');
-        if (kpiCount) kpiCount.innerText = '0';
-        if (kpiSub) kpiSub.innerText = '0 Critical • Standby';
-        if (statusPill) {
-          statusPill.innerText = 'STANDBY';
-          statusPill.style.background = '#D1FAE5';
-          statusPill.style.color = '#059669';
-        }
-        if (sidebarBadge) sidebarBadge.innerText = '0';
-
-        const img = document.getElementById('liveSurveillanceFeed');
-        const placeholder = document.getElementById('surveillanceStandbyBox');
-        const rec = document.getElementById('liveRecPill');
-        if (img) img.style.display = 'none';
-        if (placeholder) placeholder.style.display = 'flex';
-        if (rec) rec.style.display = 'none';
-
-        stopSiren();
+        badge.classList.remove('emergency');
+        text.innerText = `Fleet Standby • Target GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       }
+    }
+
+    function recenterMap() {
+      if (map) map.setView([PoliceState.lat, PoliceState.lng], 15);
     }
 
     // =========================================================================
-    // FAST CLOUD FIRESTORE POLLING (EVERY 800ms FOR SMOOTH VIDEO & 0-LATENCY SYNC)
+    // FAST FIRESTORE POLLING (800ms) - NO SIREN NOISE!
     // =========================================================================
     let isFetching = false;
 
-    function fetchFirestoreAlerts() {
+    function pollEmergencyAlerts() {
       if (isFetching) return;
       isFetching = true;
 
-      const url = 'https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts';
-      fetch(url)
-        .then(res => res.json())
+      fetch('https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts')
+        .then(r => r.json())
         .then(data => {
           isFetching = false;
           if (!data || !data.documents) return;
 
-          // Render Recent Alerts list
           renderAlertsFeed(data.documents);
 
-          // Find active emergencies
+          // Find active distress emergencies
           const activeDocs = [];
           data.documents.forEach(doc => {
             const f = doc.fields;
             if (f && f.is_alert_active && f.is_alert_active.booleanValue === true) {
               let t = 0;
               if (doc.updateTime) t = Date.parse(doc.updateTime);
-              else if (f.timestamp && f.timestamp.timestampValue) t = Date.parse(f.timestamp.timestampValue);
+              else if (f.timestamp?.timestampValue) t = Date.parse(f.timestamp.timestampValue);
               activeDocs.push({ doc, t });
             }
           });
 
-          if (activeDocs.length > 0) {
-            // Sort by newest update time
-            activeDocs.sort((a, b) => b.t - a.t);
-            const top = activeDocs[0].doc;
-            const f = top.fields;
+          const emergencyBanner = document.getElementById('emergencyBanner');
+          const kpiCard = document.getElementById('kpiSosCard');
+          const kpiNum = document.getElementById('kpiSosNum');
+          const kpiSub = document.getElementById('kpiSosSub');
+          const menuBadge = document.getElementById('menuSosCount');
+          const sysPill = document.getElementById('systemStatusPill');
+          const sysText = document.getElementById('systemStatusText');
+          const streamImg = document.getElementById('streamVideoImg');
+          const streamPlaceholder = document.getElementById('streamPlaceholder');
+          const streamLivePill = document.getElementById('streamLivePill');
+          const detailsStatusBadge = document.getElementById('detailsStatusBadge');
 
-            const phone = f.victimPhone?.stringValue || f.phone?.stringValue || top.name.split('/').pop().replace('user_', '');
+          if (activeDocs.length > 0) {
+            activeDocs.sort((a, b) => b.t - a.t);
+            const topDoc = activeDocs[0].doc;
+            const f = topDoc.fields;
+
+            const phone = f.victimPhone?.stringValue || f.phone?.stringValue || topDoc.name.split('/').pop().replace('user_', '');
             const name = f.victimName?.stringValue || f.user_name?.stringValue || 'Protected User';
-            const lat = f.lat?.doubleValue ?? f.latitude?.doubleValue ?? DispatchState.lat;
-            const lng = f.lng?.doubleValue ?? f.longitude?.doubleValue ?? DispatchState.lng;
-            const accuracy = f.accuracy?.doubleValue ?? 5.0;
+            const lat = f.lat?.doubleValue ?? f.latitude?.doubleValue ?? PoliceState.lat;
+            const lng = f.lng?.doubleValue ?? f.longitude?.doubleValue ?? PoliceState.lng;
             const speed = f.speed?.doubleValue ?? 0;
-            const battery = f.battery?.doubleValue ?? (f.battery_level ? parseInt(f.battery_level.stringValue) : 85);
+            const battery = f.battery?.doubleValue ?? 85;
             const trigger = f.trigger?.stringValue || f.trigger_source?.stringValue || 'EMERGENCY_SOS';
             const frame = f.camera_frame?.stringValue || '';
 
-            DispatchState.targetPhone = phone;
-            DispatchState.targetName = name;
-            DispatchState.speed = speed;
-            DispatchState.battery = battery;
-            DispatchState.isAlertActive = true;
-            DispatchState.trigger = trigger;
+            PoliceState.targetPhone = phone;
+            PoliceState.targetName = name;
+            PoliceState.isAlertActive = true;
+            PoliceState.trigger = trigger;
+            PoliceState.speed = speed;
+            PoliceState.battery = battery;
 
-            updateTargetPosition(lat, lng, accuracy, trigger);
-            updateUIState();
+            // Update UI elements with Emergency Highlighting
+            emergencyBanner.style.display = 'flex';
+            document.getElementById('bannerVictimDetails').innerText = `Victim: ${name} (+91 ${phone}) • Trigger: ${trigger} • GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            kpiCard.classList.add('urgent-sos');
+            kpiNum.innerText = activeDocs.length;
+            kpiSub.innerText = `${activeDocs.length} Active Emergency`;
+            menuBadge.innerText = activeDocs.length;
+            sysPill.classList.add('emergency');
+            sysText.innerText = '🚨 ACTIVE EMERGENCY';
 
+            // Details card
+            document.getElementById('detVictimName').innerText = name;
+            document.getElementById('detPhone').innerText = '+91 ' + phone;
+            document.getElementById('detTrigger').innerText = trigger;
+            document.getElementById('detTrigger').style.color = '#EF4444';
+            document.getElementById('detCoords').innerText = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            document.getElementById('detTelemetry').innerText = `${speed} km/h • ${battery}% 🔋`;
+            detailsStatusBadge.innerText = '🚨 Critical Active';
+            detailsStatusBadge.style.background = '#FEE2E2';
+            detailsStatusBadge.style.color = '#DC2626';
+
+            // Evidence stream display
             if (frame && frame.length > 50) {
-              renderSurveillanceFrame(frame);
+              streamImg.src = frame;
+              streamImg.style.display = 'block';
+              streamPlaceholder.style.display = 'none';
+              streamLivePill.style.display = 'flex';
             }
+
+            document.getElementById('chipActiveDevice').innerText = `Target: ${phone} (${trigger})`;
+            updateMapTarget(lat, lng, true, trigger);
           } else {
-            // All clear / standby
-            if (DispatchState.isAlertActive) {
-              DispatchState.isAlertActive = false;
-              DispatchState.trigger = 'NORMAL';
-              updateUIState();
-              updateTargetPosition(DispatchState.lat, DispatchState.lng, DispatchState.accuracy, 'NORMAL');
-            }
+            // Standby / normal
+            PoliceState.isAlertActive = false;
+            emergencyBanner.style.display = 'none';
+            kpiCard.classList.remove('urgent-sos');
+            kpiNum.innerText = '0';
+            kpiSub.innerText = 'Active Emergencies';
+            menuBadge.innerText = '0';
+            sysPill.classList.remove('emergency');
+            sysText.innerText = 'STANDBY • ALL CLEAR';
+
+            detailsStatusBadge.innerText = 'Standby';
+            detailsStatusBadge.style.background = '#D1FAE5';
+            detailsStatusBadge.style.color = '#059669';
+            document.getElementById('detTrigger').style.color = '#0EA5E9';
+            document.getElementById('detTrigger').innerText = 'NORMAL';
+
+            streamImg.style.display = 'none';
+            streamPlaceholder.style.display = 'flex';
+            streamLivePill.style.display = 'none';
+
+            updateMapTarget(PoliceState.lat, PoliceState.lng, false, 'NORMAL');
           }
         })
         .catch(() => { isFetching = false; });
     }
 
     function renderAlertsFeed(documents) {
-      const container = document.getElementById('alertsFeedContainer');
-      if (!container) return;
+      const feed = document.getElementById('alertsFeedList');
+      if (!feed) return;
 
       const items = documents.map(doc => {
         const f = doc.fields;
         if (!f) return '';
         const phone = f.victimPhone?.stringValue || f.phone?.stringValue || doc.name.split('/').pop().replace('user_', '');
         const name = f.victimName?.stringValue || f.user_name?.stringValue || 'Protected User';
-        const trigger = f.trigger?.stringValue || f.trigger_source?.stringValue || 'NORMAL';
-        const active = f.is_alert_active?.booleanValue || false;
+        const active = f.is_alert_active?.booleanValue === true;
+        const trigger = f.trigger?.stringValue || f.trigger_source?.stringValue || (active ? 'EMERGENCY_SOS' : 'NORMAL');
         const time = f.timestamp?.timestampValue ? new Date(f.timestamp.timestampValue).toLocaleTimeString() : 'Recently';
 
-        const badgeClass = active ? 'sos' : (trigger.includes('DEVIATION') ? 'deviation' : 'safezone');
-        const badgeLabel = active ? 'SOS' : (trigger.includes('DEVIATION') ? 'ROUTE' : 'SAFE');
-
         return `
-          <div class="alert-feed-item ${active ? 'critical' : ''}" onclick="selectTargetAlert('${phone}', '${name}')">
-            <span class="alert-badge-square ${badgeClass}">${badgeLabel}</span>
-            <div class="alert-feed-info">
-              <div class="alert-feed-title">${name} (+91 ${phone})</div>
-              <div class="alert-feed-sub">${active ? '🚨 Active Distress Alert' : 'Standby / Verified Safe'} • ${time}</div>
+          <div class="alert-feed-card ${active ? 'highlight-emergency' : ''}" onclick="selectPhoneTarget('${phone}')">
+            <div class="alert-feed-left">
+              <div class="alert-type-icon ${active ? 'sos' : 'safe'}">${active ? 'SOS' : 'OK'}</div>
+              <div>
+                <div class="alert-info-title">${name} (+91 ${phone})</div>
+                <div class="alert-info-sub">${active ? '🚨 DISTRESS TRIGGER' : 'Safe Standby'} • ${time}</div>
+              </div>
             </div>
-            <span style="font-size:12px; color:var(--text-muted);">➔</span>
+            <span style="font-size:11px; font-weight:800; color:${active ? '#DC2626' : '#059669'};">${active ? 'ACTIVE' : 'RESOLVED'}</span>
           </div>
         `;
       }).filter(Boolean).slice(0, 6);
 
-      if (items.length > 0) {
-        container.innerHTML = items.join('');
-      }
+      if (items.length > 0) feed.innerHTML = items.join('');
     }
 
-    function selectTargetAlert(phone, name) {
-      DispatchState.targetPhone = phone;
-      DispatchState.targetName = name;
-      document.getElementById('inputTargetPhone').value = phone;
-      fetchFirestoreAlerts();
+    function selectPhoneTarget(phone) {
+      PoliceState.targetPhone = phone;
+      document.getElementById('targetSearchInput').value = phone;
+      pollEmergencyAlerts();
+    }
+
+    function applyPhoneSearch() {
+      const p = document.getElementById('targetSearchInput').value.trim();
+      if (p) selectPhoneTarget(p);
     }
 
     // =========================================================================
-    // EVENT BINDINGS
+    // ACTIONS: NAVIGATE, CALL, RESOLVE
     // =========================================================================
+    function interceptNavigation() {
+      const url = `https://maps.google.com/?q=${PoliceState.lat},${PoliceState.lng}`;
+      window.open(url, '_blank');
+    }
+
+    function callVictimDirect() {
+      window.open(`tel:${PoliceState.targetPhone}`);
+    }
+
+    function markIncidentResolved() {
+      PoliceState.isAlertActive = false;
+      PoliceState.trigger = 'NORMAL';
+
+      // Clear in Firestore
+      fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${PoliceState.targetPhone}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            victimPhone: { stringValue: PoliceState.targetPhone },
+            is_alert_active: { booleanValue: false },
+            trigger: { stringValue: 'NORMAL' },
+            camera_frame: { stringValue: '' },
+            timestamp: { timestampValue: new Date().toISOString() }
+          }
+        })
+      }).then(() => {
+        pollEmergencyAlerts();
+        alert(`Incident for +91 ${PoliceState.targetPhone} marked RESOLVED.`);
+      }).catch(() => {});
+    }
+
+    function dispatchUnit(unitName) {
+      alert(`🚓 ${unitName} dispatched to GPS coordinates: ${PoliceState.lat.toFixed(4)}, ${PoliceState.lng.toFixed(4)}`);
+    }
+
+    function focusActiveAlert() {
+      recenterMap();
+    }
+
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
-      initMap();
-      fetchFirestoreAlerts();
+      initPoliceMap();
+      pollEmergencyAlerts();
+      setInterval(pollEmergencyAlerts, 800); // 800ms fast sync
 
-      // FAST POLLING: Every 800ms for smooth live video & rapid sync!
-      setInterval(fetchFirestoreAlerts, 800);
-
-      // Top Clock
       setInterval(() => {
-        const now = new Date();
-        document.getElementById('topbarClock').innerText = 'IST: ' + now.toLocaleTimeString();
+        const d = new Date();
+        document.getElementById('liveClock').innerText = d.toLocaleTimeString() + ' IST';
       }, 1000);
-
-      // Search / Track button
-      document.getElementById('btnSearchTarget').addEventListener('click', () => {
-        const val = document.getElementById('inputTargetPhone').value.trim();
-        if (val.length === 10) {
-          DispatchState.targetPhone = val;
-          fetchFirestoreAlerts();
-        }
-      });
-
-      // Silence Siren Button
-      document.getElementById('btnSilenceSiren').addEventListener('click', () => {
-        isSirenSilenced = true;
-        stopSiren();
-      });
-
-      // 1-Click Intercept Navigation
-      document.getElementById('btnLaunchGmaps').addEventListener('click', () => {
-        const url = `https://maps.google.com/?q=${DispatchState.lat},${DispatchState.lng}`;
-        window.open(url, '_blank');
-      });
-
-      // Direct Call
-      document.getElementById('btnCallVictim').addEventListener('click', () => {
-        window.open(`tel:${DispatchState.targetPhone}`);
-      });
-
-      // Mark Resolved / Stand Down
-      document.getElementById('btnStandDown').addEventListener('click', () => {
-        DispatchState.isAlertActive = false;
-        DispatchState.trigger = 'NORMAL';
-        stopSiren();
-        updateUIState();
-
-        // Reset in Cloud Firestore
-        fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${DispatchState.targetPhone}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fields: {
-              victimPhone: { stringValue: DispatchState.targetPhone },
-              is_alert_active: { booleanValue: false },
-              trigger: { stringValue: 'NORMAL' },
-              camera_frame: { stringValue: '' },
-              timestamp: { timestampValue: new Date().toISOString() }
-            }
-          })
-        }).catch(() => {});
-
-        // Reset any other active docs
-        fetch('https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts')
-          .then(r => r.json())
-          .then(data => {
-            if (data && data.documents) {
-              data.documents.forEach(doc => {
-                if (doc.fields?.is_alert_active?.booleanValue === true) {
-                  fetch(`https://firestore.googleapis.com/v1/${doc.name}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      fields: {
-                        is_alert_active: { booleanValue: false },
-                        trigger: { stringValue: 'NORMAL' },
-                        camera_frame: { stringValue: '' },
-                        timestamp: { timestampValue: new Date().toISOString() }
-                      }
-                    })
-                  }).catch(() => {});
-                }
-              });
-            }
-          }).catch(() => {});
-      });
-
-      // Snapshot Evidence
-      document.getElementById('btnEvidenceSnapshot').addEventListener('click', () => {
-        const img = document.getElementById('liveSurveillanceFeed');
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-
-        if (img && img.style.display !== 'none' && img.naturalWidth > 0) {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        } else {
-          ctx.fillStyle = '#111827';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = '#E11D48';
-          ctx.font = 'bold 22px sans-serif';
-          ctx.fillText('Jagruthi Incident Evidence Snapshot', 20, 50);
-        }
-
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(10, canvas.height - 40, 620, 30);
-        ctx.fillStyle = '#FFF';
-        ctx.font = '12px monospace';
-        ctx.fillText(`Jagruthi Evidence | Target: +91 ${DispatchState.targetPhone} | ${new Date().toISOString()} | GPS: ${DispatchState.lat.toFixed(5)}, ${DispatchState.lng.toFixed(5)}`, 16, canvas.height - 20);
-
-        const a = document.createElement('a');
-        a.download = `evidence_${DispatchState.targetPhone}_${Date.now()}.png`;
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-      });
-
-      // Recenter Map
-      document.getElementById('chipRecenterMap').addEventListener('click', () => {
-        if (map) map.setView([DispatchState.lat, DispatchState.lng], 16);
-      });
-
-      // Enable audio on user interaction
-      document.body.addEventListener('click', () => {
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      }, { once: true });
     });
   </script>
 </body>

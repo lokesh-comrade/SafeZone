@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Jagruthi - Women Safety & Emergency Dispatch System</title>
+  <title>SafeZone - Personal Safety & Tactical Emergency Dispatch System</title>
 
   <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,12 +18,9 @@
       --bg: #070B13;
       --surface: #0E1626;
       --card: #131E33;
-      --card-hover: #182640;
       --border: #1F2F4A;
-      --border-bright: #2E456B;
       --crimson: #EF4444;
       --crimson-glow: rgba(239, 68, 68, 0.4);
-      --crimson-subtle: rgba(239, 68, 68, 0.12);
       --emerald: #10B981;
       --cyan: #38BDF8;
       --text: #F8FAFC;
@@ -46,32 +43,32 @@
     }
 
     .portal-wrap {
-      max-width: 900px;
+      max-width: 960px;
       width: 100%;
       display: flex;
       flex-direction: column;
       gap: 28px;
     }
 
-    /* BRAND LOGO & HEADER */
     .brand-hero {
       text-align: center;
     }
 
     .logo-badge {
-      width: 58px;
-      height: 58px;
+      width: 64px;
+      height: 64px;
       margin: 0 auto 16px;
       background: linear-gradient(135deg, #EF4444, #B91C1C);
-      border-radius: 16px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 24px var(--crimson-glow);
+      font-size: 32px;
+      box-shadow: 0 0 25px var(--crimson-glow);
     }
 
     .brand-hero h1 {
-      font-size: 34px;
+      font-size: 36px;
       font-weight: 800;
       letter-spacing: -0.5px;
       margin-bottom: 8px;
@@ -86,19 +83,19 @@
     .brand-hero p {
       font-size: 15px;
       color: var(--muted);
-      max-width: 560px;
+      max-width: 600px;
       margin: 0 auto;
       line-height: 1.6;
     }
 
-    /* 2 PRIMARY TIERS */
+    /* 3 PRIMARY ACCESS TIERS */
     .tiers-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 820px) {
       .tiers-grid { grid-template-columns: 1fr; }
       .brand-hero h1 { font-size: 28px; }
     }
@@ -107,7 +104,7 @@
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: 22px;
-      padding: 28px;
+      padding: 24px;
       text-decoration: none;
       color: inherit;
       display: flex;
@@ -115,11 +112,10 @@
       justify-content: space-between;
       transition: all 0.2s ease;
       position: relative;
-      overflow: hidden;
     }
 
     .tier-card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
     }
 
@@ -128,59 +124,56 @@
       box-shadow: 0 16px 36px var(--crimson-glow);
     }
 
-    .tier-card.monitor:hover {
-      border-color: var(--cyan);
-      box-shadow: 0 16px 36px rgba(56, 189, 248, 0.25);
+    .tier-card.police:hover {
+      border-color: #2563EB;
+      box-shadow: 0 16px 36px rgba(37, 99, 235, 0.3);
+    }
+
+    .tier-card.admin:hover {
+      border-color: #8B5CF6;
+      box-shadow: 0 16px 36px rgba(139, 92, 246, 0.3);
     }
 
     .card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .card-icon {
-      font-size: 36px;
+      font-size: 32px;
     }
 
     .pill-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 800;
       padding: 4px 10px;
       border-radius: 8px;
       text-transform: uppercase;
     }
 
-    .tier-card.mobile .pill-tag {
-      background: var(--crimson-subtle);
-      color: #F87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .tier-card.monitor .pill-tag {
-      background: rgba(56, 189, 248, 0.12);
-      color: #38BDF8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-    }
+    .tier-card.mobile .pill-tag { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .tier-card.police .pill-tag { background: rgba(37, 99, 235, 0.15); color: #60A5FA; border: 1px solid rgba(37, 99, 235, 0.3); }
+    .tier-card.admin .pill-tag { background: rgba(139, 92, 246, 0.15); color: #C084FC; border: 1px solid rgba(139, 92, 246, 0.3); }
 
     .card-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
       color: #FFF;
       margin-bottom: 8px;
     }
 
     .card-desc {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--muted);
       line-height: 1.55;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .card-action {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -188,9 +181,10 @@
     }
 
     .tier-card.mobile .card-action { color: var(--crimson); }
-    .tier-card.monitor .card-action { color: var(--cyan); }
+    .tier-card.police .card-action { color: #60A5FA; }
+    .tier-card.admin .card-action { color: #C084FC; }
 
-    /* FOOTER BAR */
+    /* Bottom strip */
     .bottom-bar {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -251,17 +245,12 @@
 
     <!-- HERO HEADER -->
     <header class="brand-hero">
-      <div class="logo-badge" style="background:linear-gradient(135deg, #FF2A6D, #BE123C);">
-        <svg width="34" height="34" viewBox="0 0 100 100" fill="none">
-          <path d="M50 12 C35 28 20 50 20 72 C20 86 35 92 50 92 C65 92 80 86 80 72 C80 50 65 28 50 12 Z" fill="#FFF"/>
-          <path d="M50 32 C42 44 32 60 35 76 C38 86 46 89 50 89 C54 89 62 86 65 76 C68 60 58 44 50 32 Z" fill="#FF2A6D"/>
-        </svg>
-      </div>
-      <h1>Jagruthi <span>Ecosystem</span></h1>
-      <p>Autonomous Real-Time Women Safety Monitoring & Emergency Dispatch Platform</p>
+      <div class="logo-badge">🛡️</div>
+      <h1>SafeZone <span>Command Ecosystem</span></h1>
+      <p>Autonomous Real-Time Safety Monitoring, Emergency Coordination & Tactical Dispatch</p>
     </header>
 
-    <!-- 2 MAIN TIERS -->
+    <!-- 3 MAIN ACCESS TIERS -->
     <div class="tiers-grid">
       <!-- 1. Victim Mobile App -->
       <a href="app/app.html" class="tier-card mobile">
@@ -270,27 +259,42 @@
             <span class="card-icon">📱</span>
             <span class="pill-tag">Victim App</span>
           </div>
-          <div class="card-title">Mobile Safety App</div>
+          <div class="card-title">User Safety App</div>
           <div class="card-desc">
-            Smartphone application featuring hardware motion shake trigger, covert calculator PIN, live journey tracking, custom safe zones, and automatic camera frame broadcasting.
+            Smartphone application featuring Swipe-to-Trigger SOS, Swipe-to-Safe disarm, high-accuracy GPS, user-defined safe zones, and sub-second live camera streaming.
           </div>
         </div>
-        <div class="card-action">Launch Mobile App →</div>
+        <div class="card-action">Launch User App →</div>
       </a>
 
-      <!-- 2. Police & Guardian Dispatch Console -->
-      <a href="monitor/monitor.html" class="tier-card monitor">
+      <!-- 2. Police Tactical Console -->
+      <a href="monitor/monitor.html" class="tier-card police">
         <div>
           <div class="card-top">
-            <span class="card-icon">🖥️</span>
-            <span class="pill-tag">Command Center</span>
+            <span class="card-icon">👮</span>
+            <span class="pill-tag">Police Login</span>
           </div>
-          <div class="card-title">Tactical Dispatch Console</div>
+          <div class="card-title">Police Tactical Command</div>
           <div class="card-desc">
-            Dispatch monitoring station with cloud emergency detection, live GPS tracking, loud alarm siren, real-time video surveillance, and 1-click police intercept navigation.
+            Law enforcement console with officer login, emergency alert highlighting (no siren), live safe zone tracking, live video evidence stream, and 1-click intercept navigation.
           </div>
         </div>
-        <div class="card-action">Launch Command Center →</div>
+        <div class="card-action">Enter Police Console →</div>
+      </a>
+
+      <!-- 3. Admin Threat Intelligence -->
+      <a href="analytics/analytics.html" class="tier-card admin">
+        <div>
+          <div class="card-top">
+            <span class="card-icon">📊</span>
+            <span class="pill-tag">Admin Login</span>
+          </div>
+          <div class="card-title">Admin Threat Portal</div>
+          <div class="card-desc">
+            Governance portal with admin login, user growth analytics, total SOS alerts, resolved metrics, active IoT devices, live incidents map, and alerts statistics donut.
+          </div>
+        </div>
+        <div class="card-action">Enter Admin Portal →</div>
       </a>
     </div>
 
@@ -303,16 +307,15 @@
           <span>Offline support, direct emergency calls, and hardware background SMS</span>
         </div>
       </div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <a href="analytics/analytics.html" style="color:var(--muted); font-size:12px; font-weight:700; text-decoration:none; padding:8px 12px;">📊 Threat Analytics</a>
+      <div>
         <a href="app-debug.apk" download class="btn-apk">
-          <span>📥</span> Download APK (6.5 MB)
+          <span>📥</span> Download SafeZone APK (6.5 MB)
         </a>
       </div>
     </div>
 
     <footer class="system-footer">
-      Jagruthi Emergency Response Network • Production Environment
+      SafeZone Emergency Dispatch Platform • Production Environment
     </footer>
 
   </div>
