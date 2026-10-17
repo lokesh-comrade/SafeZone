@@ -1173,7 +1173,10 @@ function broadcastTelemetry(triggerType) {
 
   localStorage.setItem('safezone_alert_' + SafeZone.user.phone, JSON.stringify(payload));
   if (SafeZone.syncChannel) {
-    SafeZone.syncChannel.postMessage({ type: 'ALERT_DISPATCH', data: payload });
+    SafeZone.syncChannel.postMessage({
+      type: SafeZone.telemetry.isAlertActive ? 'ALERT_DISPATCH' : 'TELEMETRY_UPDATE',
+      data: payload
+    });
   }
 
   // Cloud Firestore REST sync

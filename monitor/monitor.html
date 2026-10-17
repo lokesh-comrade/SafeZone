@@ -569,9 +569,9 @@
         <span>Cloud: Connected (women-safety-platform-243f9)</span>
       </div>
 
-      <div class="pill-badge active-alert" id="incidentAlertPill">
-        <div class="pulse-dot crimson"></div>
-        <span id="incidentStatusText">1 ACTIVE EMERGENCY</span>
+      <div class="pill-badge" id="incidentAlertPill">
+        <div class="pulse-dot" id="incidentDot"></div>
+        <span id="incidentStatusText">ALL CLEAR — STANDBY</span>
       </div>
     </div>
   </header>
@@ -596,20 +596,20 @@
       </div>
 
       <!-- SURVEILLANCE PIP WINDOW (WebRTC Ambient Video Feed) -->
-      <div class="surveillance-pip live" id="surveillancePipWindow">
+      <div class="surveillance-pip" id="surveillancePipWindow">
         <div class="pip-header">
           <div class="pip-title-wrap">
-            <div class="pulse-dot crimson"></div>
-            <span>LIVE SURVEILLANCE FEED</span>
+            <div class="pulse-dot" id="pipPulseDot"></div>
+            <span id="pipStatusLabel">SURVEILLANCE STANDBY</span>
           </div>
-          <span id="peerLabelPhone" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#F43F5E;">PEER: safezone-9876543210</span>
+          <span id="peerLabelPhone" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted);">PEER: safezone-9876543210</span>
         </div>
 
         <div class="pip-feed-view">
           <video id="pipRemoteVideo" autoplay playsinline style="display:none;"></video>
           <img id="pipSurveillanceImg" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Live Surveillance Feed" />
           <div id="pipPlaceholder" class="pip-placeholder-text">
-            Awaiting Live Video / Camera Stream from Target Device...
+            Standby — Surveillance activates automatically on SOS trigger
           </div>
         </div>
 
@@ -638,17 +638,17 @@
 
       <div class="hud-content">
         <!-- Target Victim Card -->
-        <div class="hud-victim-card emergency" id="hudVictimCard">
+        <div class="hud-victim-card" id="hudVictimCard">
           <div class="victim-card-header">
             <div>
-              <div class="victim-name" id="hudVictimName">Ananya Sharma</div>
+              <div class="victim-name" id="hudVictimName">Registered Client</div>
               <div class="victim-phone" id="hudVictimPhone">+91 98765 43210</div>
             </div>
-            <div class="trigger-badge" id="hudTriggerBadge">MANUAL_HOLD_3S</div>
+            <div class="trigger-badge" id="hudTriggerBadge" style="background:#059669;">NORMAL</div>
           </div>
           <div style="font-size:12px; color:var(--text-muted); line-height:1.4;">
-            Status: <strong style="color:#F43F5E;" id="hudAlertState">HIGH PRIORITY DISPATCH</strong><br>
-            Journey: <strong>Hostel Sec 12 ➔ Tech Park</strong>
+            Status: <strong style="color:#10B981;" id="hudAlertState">NORMAL ROUTINE / STANDBY</strong><br>
+            Tracking: <strong id="hudJourney">Routine Safety Monitoring Active</strong>
           </div>
         </div>
 
@@ -656,19 +656,19 @@
         <div class="telemetry-grid">
           <div class="metric-box">
             <div class="metric-label">Velocity (Haversine)</div>
-            <div class="metric-value highlight" id="hudSpeed">18.4 km/h</div>
+            <div class="metric-value highlight" id="hudSpeed">0.0 km/h</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">GPS Precision</div>
-            <div class="metric-value" id="hudAccuracy">±5.8 m</div>
+            <div class="metric-value" id="hudAccuracy">±8.0 m</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">Device Battery</div>
-            <div class="metric-value" id="hudBattery">🔋 88%</div>
+            <div class="metric-value" id="hudBattery">🔋 100%</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">Safe Zone Radius</div>
-            <div class="metric-value highlight" id="hudCorridorStatus">BREACH (220m)</div>
+            <div class="metric-value highlight" id="hudCorridorStatus">SAFE (In Perimeter)</div>
           </div>
         </div>
 
@@ -717,13 +717,16 @@
     const savedProf = localStorage.getItem('safezone_user_profile');
     const parsedProf = savedProf ? JSON.parse(savedProf) : null;
     const initialPhone = (qPhone && qPhone.length === 10) ? qPhone : (parsedProf ? parsedProf.phone : '9876543210');
-    const initialName = (parsedProf && parsedProf.phone === initialPhone) ? parsedProf.name : 'Target Device';
+    const initialName = (parsedProf && parsedProf.name) ? parsedProf.name : 'Target Client';
 
     const savedAlert = localStorage.getItem('safezone_alert_' + initialPhone);
     const parsedAlert = savedAlert ? JSON.parse(savedAlert) : null;
 
     const savedUserZones = localStorage.getItem('safezone_user_zones');
     const parsedZones = savedUserZones ? JSON.parse(savedUserZones) : [];
+
+    // Alert is ONLY active if explicitly true AND triggered recently (within 5 minutes)
+    const isFreshAlert = !!(parsedAlert && parsedAlert.is_alert_active === true && (Date.now() - (parsedAlert.timestamp || 0) < 300000));
 
     const ConsoleState = {
       targetPhone: initialPhone,
@@ -734,9 +737,9 @@
       prevLng: null,
       speed: parsedAlert && parsedAlert.speed ? parsedAlert.speed : 0,
       accuracy: parsedAlert && parsedAlert.accuracy ? parsedAlert.accuracy : 8,
-      battery: parsedAlert && parsedAlert.battery ? parsedAlert.battery : 85,
-      trigger: parsedAlert && parsedAlert.trigger ? parsedAlert.trigger : 'NONE',
-      isAlertActive: parsedAlert ? parsedAlert.is_alert_active : false,
+      battery: parsedAlert && parsedAlert.battery ? parsedAlert.battery : 100,
+      trigger: isFreshAlert ? parsedAlert.trigger : 'NORMAL',
+      isAlertActive: isFreshAlert,
       breadcrumbs: parsedAlert && parsedAlert.lat ? [[parsedAlert.lat, parsedAlert.lng]] : [],
       safeZones: parsedZones,
       peer: null,
@@ -776,9 +779,10 @@
         attributionControl: false
       }).setView([ConsoleState.lat, ConsoleState.lng], 15);
 
-      // Dark Tactical Tile Layer (CartoDB Dark Matter)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19
+      // Clean OpenStreetMap Tile Layer (Free, no watermarks, no API keys)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
       // Breadcrumbs Polyline
@@ -804,19 +808,21 @@
       // Accuracy circle
       accuracyCircle = L.circle([ConsoleState.lat, ConsoleState.lng], {
         radius: ConsoleState.accuracy,
-        color: '#E11D48',
-        fillColor: '#E11D48',
+        color: ConsoleState.isAlertActive ? '#E11D48' : '#10B981',
+        fillColor: ConsoleState.isAlertActive ? '#E11D48' : '#10B981',
         fillOpacity: 0.15,
         weight: 1
       }).addTo(map);
 
-      // Custom animated pulsing beacon marker
+      // Custom animated pulsing beacon marker (green when standby, red when alert)
+      const beaconColor = ConsoleState.isAlertActive ? '#E11D48' : '#10B981';
+      const beaconBg = ConsoleState.isAlertActive ? 'rgba(225, 29, 72, 0.45)' : 'rgba(16, 185, 129, 0.45)';
       const beaconIcon = L.divIcon({
         className: 'custom-pulsing-marker',
         html: `
           <div class="pulsing-beacon-icon">
-            <div class="beacon-pulse-circle"></div>
-            <div class="beacon-core-circle"></div>
+            <div class="beacon-pulse-circle" style="background:${beaconBg};"></div>
+            <div class="beacon-core-circle" style="background:${beaconColor}; box-shadow:0 0 10px ${beaconColor};"></div>
           </div>
         `,
         iconSize: [28, 28],
@@ -839,11 +845,29 @@
       // Update Map elements
       if (targetMarker) {
         targetMarker.setLatLng([newLat, newLng]);
-        targetMarker.setPopupContent(`<b>${ConsoleState.targetName}</b><br>Trigger: ${ConsoleState.trigger}<br>Live GPS: ${newLat.toFixed(5)}, ${newLng.toFixed(5)}`);
+        const color = ConsoleState.isAlertActive ? '#E11D48' : '#10B981';
+        const pulseBg = ConsoleState.isAlertActive ? 'rgba(225, 29, 72, 0.45)' : 'rgba(16, 185, 129, 0.45)';
+        const updatedIcon = L.divIcon({
+          className: 'custom-pulsing-marker',
+          html: `
+            <div class="pulsing-beacon-icon">
+              <div class="beacon-pulse-circle" style="background:${pulseBg};"></div>
+              <div class="beacon-core-circle" style="background:${color}; box-shadow:0 0 10px ${color};"></div>
+            </div>
+          `,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+        targetMarker.setIcon(updatedIcon);
+        targetMarker.setPopupContent(`<b>${ConsoleState.targetName}</b><br>Status: ${ConsoleState.isAlertActive ? ConsoleState.trigger : 'Normal Standby'}<br>Live GPS: ${newLat.toFixed(5)}, ${newLng.toFixed(5)}`);
       }
       if (accuracyCircle) {
         accuracyCircle.setLatLng([newLat, newLng]);
         accuracyCircle.setRadius(ConsoleState.accuracy);
+        accuracyCircle.setStyle({
+          color: ConsoleState.isAlertActive ? '#E11D48' : '#10B981',
+          fillColor: ConsoleState.isAlertActive ? '#E11D48' : '#10B981'
+        });
       }
 
       // Add to breadcrumb polyline
@@ -954,25 +978,69 @@
       document.getElementById('hudAccuracy').innerText = '±' + ConsoleState.accuracy.toFixed(1) + ' m';
       document.getElementById('hudSpeed').innerText = ConsoleState.speed + ' km/h';
       document.getElementById('hudBattery').innerText = '🔋 ' + ConsoleState.battery + '%';
-      document.getElementById('hudTriggerBadge').innerText = ConsoleState.trigger;
+
+      const victimNameEl = document.getElementById('hudVictimName');
+      if (victimNameEl) victimNameEl.innerText = ConsoleState.targetName;
+      const victimPhoneEl = document.getElementById('hudVictimPhone');
+      if (victimPhoneEl) victimPhoneEl.innerText = '+91 ' + ConsoleState.targetPhone;
 
       const card = document.getElementById('hudVictimCard');
       const pill = document.getElementById('incidentAlertPill');
       const statusText = document.getElementById('incidentStatusText');
+      const dot = document.getElementById('incidentDot');
+      const triggerBadge = document.getElementById('hudTriggerBadge');
+      const alertState = document.getElementById('hudAlertState');
+      const journey = document.getElementById('hudJourney');
+      const corridor = document.getElementById('hudCorridorStatus');
+      const pip = document.getElementById('surveillancePipWindow');
+      const pipDot = document.getElementById('pipPulseDot');
+      const pipLabel = document.getElementById('pipStatusLabel');
 
       if (ConsoleState.isAlertActive) {
-        card.classList.add('emergency');
-        pill.classList.add('active-alert');
-        statusText.innerText = '1 ACTIVE EMERGENCY (' + ConsoleState.trigger + ')';
-        document.getElementById('hudAlertState').innerText = 'HIGH PRIORITY DISPATCH';
-        document.getElementById('hudAlertState').style.color = '#F43F5E';
+        if (card) card.classList.add('emergency');
+        if (pill) pill.classList.add('active-alert');
+        if (dot) dot.className = 'pulse-dot crimson';
+        if (statusText) statusText.innerText = '1 ACTIVE EMERGENCY (' + ConsoleState.trigger + ')';
+        if (alertState) {
+          alertState.innerText = 'HIGH PRIORITY DISPATCH';
+          alertState.style.color = '#F43F5E';
+        }
+        if (triggerBadge) {
+          triggerBadge.innerText = ConsoleState.trigger;
+          triggerBadge.style.background = '#E11D48';
+        }
+        if (journey) journey.innerText = 'Emergency SOS Dispatched';
+        if (corridor) {
+          corridor.innerText = 'BREACH ALERT';
+          corridor.className = 'metric-value alert';
+        }
+        if (pip) pip.classList.add('live');
+        if (pipDot) pipDot.className = 'pulse-dot crimson';
+        if (pipLabel) pipLabel.innerText = 'LIVE SURVEILLANCE FEED';
+
         playConsoleSiren();
       } else {
-        card.classList.remove('emergency');
-        pill.classList.remove('active-alert');
-        statusText.innerText = '0 ACTIVE EMERGENCIES — STAND DOWN';
-        document.getElementById('hudAlertState').innerText = 'ALL CLEAR / RESOLVED';
-        document.getElementById('hudAlertState').style.color = '#10B981';
+        if (card) card.classList.remove('emergency');
+        if (pill) pill.classList.remove('active-alert');
+        if (dot) dot.className = 'pulse-dot';
+        if (statusText) statusText.innerText = 'ALL CLEAR — STANDBY';
+        if (alertState) {
+          alertState.innerText = 'NORMAL ROUTINE / STANDBY';
+          alertState.style.color = '#10B981';
+        }
+        if (triggerBadge) {
+          triggerBadge.innerText = 'NORMAL';
+          triggerBadge.style.background = '#059669';
+        }
+        if (journey) journey.innerText = 'Routine Safety Monitoring Active';
+        if (corridor) {
+          corridor.innerText = 'SAFE (In Perimeter)';
+          corridor.className = 'metric-value highlight';
+        }
+        if (pip) pip.classList.remove('live');
+        if (pipDot) pipDot.className = 'pulse-dot';
+        if (pipLabel) pipLabel.innerText = 'SURVEILLANCE STANDBY';
+
         stopConsoleSiren();
       }
     }
@@ -1035,21 +1103,36 @@
         ConsoleState.syncChannel.onmessage = (event) => {
           const msg = event.data;
           if (!msg) return;
-          if (msg.type === 'ALERT_DISPATCH') {
+          if (msg.type === 'ALERT_DISPATCH' && msg.data && msg.data.is_alert_active) {
             const d = msg.data;
             ConsoleState.isAlertActive = true;
+            ConsoleState.trigger = d.trigger || 'MANUAL_HOLD_3S';
             ConsoleState.targetPhone = d.victimPhone;
             ConsoleState.targetName = d.victimName || ConsoleState.targetName;
-            updateTargetPosition(d.lat, d.lng, d.accuracy, d.trigger);
+            if (d.battery) ConsoleState.battery = d.battery;
+            if (d.speed) ConsoleState.speed = d.speed;
+            updateTargetPosition(d.lat, d.lng, d.accuracy, ConsoleState.trigger);
             connectToVictimStream();
             playConsoleSiren();
+          } else if (msg.type === 'TELEMETRY_UPDATE' || (msg.type === 'ALERT_DISPATCH' && msg.data && !msg.data.is_alert_active)) {
+            const d = msg.data;
+            ConsoleState.targetPhone = d.victimPhone;
+            ConsoleState.targetName = d.victimName || ConsoleState.targetName;
+            if (d.battery) ConsoleState.battery = d.battery;
+            if (d.speed) ConsoleState.speed = d.speed;
+            if (!ConsoleState.isAlertActive) {
+              updateTargetPosition(d.lat, d.lng, d.accuracy, 'NORMAL');
+            } else {
+              updateTargetPosition(d.lat, d.lng, d.accuracy, ConsoleState.trigger);
+            }
           } else if (msg.type === 'ALERT_STANDDOWN') {
             ConsoleState.isAlertActive = false;
-            ConsoleState.trigger = 'NONE';
+            ConsoleState.trigger = 'NORMAL';
             stopConsoleSiren();
             updateHudUI();
+            updateTargetPosition(ConsoleState.lat, ConsoleState.lng, ConsoleState.accuracy, 'NORMAL');
           } else if (msg.type === 'SURVEILLANCE_FRAME') {
-            if (msg.phone === ConsoleState.targetPhone && msg.frame) {
+            if (ConsoleState.isAlertActive && msg.phone === ConsoleState.targetPhone && msg.frame) {
               displaySurveillanceFrame(msg.frame);
             }
           }
@@ -1062,19 +1145,22 @@
         if (raw) {
           try {
             const data = JSON.parse(raw);
-            if (data.is_alert_active !== ConsoleState.isAlertActive || data.trigger !== ConsoleState.trigger) {
-              ConsoleState.isAlertActive = data.is_alert_active;
-              ConsoleState.trigger = data.trigger;
-              if (data.lat && data.lng) updateTargetPosition(data.lat, data.lng, data.accuracy, data.trigger);
+            const isFresh = data.is_alert_active === true && (Date.now() - (data.timestamp || 0) < 300000);
+            if (isFresh !== ConsoleState.isAlertActive) {
+              ConsoleState.isAlertActive = isFresh;
+              ConsoleState.trigger = isFresh ? (data.trigger || 'MANUAL_HOLD_3S') : 'NORMAL';
+              if (data.lat && data.lng) updateTargetPosition(data.lat, data.lng, data.accuracy, ConsoleState.trigger);
               updateHudUI();
             }
           } catch(e) {}
         }
 
-        // Live surveillance camera frame polling
-        const savedFrame = localStorage.getItem('safezone_surveillance_frame_' + ConsoleState.targetPhone);
-        if (savedFrame) {
-          displaySurveillanceFrame(savedFrame);
+        // Live surveillance camera frame polling ONLY if emergency is active
+        if (ConsoleState.isAlertActive) {
+          const savedFrame = localStorage.getItem('safezone_surveillance_frame_' + ConsoleState.targetPhone);
+          if (savedFrame) {
+            displaySurveillanceFrame(savedFrame);
+          }
         }
       }, 1000);
 
@@ -1088,11 +1174,22 @@
               const f = doc.fields;
               const lat = f.lat ? f.lat.doubleValue : ConsoleState.lat;
               const lng = f.lng ? f.lng.doubleValue : ConsoleState.lng;
-              const trigger = f.trigger ? f.trigger.stringValue : ConsoleState.trigger;
-              const active = f.is_alert_active ? f.is_alert_active.booleanValue : ConsoleState.isAlertActive;
-              ConsoleState.isAlertActive = active;
-              updateTargetPosition(lat, lng, 6, trigger);
-              if (active) playConsoleSiren();
+              const trigger = f.trigger ? f.trigger.stringValue : 'NORMAL';
+              const active = f.is_alert_active ? f.is_alert_active.booleanValue : false;
+              
+              if (active !== ConsoleState.isAlertActive) {
+                ConsoleState.isAlertActive = active;
+                ConsoleState.trigger = active ? trigger : 'NORMAL';
+                updateTargetPosition(lat, lng, 6, ConsoleState.trigger);
+                updateHudUI();
+                if (active) {
+                  playConsoleSiren();
+                } else {
+                  stopConsoleSiren();
+                }
+              } else if (!active && (lat !== ConsoleState.lat || lng !== ConsoleState.lng)) {
+                updateTargetPosition(lat, lng, 6, 'NORMAL');
+              }
             }
           })
           .catch(() => {});
@@ -1114,10 +1211,12 @@
         const peerLbl = document.getElementById('peerLabelPhone');
         if (peerLbl) peerLbl.innerText = 'PEER: safezone-' + ConsoleState.targetPhone;
         
-        // Check if there is an existing surveillance frame
-        const initialFrame = localStorage.getItem('safezone_surveillance_frame_' + ConsoleState.targetPhone);
-        if (initialFrame) {
-          displaySurveillanceFrame(initialFrame);
+        // Check if there is an existing surveillance frame ONLY if emergency is active
+        if (ConsoleState.isAlertActive) {
+          const initialFrame = localStorage.getItem('safezone_surveillance_frame_' + ConsoleState.targetPhone);
+          if (initialFrame) {
+            displaySurveillanceFrame(initialFrame);
+          }
         }
       }
 
@@ -1150,8 +1249,10 @@
           const peerLbl = document.getElementById('peerLabelPhone');
           if (peerLbl) peerLbl.innerText = 'PEER: safezone-' + phone;
           connectToVictimStream();
-          const frame = localStorage.getItem('safezone_surveillance_frame_' + phone);
-          if (frame) displaySurveillanceFrame(frame);
+          if (ConsoleState.isAlertActive) {
+            const frame = localStorage.getItem('safezone_surveillance_frame_' + phone);
+            if (frame) displaySurveillanceFrame(frame);
+          }
           alert(`Interception locked onto device: +91 ${phone}`);
         } else {
           alert('Please enter a valid 10-digit mobile number.');
@@ -1195,25 +1296,52 @@
         toggleConsoleSiren();
       });
 
-      // Mark Resolved
+      // Reset to Normal / Stand Down
       document.getElementById('btnMarkResolved').addEventListener('click', () => {
         ConsoleState.isAlertActive = false;
-        ConsoleState.trigger = 'RESOLVED';
+        ConsoleState.trigger = 'NORMAL';
         stopConsoleSiren();
         if (ConsoleState.syncChannel) {
           ConsoleState.syncChannel.postMessage({
-            type: 'MONITOR_COMMAND',
-            action: 'STAND_DOWN'
+            type: 'ALERT_STANDDOWN'
           });
         }
         localStorage.setItem('safezone_alert_' + ConsoleState.targetPhone, JSON.stringify({
           victimPhone: ConsoleState.targetPhone,
           is_alert_active: false,
-          trigger: 'RESOLVED',
+          trigger: 'NORMAL',
           timestamp: Date.now()
         }));
+        localStorage.removeItem('safezone_surveillance_frame_' + ConsoleState.targetPhone);
+
+        // Clear in Cloud Firestore
+        fetch(`https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts/${ConsoleState.targetPhone}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              victimPhone: { stringValue: ConsoleState.targetPhone },
+              is_alert_active: { booleanValue: false },
+              trigger: { stringValue: 'NORMAL' },
+              timestamp: { timestampValue: new Date().toISOString() }
+            }
+          })
+        }).catch(() => {});
+
         updateHudUI();
-        alert('Incident marked as RESOLVED. Stand-down protocol broadcast.');
+        if (targetMarker) {
+          updateTargetPosition(ConsoleState.lat, ConsoleState.lng, ConsoleState.accuracy, 'NORMAL');
+        }
+
+        const img = document.getElementById('pipSurveillanceImg');
+        if (img) img.style.display = 'none';
+        const placeholder = document.getElementById('pipPlaceholder');
+        if (placeholder) {
+          placeholder.style.display = 'block';
+          placeholder.innerText = 'Standby — Surveillance activates automatically on SOS trigger';
+        }
+
+        alert('System reset to NORMAL STANDBY. All clear confirmed.');
       });
 
       // Snapshot Evidence
