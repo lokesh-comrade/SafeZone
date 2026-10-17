@@ -505,10 +505,14 @@
       background-color: #0F172A;
       color: #FFF;
       padding: 16px;
-      display: flex;
-      flex-direction: column;
       justify-content: space-between;
       height: 100%;
+      display: none;
+    }
+
+    .calc-screen.active {
+      display: flex !important;
+      flex-direction: column;
     }
 
     .calc-display {
@@ -985,8 +989,8 @@
     </div>
 
     <div style="display:flex; gap:10px; margin-bottom:14px;">
-      <button class="btn-secondary" id="btnToggleAudioSiren" onclick="toggleSirenAlarm()" style="flex:1;">
-        🔊 <span id="sirenBtnText">Sound Siren</span>
+      <button class="btn-secondary" onclick="shareGuardianLiveTrackingLink()" style="flex:1;">
+        🔗 Share Guardian Link
       </button>
       <button class="btn-secondary" onclick="makeEmergencyPhoneCallDirect()" style="flex:1;">
         📞 Call Guardian
@@ -1569,15 +1573,21 @@ function triggerEmergencySOS(triggerType) {
     }
   }
 
-  // 2. START AUTOMATIC WEBRTC LIVE VIDEO/AUDIO STREAM
+  // 2. START AUTOMATIC WEBRTC LIVE VIDEO/AUDIO STREAM & FRAME BROADCAST
   startAmbientWebRtcStream();
-
-  // 3. SOUND EMERGENCY SIREN
-  toggleSirenAlarm(true);
 
   // Show Active SOS Screen
   openScreen('screenSosActive');
   showToast(`🚨 SOS Triggered: ${triggerType}`, '🚨');
+}
+
+function shareGuardianLiveTrackingLink() {
+  const guardianUrl = `https://lokesh-comrade.github.io/SafeZone/monitor/monitor.html?phone=${SafeZone.user.phone}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(guardianUrl);
+  }
+  showToast('Guardian Tracking Link Copied!', '📋');
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent('SafeZone Emergency: Track my live location & surveillance feed here: ' + guardianUrl)}`);
 }
 
 function directCall(phone) {
@@ -1616,7 +1626,6 @@ function deactivateSOS() {
   document.getElementById('sosHoldPrompt').innerText = 'Tap and Hold for 3 Seconds';
   document.getElementById('sosHoldTimer').innerText = 'Prevents accidental pocket triggers';
 
-  toggleSirenAlarm(false);
   stopAmbientWebRtcStream();
 
   showToast('SafeZone Stand Down Confirmed', '🛡️');
@@ -1738,61 +1747,96 @@ function updateCalcUI(main, sub) {
 }
 
 /* ==========================================================================
-   WEBRTC AMBIENT STREAM & SIREN
+   LIVE SURVEILLANCE BROADCAST (CAMERA SNAPSHOTS & PEERJS)
    ========================================================================== */
+let surveillanceBroadcastTimer = null;
+
 function startAmbientWebRtcStream() {
   const vid = document.getElementById('sosVideoFeed');
+  const canvas = document.createElement('canvas');
+  canvas.width = 320;
+  canvas.height = 240;
+  const ctx = canvas.getContext('2d');
+
+  function captureAndBroadcastFrame() {
+    if (vid && vid.videoWidth > 0) {
+      ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
+      ctx.fillStyle = '#FFF';
+      ctx.font = '10px monospace';
+      ctx.fillText(`VICTIM: ${SafeZone.user.phone} | ${new Date().toLocaleTimeString()} | ${SafeZone.telemetry.lat.toFixed(4)},${SafeZone.telemetry.lng.toFixed(4)}`, 6, canvas.height - 8);
+
+      const frameData = canvas.toDataURL('image/jpeg', 0.6);
+      localStorage.setItem('safezone_surveillance_frame_' + SafeZone.user.phone, frameData);
+      if (SafeZone.syncChannel) {
+        SafeZone.syncChannel.postMessage({
+          type: 'SURVEILLANCE_FRAME',
+          phone: SafeZone.user.phone,
+          frame: frameData,
+          timestamp: Date.now()
+        });
+      }
+    } else {
+      // Fallback ambient visualizer if camera is initializing
+      ctx.fillStyle = '#0F172A';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#E11D48';
+      ctx.beginPath();
+      ctx.arc(canvas.width/2, canvas.height/2, 32, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('LIVE AMBIENT STREAM', canvas.width/2, 28);
+      ctx.fillText(`VICTIM: ${SafeZone.user.name}`, canvas.width/2, canvas.height/2 + 4);
+      ctx.fillText(`${SafeZone.telemetry.lat.toFixed(4)}, ${SafeZone.telemetry.lng.toFixed(4)}`, canvas.width/2, canvas.height - 28);
+      ctx.fillText(new Date().toLocaleTimeString(), canvas.width/2, canvas.height - 12);
+      ctx.textAlign = 'start';
+
+      const frameData = canvas.toDataURL('image/jpeg', 0.6);
+      localStorage.setItem('safezone_surveillance_frame_' + SafeZone.user.phone, frameData);
+      if (SafeZone.syncChannel) {
+        SafeZone.syncChannel.postMessage({
+          type: 'SURVEILLANCE_FRAME',
+          phone: SafeZone.user.phone,
+          frame: frameData,
+          timestamp: Date.now()
+        });
+      }
+    }
+  }
+
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true })
       .then(stream => {
         SafeZone.webrtcStream = stream;
         vid.srcObject = stream;
+        if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
+        surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
+        setTimeout(captureAndBroadcastFrame, 400);
       })
-      .catch(() => {
-        console.log('Falling back to simulated stream');
+      .catch((err) => {
+        console.log('Camera permission fallback, streaming telemetry frame:', err);
+        if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
+        surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
+        captureAndBroadcastFrame();
       });
+  } else {
+    if (surveillanceBroadcastTimer) clearInterval(surveillanceBroadcastTimer);
+    surveillanceBroadcastTimer = setInterval(captureAndBroadcastFrame, 1500);
+    captureAndBroadcastFrame();
   }
 }
 
 function stopAmbientWebRtcStream() {
+  if (surveillanceBroadcastTimer) {
+    clearInterval(surveillanceBroadcastTimer);
+    surveillanceBroadcastTimer = null;
+  }
   if (SafeZone.webrtcStream) {
     SafeZone.webrtcStream.getTracks().forEach(t => t.stop());
     SafeZone.webrtcStream = null;
-  }
-}
-
-function toggleSirenAlarm(force) {
-  const start = force !== undefined ? force : !SafeZone.sirenInterval;
-  const label = document.getElementById('sirenBtnText');
-  if (start) {
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      SafeZone.audioContext = new AC();
-      let f = 600; let step = 50;
-      SafeZone.sirenInterval = setInterval(() => {
-        if (!SafeZone.audioContext) return;
-        const osc = SafeZone.audioContext.createOscillator();
-        const gain = SafeZone.audioContext.createGain();
-        osc.connect(gain); gain.connect(SafeZone.audioContext.destination);
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(f, SafeZone.audioContext.currentTime);
-        gain.gain.setValueAtTime(0.3, SafeZone.audioContext.currentTime);
-        osc.start(); osc.stop(SafeZone.audioContext.currentTime + 0.1);
-        f += step;
-        if (f > 1100 || f < 600) step = -step;
-      }, 100);
-      if (label) label.innerText = 'Stop Siren';
-    } catch(e) {}
-  } else {
-    if (SafeZone.sirenInterval) {
-      clearInterval(SafeZone.sirenInterval);
-      SafeZone.sirenInterval = null;
-    }
-    if (SafeZone.audioContext) {
-      SafeZone.audioContext.close();
-      SafeZone.audioContext = null;
-    }
-    if (label) label.innerText = 'Sound Siren';
   }
 }
 
