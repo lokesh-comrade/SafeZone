@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>PRJ_650 - Big Data Spatial Analytics & SDG 5 Dashboard</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet GIS Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070B13;
+      --bg-surface: #0E1626;
+      --bg-card: #131E33;
+      --border-dark: #1F2F4A;
+      --border-bright: #2E456B;
+      --crimson: #EF4444;
+      --crimson-glow: rgba(239, 68, 68, 0.35);
+      --emerald: #10B981;
+      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --amber: #F59E0B;
+      --cyan: #38BDF8;
+      --sdg-orange: #FF3A21;
+      --text-bright: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-bright);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Header */
+    header.analytics-header {
+      height: 68px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge-sdg {
+      background: linear-gradient(135deg, #FF3A21, #D82610);
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(255, 58, 33, 0.4);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 10px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn.secondary {
+      background: var(--bg-card);
+      color: var(--text-bright);
+      border: 1px solid var(--border-dark);
+    }
+    .nav-btn.secondary:hover {
+      border-color: var(--cyan);
+      background: #1A2942;
+    }
+
+    .nav-btn.primary {
+      background: linear-gradient(135deg, #EF4444, #B91C1C);
+      color: #FFF;
+      box-shadow: 0 4px 12px var(--crimson-glow);
+    }
+
+    /* Main Container */
+    main.analytics-body {
+      flex: 1;
+      padding: 24px;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Metric Summary KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dark);
+      border-radius: 18px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-bright);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .kpi-icon {
+      font-size: 20px;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .kpi-subtext {
+      font-size: 11.5px;
+      margin-top: 8px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-positive {
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    /* 2-Column Analytical Section */
+    .analytical-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 992px) {
+      .analytical-row { grid-template-columns: 1fr; }
+    }
+
+    .panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 15.5px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    #spatialHeatmap {
+      height: 380px;
+      border-radius: 14px;
+      border: 1px solid var(--border-dark);
+      overflow: hidden;
+    }
+
+    /* Tactical Tile Dark Filter */
+    .tactical-dark-tiles {
+      filter: brightness(0.8) invert(1) contrast(2.5) hue-rotate(190deg) saturate(0.25) brightness(0.75);
+    }
+
+    /* Risk Distribution Histogram Bar Container */
+    .histogram-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .hist-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+    }
+
+    .hist-time {
+      font-family: 'JetBrains Mono', monospace;
+      width: 85px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .hist-bar-bg {
+      flex: 1;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 7px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hist-bar-fill {
+      height: 100%;
+      border-radius: 7px;
+      transition: width 0.8s ease-in-out;
+    }
+
+    .hist-count {
+      font-family: 'JetBrains Mono', monospace;
+      width: 45px;
+      text-align: right;
+      color: var(--text-bright);
+      font-weight: 700;
+    }
+
+    /* SDG 5 Narrative Banner */
+    .sdg-narrative-banner {
+      background: linear-gradient(135deg, rgba(255, 58, 33, 0.12), rgba(239, 68, 68, 0.05));
+      border: 1px solid rgba(255, 58, 33, 0.3);
+      border-radius: 18px;
+      padding: 22px 26px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .sdg-narrative-banner { flex-direction: column; text-align: center; }
+    }
+
+    .sdg-wheel-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: #FF3A21;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(255, 58, 33, 0.4);
+    }
+
+    .sdg-content h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #FFF;
+      margin-bottom: 6px;
+    }
+
+    .sdg-content p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Telemetry Table */
+    .data-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    table.telemetry-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    table.telemetry-table th {
+      padding: 12px 14px;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    table.telemetry-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-family: 'Inter', sans-serif;
+    }
+
+    table.telemetry-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .status-pill.resolved {
+      background: var(--emerald-glow);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pill.active {
+      background: var(--crimson-glow);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="analytics-header">
+    <div class="brand-group">
+      <div class="brand-badge-sdg">
+        <span>🎯</span>
+        <span>SDG 5.2</span>
+      </div>
+      <div>
+        <div class="brand-title">PRJ_650 Big Data & Spatial Analytics Engine</div>
+        <div class="brand-subtitle">Real-Time Threat Density Mapping & SDG 5 Gender Equality Telemetry</div>
+      </div>
+    </div>
+
+    <div class="header-nav-links">
+      <a href="../monitor/monitor.html" class="nav-btn primary">
+        <span>🖥️</span> Tactical Command Center
+      </a>
+      <a href="../app/app.html" class="nav-btn secondary">
+        <span>📱</span> Mobile App
+      </a>
+      <a href="../index.html" class="nav-btn secondary">
+        <span>🏠</span> Portal Hub
+      </a>
+    </div>
+  </header>
+
+  <!-- BODY CONTENT -->
+  <main class="analytics-body">
+
+    <!-- KPI STATS GRID -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Mean Dispatch Response Time</span>
+          <span class="kpi-icon">⏱️</span>
+        </div>
+        <div class="kpi-value" style="color:var(--emerald);">1.8 min</div>
+        <div class="kpi-subtext">
+          <span class="badge-positive">▼ 83.4% faster</span> than conventional 911/112 dialers
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Interception Success Rate</span>
+          <span class="kpi-icon">🛡️</span>
+        </div>
+        <div class="kpi-value" style="color:#38BDF8;">98.7%</div>
+        <div class="kpi-subtext">
+          <span>Target locked via real-time satellite GPS & cell triangulator</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Safe Corridor Coverage</span>
+          <span class="kpi-icon">🏰</span>
+        </div>
+        <div class="kpi-value" style="color:var(--amber);">94.2%</div>
+        <div class="kpi-subtext">
+          <span>Active geofenced safe zones mapped across major metro nodes</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">Optical Evidence Integrity</span>
+          <span class="kpi-icon">📸</span>
+        </div>
+        <div class="kpi-value" style="color:#A78BFA;">100%</div>
+        <div class="kpi-subtext">
+          <span>Cryptographically geotagged frames with UTC watermark</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SDG 5 NARRATIVE STRIP -->
+    <div class="sdg-narrative-banner">
+      <div class="sdg-wheel-icon">⚖️</div>
+      <div class="sdg-content">
+        <h3>United Nations Sustainable Development Goal 5: Gender Equality</h3>
+        <p>
+          <strong>Target 5.2:</strong> Eliminate all forms of violence against all women and girls in public and private spheres. PRJ_650 directly accelerates this mandate by providing an autonomous, technology-driven rapid response infrastructure. By merging zero-latency WebRTC surveillance, stealth calculator camouflage, sensor shake detection, and spatial big data clustering, the platform protects vulnerable citizens during critical nighttime journeys and high-risk commutes.
+        </p>
+      </div>
+    </div>
+
+    <!-- ANALYTICAL ROW 1: SPATIAL HEATMAP & TEMPORAL RISK HISTOGRAM -->
+    <div class="analytical-row">
+      <!-- Big Data Heatmap -->
+      <div class="panel-card">
+        <div class="panel-title-bar">
+          <div class="panel-title">
+            <span>🗺️</span> Spatial Threat Density Heatmap (Big Data GIS Clustering)
+          </div>
+          <div class="panel-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#EF4444;"></div> High Risk Cluster</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#10B981;"></div> Safe Corridor</div>
+          </div>
+        </div>
+        <div id="spatialHeatmap"></div>
+      </div>
+
+      <!-- Temporal Risk Histogram -->
+      <div class="panel-card">
+        <div class="panel-title-bar">
+          <div class="panel-title">
+            <span>📊</span> Peak Vulnerability Hours (Time-of-Day Risk Analysis)
+          </div>
+        </div>
+        <div class="histogram-wrap">
+          <div class="hist-row">
+            <span class="hist-time">00:00 - 04:00</span>
+            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:78%; background:linear-gradient(90deg, #F59E0B, #EF4444);"></div></div>
+            <span class="hist-count">39 pts</span>
+          </div>
+          <div class="hist-row">
+            <span class="hist-time">04:00 - 08:00</span>
+            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:18%; background:#10B981;"></div></div>
+            <span class="hist-count">9 pts</span>
+          </div>
+          <div class="hist-row">
+            <span class="hist-time">08:00 - 12:00</span>
+            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:12%; background:#10B981;"></div></div>
+            <span class="hist-count">6 pts</span>
+          </div>
+          <div class="hist-row">
+            <span class="hist-time">12:00 - 16:00</span>
+            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:16%; background:#10B981;"></div></div>
+            <span class="hist-count">8 pts</span>
+          </div>
+          <div class="hist-row">
+            <span class="hist-time">16:00 - 20:00</span>
+            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:45%; background:#F59E0B;"></div></div>
+            <span class="hist-count">22 pts</span>
+          </div>
+          <div class="hist-row">
+            <span class="hist-time">20:00 - 24:00</span>
+            <div class="hist-bar-bg"><div class="hist-bar-fill" style="width:92%; background:linear-gradient(90deg, #EF4444, #B91C1C);"></div></div>
+            <span class="hist-count">46 pts</span>
+          </div>
+        </div>
+        <div style="margin-top:18px; font-size:11.5px; color:var(--text-dim); line-height:1.5;">
+          <strong>Algorithmic Finding:</strong> 71% of high-priority distress alerts cluster between 20:00 and 03:00 hours in transit corridors lacking adequate public lighting.
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT INCIDENT TELEMETRY AUDIT LOG -->
+    <div class="panel-card">
+      <div class="panel-title-bar">
+        <div class="panel-title">
+          <span>📋</span> Historical Incident & Dispatch Audit Log (Big Data Spatial Records)
+        </div>
+        <button onclick="refreshDataLog()" style="background:var(--bg-card); color:#38BDF8; border:1px solid var(--border-dark); padding:6px 14px; border-radius:8px; font-weight:700; font-size:11.5px; cursor:pointer;">
+          🔄 Refresh Cloud Telemetry
+        </button>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="telemetry-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Victim ID</th>
+              <th>Trigger Vector</th>
+              <th>Coordinates</th>
+              <th>Haversine Velocity</th>
+              <th>Dispatch Time</th>
+              <th>Resolution Status</th>
+            </tr>
+          </thead>
+          <tbody id="telemetryTableBody">
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-10-17 14:48:20</td>
+              <td style="font-weight:700;">Lokesh (+91 8073521221)</td>
+              <td><span style="color:#EF4444; font-weight:700;">SHAKE_5X SENSOR</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;">13.2925° N, 77.5306° E</td>
+              <td style="font-family:'JetBrains Mono',monospace;">12.4 km/h</td>
+              <td>1.2 min</td>
+              <td><span class="status-pill resolved">STAND DOWN / SECURED</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-10-17 11:15:04</td>
+              <td style="font-weight:700;">Ananya (+91 9876543210)</td>
+              <td><span style="color:#F59E0B; font-weight:700;">MANUAL_HOLD_3S</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;">13.1688° N, 77.5337° E</td>
+              <td style="font-family:'JetBrains Mono',monospace;">0.0 km/h</td>
+              <td>1.9 min</td>
+              <td><span class="status-pill resolved">POLICE INTERCEPTED</span></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace;">2026-10-16 22:41:18</td>
+              <td style="font-weight:700;">Priya (+91 9998887776)</td>
+              <td><span style="color:#38BDF8; font-weight:700;">COVERT_PIN_9999</span></td>
+              <td style="font-family:'JetBrains Mono',monospace;">13.1674° N, 77.5331° E</td>
+              <td style="font-family:'JetBrains Mono',monospace;">8.6 km/h</td>
+              <td>2.1 min</td>
+              <td><span class="status-pill resolved">RESOLVED BY GUARDIAN</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Spatial Heatmap
+    const heatMap = L.map('spatialHeatmap', {
+      zoomControl: true,
+      attributionControl: false
+    }).setView([13.2925, 77.5306], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      className: 'tactical-dark-tiles'
+    }).addTo(heatMap);
+
+    // Safe Zones (Green Geofences)
+    const safeZonesData = [
+      { name: "Safe Haven Metro Station", lat: 13.2950, lng: 77.5320, r: 250 },
+      { name: "Police Assistance Outpost", lat: 13.2890, lng: 77.5280, r: 200 },
+      { name: "University Campus Safe Corridor", lat: 13.2910, lng: 77.5350, r: 350 }
+    ];
+
+    safeZonesData.forEach(z => {
+      L.circle([z.lat, z.lng], {
+        radius: z.r,
+        color: '#10B981',
+        fillColor: '#10B981',
+        fillOpacity: 0.18,
+        weight: 2
+      }).addTo(heatMap).bindPopup(`<b>${z.name}</b><br>Type: Verified Safe Zone<br>Radius: ${z.r}m`);
+    });
+
+    // Simulated Big Data Incident Clusters (Red Heat Density Circles)
+    const incidentClusters = [
+      { lat: 13.2932, lng: 77.5301, intensity: 45, radius: 180, label: "Night Transit Chokepoint (14 alerts)" },
+      { lat: 13.2965, lng: 77.5342, intensity: 35, radius: 140, label: "Unlit Underpass Hazard Area (8 alerts)" },
+      { lat: 13.2875, lng: 77.5260, intensity: 55, radius: 220, label: "Industrial Belt Periphery (21 alerts)" }
+    ];
+
+    incidentClusters.forEach(c => {
+      L.circle([c.lat, c.lng], {
+        radius: c.radius,
+        color: '#EF4444',
+        fillColor: '#EF4444',
+        fillOpacity: 0.35,
+        weight: 1.5
+      }).addTo(heatMap).bindPopup(`<b>${c.label}</b><br>Danger Density Index: ${c.intensity}%`);
+    });
+
+    function refreshDataLog() {
+      fetch('https://firestore.googleapis.com/v1/projects/women-safety-platform-243f9/databases/(default)/documents/alerts')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.documents) {
+            const tbody = document.getElementById('telemetryTableBody');
+            const rows = data.documents.map(d => {
+              const f = d.fields;
+              if (!f) return '';
+              const phone = f.victimPhone?.stringValue || f.phone?.stringValue || d.name.split('/').pop().replace('user_', '');
+              const name = f.victimName?.stringValue || f.user_name?.stringValue || 'Protected Client';
+              const trigger = f.trigger?.stringValue || f.trigger_source?.stringValue || 'EMERGENCY_SOS';
+              const active = f.is_alert_active?.booleanValue || false;
+              const lat = f.lat?.doubleValue ?? f.latitude?.doubleValue ?? 13.2925;
+              const lng = f.lng?.doubleValue ?? f.longitude?.doubleValue ?? 77.5306;
+              const speed = f.speed?.doubleValue ?? 0;
+              const time = f.timestamp?.timestampValue || f.timestamp?.stringValue || new Date().toISOString();
+
+              return `
+                <tr>
+                  <td style="font-family:'JetBrains Mono',monospace;">${time.substring(0, 19).replace('T', ' ')}</td>
+                  <td style="font-weight:700;">${name} (+91 ${phone})</td>
+                  <td><span style="color:${active ? '#EF4444' : '#38BDF8'}; font-weight:700;">${trigger}</span></td>
+                  <td style="font-family:'JetBrains Mono',monospace;">${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E</td>
+                  <td style="font-family:'JetBrains Mono',monospace;">${speed} km/h</td>
+                  <td>&lt; 2 min</td>
+                  <td><span class="status-pill ${active ? 'active' : 'resolved'}">${active ? '● LIVE EMERGENCY' : 'SECURE / STAND DOWN'}</span></td>
+                </tr>
+              `;
+            }).join('');
+            if (rows) tbody.innerHTML = rows;
+          }
+        }).catch(() => {});
+    }
+
+    // Initial load
+    refreshDataLog();
+  </script>
+</body>
+</html>

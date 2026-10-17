@@ -18,8 +18,8 @@ class SafeZoneHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self):
-        # Convenient routing redirects
-        if self.path in ('/', '/app', '/mobile'):
+        # Friendly route redirection
+        if self.path in ('/app', '/mobile'):
             self.send_response(302)
             self.send_header('Location', '/app/app.html')
             self.end_headers()
@@ -29,22 +29,31 @@ class SafeZoneHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Location', '/monitor/monitor.html')
             self.end_headers()
             return
+        elif self.path in ('/analytics', '/data', '/sdg'):
+            self.send_response(302)
+            self.send_header('Location', '/analytics/analytics.html')
+            self.end_headers()
+            return
         return super().do_GET()
 
 def run_server():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), SafeZoneHandler) as httpd:
-        print(f"===============================================================")
-        print(f" SafeZone: Women Safety Monitoring & Response System Server")
-        print(f"===============================================================")
-        print(f" Mobile App (Jagruthi Paradigm): http://localhost:{PORT}/app/app.html")
-        print(f" Desktop Tactical Console:       http://localhost:{PORT}/monitor/monitor.html")
-        print(f" Native Android Project:         {os.path.join(BASE_DIR, 'android')}")
-        print(f"===============================================================")
+        print(f"==========================================================================")
+        print(f"  PRJ_650: Real-Time Women Safety Monitoring & Response Platform")
+        print(f"  Mapped to UN SDG 5 (Gender Equality - Target 5.2)")
+        print(f"==========================================================================")
+        print(f"  [1] Project Portal (Main Hub):     http://localhost:{PORT}/index.html")
+        print(f"  [2] Victim Mobile Web Client:      http://localhost:{PORT}/app/app.html")
+        print(f"  [3] Police Tactical Command Center: http://localhost:{PORT}/monitor/monitor.html")
+        print(f"  [4] Big Data & SDG 5 Analytics:    http://localhost:{PORT}/analytics/analytics.html")
+        print(f"  [5] Native Android APK:            {os.path.join(BASE_DIR, 'app-debug.apk')}")
+        print(f"==========================================================================")
+        print(f"  Server is ACTIVE. Press Ctrl+C to terminate.")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\nShutting down server.")
+            print("\nShutting down server cleanly.")
 
 if __name__ == '__main__':
     run_server()
